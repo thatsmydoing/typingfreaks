@@ -1,0 +1,14 @@
+{
+  "name": "typingfreaks",
+  "version": "0.0.1",
+  "description": "A typing game for Japanese",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thomas Dy <thatsmydoing@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^2.6.2"
+  }
+}

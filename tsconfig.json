@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "outFile": "dist/bundle.js"
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
