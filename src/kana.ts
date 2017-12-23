@@ -287,6 +287,14 @@ namespace kana {
       this.currentIndex = 0;
     }
 
+    map<T>(func: (s: string, m: StateMachine) => T): T[] {
+      let result: T[] = [];
+      for (let i = 0; i < this.kana.length; ++i) {
+        result.push(func(this.kana[i], this.stateMachines[i]));
+      }
+      return result;
+    }
+
     handleInput(input: string): boolean {
       if (this.currentIndex >= this.stateMachines.length) return false;
 

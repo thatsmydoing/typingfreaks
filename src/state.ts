@@ -23,6 +23,10 @@ namespace state {
     [index: string]: State
   }
 
+  export interface Observer {
+    (result: TransitionResult): void
+  }
+
   export class State {
     display: string;
     transitions: StateTransitionList;
@@ -60,14 +64,22 @@ namespace state {
     initialState: State;
     finalState: State;
     currentState: State;
+    observers: Set<Observer>;
 
     constructor(initialState: State, finalState: State) {
       this.initialState = initialState;
       this.currentState = initialState;
       this.finalState = finalState;
+      this.observers = new Set();
     }
 
     transition(input: string): TransitionResult {
+      let result = this._transition(input);
+      this.notify(result);
+      return result;
+    }
+
+    private _transition(input: string): TransitionResult {
       let newState = this.currentState.transition(input);
       if (newState == null) {
         return TransitionResult.FAILED;
@@ -79,6 +91,10 @@ namespace state {
           return TransitionResult.SUCCESS;
         }
       }
+    }
+
+    isNew(): boolean {
+      return this.currentState === this.initialState;
     }
 
     isFinished(): boolean {
@@ -104,6 +120,18 @@ namespace state {
 
     getDisplay(): string {
       return this.currentState.display;
+    }
+
+    addObserver(observer: Observer): void {
+      this.observers.add(observer);
+    }
+
+    removeObserver(observer: Observer): void {
+      this.observers.delete(observer);
+    }
+
+    notify(result: TransitionResult): void {
+      this.observers.forEach(o => o(result));
     }
   }
 

@@ -1,0 +1,48 @@
+.kana {
+  display: inline-block;
+  position: relative;
+  color: black;
+}
+
+.kana::after {
+  display: inline-block;
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: red;
+  font-weight: bold;
+  overflow: hidden;
+  width: 0px;
+  transition: width 0.1s;
+}
+
+.kana.half::after {
+  width: 50%;
+}
+
+.kana.full::after {
+  width: 100%;
+}
+
+.romaji {
+  display: inline-block;
+}
+
+.romaji.error {
+  animation-name: pulse;
+  animation-duration: 0.5s;
+  animation-iteration-count: 1;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1, 1)
+  }
+  50% {
+    transform: scale(2, 2)
+  }
+  100% {
+    transform: scale(1, 1)
+  }
+}

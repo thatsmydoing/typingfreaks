@@ -1,18 +1,6 @@
-/// <reference path="kana.ts" />
-
-let input = 'ちっじゃう';
-let inputState = new kana.KanaInputState(input);
+/// <reference path="display.ts" />
 
 let container = document.querySelector('#container');
-let kanaElement = document.createElement('p');
-kanaElement.textContent = input;
-container.appendChild(kanaElement);
-let romajiElement = document.createElement('p');
-romajiElement.textContent = input;
-container.appendChild(romajiElement);
-
-romajiElement.textContent = inputState.getRemainingInput();
-document.addEventListener('keydown', event => {
-  inputState.handleInput(event.key);
-  romajiElement.textContent = inputState.getRemainingInput();
-});
+let controller = new display.MainAreaController();
+container.appendChild(controller.element);
+controller.setData('大丈夫ですか', 'だいじょうぶですか');
