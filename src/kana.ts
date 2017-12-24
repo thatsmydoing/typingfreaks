@@ -300,15 +300,10 @@ namespace kana {
 
       let currentMachine = this.stateMachines[this.currentIndex];
       let result = currentMachine.transition(input);
-      switch (result) {
-        case TransitionResult.FAILED:
-          return false;
-        case TransitionResult.SUCCESS:
-          return true;
-        case TransitionResult.FINISHED:
-          this.currentIndex += 1;
-          return true;
+      if (result === TransitionResult.FINISHED) {
+        this.currentIndex += 1;
       }
+      return this.currentIndex >= this.stateMachines.length;
     }
 
     getRemainingInput(): string {

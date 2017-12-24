@@ -1,6 +1,9 @@
 /// <reference path="display.ts" />
+/// <reference path="level.ts" />
 
 let container = document.querySelector('#container');
-let controller = new display.MainAreaController();
-container.appendChild(controller.element);
-controller.setData('大丈夫ですか', 'だいじょうぶですか');
+
+level.loadFromJson('jugemu.json').then(level => {
+  let controller = new display.LevelController(level);
+  container.appendChild(controller.element);
+});

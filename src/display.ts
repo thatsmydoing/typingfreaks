@@ -59,6 +59,7 @@ namespace display {
     }
 
     setInputState(inputState: InputState) {
+      this.clearChildren();
       if (inputState == null) {
         this.children = [];
       } else {
@@ -71,8 +72,8 @@ namespace display {
 
     private clearChildren(): void {
       this.children.forEach(child => {
-        child.destroy();
         this.element.removeChild(child.element);
+        child.destroy();
       });
     }
 
@@ -147,7 +148,7 @@ namespace display {
     }
   }
 
-  export class MainAreaController implements Component{
+  class MainAreaController implements Component {
     element: HTMLElement;
     inputState: InputState | null;
     kanaController: KanaDisplayController;
@@ -163,28 +164,12 @@ namespace display {
       this.element.appendChild(this.kanaController.element);
       this.element.appendChild(this.kanjiHTMLElement);
       this.element.appendChild(this.romajiController.element);
-
-      document.addEventListener('keydown', event => {
-        if (this.inputState !== null) {
-          this.inputState.handleInput(event.key);
-        }
-      });
     }
 
-    setData(kanji: string, kana: string) {
-      if (kanji === '@') {
-        this.kanjiHTMLElement.textContent = '';
-      } else {
-        this.kanjiHTMLElement.textContent = kanji;
-      }
-
-      if (kana === '@') {
-        this.inputState = null;
-      } else {
-        this.inputState = new InputState(kana);
-      }
-      this.kanaController.setInputState(this.inputState);
-      this.romajiController.setInputState(this.inputState);
+    setData(kanji: string, kana: InputState) {
+      this.kanjiHTMLElement.textContent = kanji;
+      this.kanaController.setInputState(kana);
+      this.romajiController.setInputState(kana);
     }
 
     destroy(): void {
@@ -193,6 +178,70 @@ namespace display {
       this.element.removeChild(this.kanaController.element);
       this.element.removeChild(this.kanjiHTMLElement);
       this.element.removeChild(this.romajiController.element);
+    }
+  }
+
+  export class LevelController implements Component {
+    element: HTMLElement;
+    level: level.Level;
+    currentLine: number;
+    inputState: InputState | null;
+    mainAreaController: MainAreaController;
+    listener: (event: KeyboardEvent) => void;
+
+    constructor(level: level.Level) {
+      this.element = document.createElement('div');
+      this.level = level;
+      this.currentLine = -1;
+      this.inputState = null;
+      this.mainAreaController = new MainAreaController();
+      this.listener = event => this.handleInput(event.key);
+
+      this.nextLine();
+
+      document.addEventListener('keydown', this.listener);
+      this.element.appendChild(this.mainAreaController.element);
+    }
+
+    handleInput(key: string): void {
+      if (this.inputState !== null) {
+        if (this.inputState.handleInput(key)) {
+          this.nextLine();
+        }
+      } else {
+        this.nextLine();
+      }
+    }
+
+    nextLine(): void {
+      if (this.currentLine + 1 < this.level.lines.length) {
+        this.currentLine += 1;
+        this.setLine(this.level.lines[this.currentLine]);
+      } else {
+        this.setLine({ kanji: '@', kana: '@' });
+      }
+    }
+
+    setLine(line: level.Line): void {
+      let kanji, inputState;
+      if (line.kanji === '@') {
+        kanji = '';
+      } else {
+        kanji = line.kanji;
+      }
+
+      if (line.kana === '@') {
+        inputState = null;
+      } else {
+        inputState = new InputState(line.kana);
+      }
+
+      this.inputState = inputState;
+      this.mainAreaController.setData(kanji, inputState);
+    }
+
+    destroy(): void {
+      document.removeEventListener('keydown', this.listener);
     }
   }
 }
