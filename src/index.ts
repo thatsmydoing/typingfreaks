@@ -3,7 +3,7 @@
 
 let container = document.querySelector('#container');
 
-level.loadFromJson('jugemu.json').then(level => {
-  let controller = new display.LevelController(level);
+level.loadFromJson('levels.json').then(levelsets => {
+  let controller = new display.LevelController(levelsets[0].levels[0]);
   container.appendChild(controller.element);
 });
