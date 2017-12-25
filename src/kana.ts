@@ -277,7 +277,7 @@ namespace kana {
               kana.push(nextOne);
               if (/\s/.test(nextOne)) {
                 machines.push(WHITESPACE.clone());
-              } else {
+              } else if (/[a-z]/.test(nextOne)) {
                 machines.push(literal(nextOne));
               }
             }

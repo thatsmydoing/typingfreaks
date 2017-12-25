@@ -284,10 +284,12 @@ namespace display {
     handleInput(key: string): void {
       switch (this.state) {
         case LevelState.READY:
-          this.onStart();
+          if (key == ' ' || key == 'Enter') {
+            this.onStart();
+          }
           break;
         case LevelState.PLAYING:
-          if (this.inputState !== null) {
+          if (this.inputState !== null && /^[-_ a-z]$/.test(key)) {
             if (this.inputState.handleInput(key)) {
               this.onComplete();
             }
