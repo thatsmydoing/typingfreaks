@@ -113,6 +113,12 @@ namespace kana {
     [index: string]: StateMachine
   }
 
+  const WHITESPACE = state.buildFromTransitions('_', [
+    t('_', '_', ''),
+    t('_', ' ', '')
+  ]);
+
+
   const SINGLE_KANA_MAPPING: KanaMapping = {
     "あ": literal('a'),
     "い": literal('i'),
@@ -241,11 +247,6 @@ namespace kana {
       let remaining = input.toLowerCase() + ' ';
       while (remaining.length > 1) {
         let nextOne = remaining.substring(0, 1);
-        if (/\s/.test(nextOne)) {
-          remaining = remaining.substring(1);
-          continue;
-        }
-
         let nextTwo = remaining.substring(0, 2);
         let doubleKana = DOUBLE_KANA_MAPPING[nextTwo];
         if (doubleKana != undefined) {
@@ -274,7 +275,11 @@ namespace kana {
               }
             } else {
               kana.push(nextOne);
-              machines.push(literal(nextOne));
+              if (/\s/.test(nextOne)) {
+                machines.push(WHITESPACE.clone());
+              } else {
+                machines.push(literal(nextOne));
+              }
             }
 
             prevTsu = false;

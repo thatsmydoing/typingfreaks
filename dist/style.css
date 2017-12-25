@@ -1,6 +1,7 @@
 .kana {
   display: inline-block;
   position: relative;
+  white-space: pre;
 }
 
 .kana::after {
