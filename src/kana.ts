@@ -184,7 +184,8 @@ namespace kana {
     "ぴ": literal('pi'),
     "ぷ": literal('pu'),
     "ぺ": literal('pe'),
-    "ぽ": literal('po')
+    "ぽ": literal('po'),
+    "ー": literal('-')
   }
 
   const DOUBLE_KANA_MAPPING: KanaMapping = {
