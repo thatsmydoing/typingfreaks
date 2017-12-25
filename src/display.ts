@@ -7,6 +7,7 @@
 
 /// <reference path="kana.ts" />
 /// <reference path="state.ts" />
+/// <reference path="audio.ts" />
 
 namespace display {
   import InputState = kana.KanaInputState;
@@ -181,42 +182,124 @@ namespace display {
     }
   }
 
+  enum LevelState {
+    LOADING,
+    READY,
+    PLAYING,
+    WAITING,
+    FINISH
+  }
+
   export class LevelController implements Component {
     element: HTMLElement;
     level: level.Level;
-    currentLine: number;
+    currentIndex: number;
     inputState: InputState | null;
     mainAreaController: MainAreaController;
+    progressController: TrackProgressController | null;
     listener: (event: KeyboardEvent) => void;
+    state: LevelState;
+    track: audio.Track | null;
 
-    constructor(level: level.Level) {
+    constructor(audioManager: audio.AudioManager, level: level.Level) {
       this.element = document.createElement('div');
       this.level = level;
-      this.currentLine = -1;
+      this.currentIndex = -1;
       this.inputState = null;
       this.mainAreaController = new MainAreaController();
+      this.progressController = null;
       this.listener = event => this.handleInput(event.key);
+      this.state = LevelState.LOADING;
+      this.track = null;
 
-      this.nextLine();
-
-      document.addEventListener('keydown', this.listener);
+      this.element.className = 'level-control';
       this.element.appendChild(this.mainAreaController.element);
+      document.addEventListener('keydown', this.listener);
+
+      if (this.level.audio == null) {
+        this.level.lines = this.level.lines.filter(line => line.kana != "@");
+        this.onReady();
+      } else {
+        this.progressController = new TrackProgressController(this.level);
+        this.element.insertBefore(
+          this.progressController.element,
+          this.mainAreaController.element
+        );
+        this.progressController.setListener(event => this.onIntervalEnd());
+        audioManager.loadTrack(this.level.audio).then(track => {
+          this.track = track;
+          this.onReady();
+        })
+      }
+
+    }
+
+    onReady(): void {
+      this.setState(LevelState.READY);
+    }
+
+    onStart(): void {
+      this.nextLine();
+      if (this.track !== null) {
+        this.progressController.start();
+        this.track.play();
+      }
+
+      this.setState(LevelState.PLAYING);
+      this.checkComplete();
+    }
+
+    checkComplete(): void {
+      let currentLine = this.level.lines[this.currentIndex];
+      if (currentLine.kana == '@' && currentLine.kanji == '@') {
+        this.onComplete();
+      }
+    }
+
+    onIntervalEnd(): void {
+      if (this.state === LevelState.WAITING) {
+        this.setState(LevelState.PLAYING);
+      } else if (this.state === LevelState.PLAYING) {
+        this.nextLine();
+      }
+      this.checkComplete();
+    }
+
+    onComplete(): void {
+      this.nextLine();
+      if (this.track !== null) {
+        this.setState(LevelState.WAITING);
+      }
+    }
+
+    setState(state: LevelState): void {
+      if (state === LevelState.WAITING) {
+        this.element.classList.add('waiting');
+      } else {
+        this.element.classList.remove('waiting');
+      }
+      this.state = state;
     }
 
     handleInput(key: string): void {
-      if (this.inputState !== null) {
-        if (this.inputState.handleInput(key)) {
-          this.nextLine();
-        }
-      } else {
-        this.nextLine();
+      switch (this.state) {
+        case LevelState.READY:
+          this.onStart();
+          break;
+        case LevelState.PLAYING:
+          if (this.inputState !== null) {
+            if (this.inputState.handleInput(key)) {
+              this.onComplete();
+            }
+          }
+          break;
       }
     }
 
     nextLine(): void {
-      if (this.currentLine + 1 < this.level.lines.length) {
-        this.currentLine += 1;
-        this.setLine(this.level.lines[this.currentLine]);
+      if (this.currentIndex + 1 < this.level.lines.length) {
+        this.currentIndex += 1;
+        this.setLine(this.level.lines[this.currentIndex]);
       } else {
         this.setLine({ kanji: '@', kana: '@' });
       }
@@ -243,5 +326,65 @@ namespace display {
     destroy(): void {
       document.removeEventListener('keydown', this.listener);
     }
+  }
+
+  class ProgressBar implements Component {
+    element: HTMLElement;
+    barElement: HTMLElement;
+
+    constructor() {
+      this.element = document.createElement('div');
+      this.element.className = 'progress-bar';
+      this.barElement = document.createElement('div');
+      this.barElement.className = 'shade';
+      this.element.appendChild(this.barElement);
+    }
+
+    get style() {
+      return this.barElement.style;
+    }
+
+    destroy(): void {}
+  }
+
+  class TrackProgressController implements Component {
+    element: HTMLElement;
+    totalBar: ProgressBar;
+    intervalBar: ProgressBar;
+
+    constructor(level: level.Level) {
+      this.element = document.createElement('div');
+      this.totalBar = new ProgressBar();
+      this.intervalBar = new ProgressBar();
+      this.element.appendChild(this.totalBar.element);
+      this.element.appendChild(this.intervalBar.element);
+
+      let lines = level.lines;
+
+      let totalDuration = lines[lines.length - 1].end;
+      this.totalBar.style.animationName = 'progress';
+      this.totalBar.style.animationDuration = totalDuration + 's';
+
+      let names = lines.map(line => 'progress').join(',');
+      let delays = lines.map(line => line.start + 's').join(',');
+      let durations = lines.map(line => (line.end - line.start) + 's').join(',');
+      this.intervalBar.style.animationName = names;
+      this.intervalBar.style.animationDelay = delays;
+      this.intervalBar.style.animationDuration = durations;
+    }
+
+    start(): void {
+      this.intervalBar.style.width = '100%';
+      this.totalBar.style.width = '100%';
+
+      this.intervalBar.style.animationPlayState = 'running';
+      this.totalBar.style.animationPlayState = 'running';
+    }
+
+    setListener(func: (event: AnimationEvent) => void): void {
+      this.intervalBar.element.addEventListener('animationend', func);
+    }
+
+    destroy(): void {}
   }
 }

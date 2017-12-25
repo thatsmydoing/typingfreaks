@@ -1,7 +1,6 @@
 .kana {
   display: inline-block;
   position: relative;
-  color: black;
 }
 
 .kana::after {
@@ -45,4 +44,35 @@
   100% {
     transform: scale(1, 1)
   }
+}
+
+.progress-bar {
+  position: relative;
+  height: 5px;
+  background-color: lightgrey;
+}
+
+.progress-bar .shade {
+  position: absolute;
+  height: 5px;
+  background-color: red;
+  animation-timing-function: linear;
+  animation-play-state: paused;
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.level-control.waiting {
+  color: grey;
+}
+
+.level-control.waiting .romaji {
+  color: transparent;
 }

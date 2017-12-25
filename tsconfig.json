@@ -3,7 +3,8 @@
     "noImplicitAny": true,
     "removeComments": true,
     "sourceMap": true,
-    "outFile": "dist/bundle.js"
+    "outFile": "dist/bundle.js",
+    "target": "es5"
   },
   "include": [
     "src/**/*"
