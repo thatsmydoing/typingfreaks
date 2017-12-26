@@ -222,6 +222,7 @@ namespace kana {
     "プ": "ぷ",
     "ペ": "ぺ",
     "ポ": "ぽ",
+    "ヴ": "ゔ",
     "ァ": "ぁ",
     "ィ": "ぃ",
     "ゥ": "ぅ",
@@ -305,6 +306,7 @@ namespace kana {
     "ぷ": literal('pu'),
     "ぺ": literal('pe'),
     "ぽ": literal('po'),
+    "ゔ": literal('vu'),
     "ー": literal('-'),
     " ": WHITESPACE
   };
@@ -361,7 +363,15 @@ namespace kana {
     "びょ": literal('byo'),
     "ぴゃ": literal('pya'),
     "ぴゅ": literal('pyu'),
-    "ぴょ": literal('pyo')
+    "ぴょ": literal('pyo'),
+    "ふぁ": literal('fa'),
+    "ふぃ": literal('fi'),
+    "ふぇ": literal('fe'),
+    "ふぉ": literal('fo'),
+    "ゔぁ": literal('va'),
+    "ゔぃ": literal('vi'),
+    "ゔぇ": literal('ve'),
+    "ゔぉ": literal('vo')
   }
 
   const TRIPLE_KANA_MAPPING: KanaMapping = {};
@@ -375,7 +385,8 @@ namespace kana {
     "ざ", "じ", "ず", "ぜ", "ぞ",
     "だ", "ぢ", "づ", "で", "ど",
     "ば", "び", "ぶ", "べ", "ぼ",
-    "ぱ", "ぴ", "ぷ", "ぺ", "ぽ"
+    "ぱ", "ぴ", "ぷ", "ぺ", "ぽ",
+    "ゔ"
   ].forEach(kana => {
     DOUBLE_KANA_MAPPING['っ' + kana] = smallTsu(SINGLE_KANA_MAPPING[kana]);
   });
@@ -387,7 +398,9 @@ namespace kana {
     "じゃ", "じゅ", "じょ",
     "ぢゃ", "ぢゅ", "ぢょ",
     "びゃ", "びゅ", "びょ",
-    "ぴゃ", "ぴゅ", "ぴょ"
+    "ぴゃ", "ぴゅ", "ぴょ",
+    "ふぁ", "ふぃ", "ふぇ", "ふぉ",
+    "ゔぁ", "ゔぃ", "ゔぇ", "ゔぉ"
   ].forEach(kana => {
     TRIPLE_KANA_MAPPING['っ' + kana] = smallTsu(DOUBLE_KANA_MAPPING[kana]);
   });
