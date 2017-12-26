@@ -3,18 +3,29 @@
   --highlight-color: red;
 
   position: relative;
-  display: grid;
   background-color: black;
   color: var(--base-color);
   height: 450px;
   width: 800px;
   margin: 0 auto;
+  overflow: hidden;
 }
 
-#container #loading {
-  display: inline-block;
-  align-self: center;
-  justify-self: center;
+#container > div {
+  display: grid;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
+#loading {
+  align-items: center;
+  justify-items: center;
+  transition: opacity 0.5s;
+}
+
+#loading.finished {
+  opacity: 0;
 }
 
 .kana {

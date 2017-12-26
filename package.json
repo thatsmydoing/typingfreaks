@@ -9,8 +9,7 @@
   "author": "Thomas Dy <thatsmydoing@gmail.com",
   "license": "ISC",
   "devDependencies": {
-    "@types/es6-collections": "^0.5.31",
-    "@types/es6-promise": "0.0.33",
     "typescript": "^2.6.2"
-  }
+  },
+  "dependencies": {}
 }

@@ -1,5 +1,5 @@
 /// <reference path="game.ts" />
 
-let container = document.querySelector('#container');
-let controller = new game.GameController(container, 'levels.json');
-controller.stateLoading();
+let container: HTMLElement = document.querySelector('#container');
+let controller = new game.MainController(container, 'levels.json');
+controller.start();

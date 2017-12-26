@@ -9,11 +9,84 @@ namespace game {
     PLAYING
   }
 
-  export class GameController {
+  interface GameSounds {
+    selectSound: audio.Track,
+    decideSound: audio.Track
+  }
+
+  class LoadingScreen {
+    controller: MainController;
+
+    constructor(controller: MainController) {
+      this.controller = controller;
+    }
+
+    load(): void {
+      console.log('Loading assets...');
+      let configUrl = this.controller.configUrl;
+      let configPromise;
+      if (configUrl.endsWith('.json')) {
+        configPromise = level.loadFromJson(configUrl);
+      } else {
+        configPromise = level.loadFromTM(configUrl);
+      }
+      configPromise.then(config => {
+        this.controller.config = config;
+        this.loadAssets();
+      })
+    }
+
+    loadAssets(): void {
+      let config = this.controller.config;
+
+      Promise.all([
+        this.loadImage(config.background),
+        this.loadTrack(config.selectSound),
+        this.loadTrack(config.decideSound)
+      ]).then(v => {
+        console.log('Loaded assets.');
+        let [background, selectSound, decideSound] = v;
+        this.controller.assets = {
+          selectSound,
+          decideSound
+        }
+        this.finishLoading();
+      })
+    }
+
+    finishLoading(): void {
+      let loadingElement = this.controller.container.querySelector('#loading');
+      loadingElement.addEventListener('transitionend', (event) => this.controller.onConfigLoad());
+      loadingElement.classList.add('finished');
+    }
+
+    loadTrack(url: string): Promise<audio.Track> {
+      if (url == null) {
+        return Promise.resolve(null);
+      } else {
+        return this.controller.audioManager.loadTrack(url);
+      }
+    }
+
+    loadImage(url: string): Promise<void> {
+      if (url.includes('.')) {
+        return new Promise((resolve, reject) => {
+          let image = new Image();
+          image.onload = (event) => resolve();
+          image.src = url;
+        });
+      } else {
+        return Promise.resolve();
+      }
+    }
+  }
+
+  export class MainController {
     container: HTMLElement;
     configUrl: string;
     config: level.Config | null;
     audioManager: audio.AudioManager;
+    assets: GameSounds | null;
 
     constructor(container: HTMLElement, configUrl: string) {
       this.container = container;
@@ -21,20 +94,13 @@ namespace game {
       this.audioManager = new audio.AudioManager();
     }
 
-    stateLoading(): void {
-      let configPromise;
-      if (this.configUrl.endsWith('.json')) {
-        configPromise = level.loadFromJson(this.configUrl);
-      } else {
-        configPromise = level.loadFromTM(this.configUrl);
-      }
-      configPromise.then(config => {
-        this.onConfigLoad(config);
-      })
+    start(): void {
+      let loadingScreen = new LoadingScreen(this);
+      loadingScreen.load();
     }
 
-    onConfigLoad(config: level.Config): void {
-      this.config = config;
+    onConfigLoad(): void {
+      let config = this.config;
       let background = config.background;
       if (background.indexOf('.') >= 0) {
         background = `url(${background}), black`;
@@ -42,10 +108,9 @@ namespace game {
       this.container.style.background = background;
       this.container.style.setProperty('--base-color', config.baseColor);
       this.container.style.setProperty('--highlight-color', config.highlightColor);
-      this.container.querySelector('#loading').style.opacity = 0;
 
       let controller = new display.LevelController(this.audioManager, this.config.levelSets[0].levels[0]);
-      container.appendChild(controller.element);
+      this.container.querySelector('#game').appendChild(controller.element);
     }
   }
 }
