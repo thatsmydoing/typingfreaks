@@ -4,13 +4,6 @@
  * state. The state also has a display field as metadata. This serves as the
  * state name and is also used to represent the remaining text to be input at
  * that particular state.
- *
- * The only other important thing to note is the extend method. This is solely
- * for handling っ. Essentially, it "doubles" the first letter of the current
- * state by creating a new state and intermediate states for each transition out
- * it has. A state with multiple transitions essentially means it has multiple
- * different spellings, so it's important to name the intermediate states
- * correctly.
  */
 namespace state {
   export enum TransitionResult { FAILED, SUCCESS, FINISHED }
@@ -38,21 +31,6 @@ namespace state {
 
     addTransition(input: string, state: State): void {
       this.transitions[input] = state;
-    }
-
-    extend(): State {
-      let extendedDisplay = this.display.charAt(0) + this.display;
-      let newState = new State(extendedDisplay);
-
-      Object.keys(this.transitions).forEach(k => {
-        let nextState = this.transitions[k];
-        let intermediateDisplay = k + nextState.display;
-        let intermediateState = new State(intermediateDisplay);
-        intermediateState.addTransition(k, nextState);
-        newState.addTransition(k, intermediateState);
-      })
-
-      return newState;
     }
 
     transition(input: string): State | null {
@@ -107,11 +85,6 @@ namespace state {
 
     clone(): StateMachine {
       return new StateMachine(this.initialState, this.finalState);
-    }
-
-    extend(): StateMachine {
-      let newInitialState = this.initialState.extend();
-      return new StateMachine(newInitialState, this.finalState);
     }
 
     getWord(): string {

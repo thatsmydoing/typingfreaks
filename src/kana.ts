@@ -8,11 +8,17 @@
  * should handle all possible variations of the romaji to be inputted.
  * Additionally, it also keeps track of what is left to be input, and adjusts
  * itself accordingly if an alternative romaji was used.
+ *
+ * One of the key considerations is handling っ. It doesn't have a spelling in
+ * and of itself, but just modifies the state machine that will come after it.
+ * Intermediate states need to be created and care should be given in what shows
+ * up in the display.
  */
 
 /// <reference path="state.ts" />
 
 namespace kana {
+  import State = state.State;
   import StateMachine = state.StateMachine;
   import TransitionResult = state.TransitionResult;
   import t = state.makeTransition;
@@ -109,6 +115,21 @@ namespace kana {
     ]);
   }
 
+  function smallTsu(base: StateMachine): StateMachine {
+    let { display, transitions } = base.initialState;
+
+    let newState = new State(display.charAt(0) + display);
+    Object.keys(transitions).forEach(k => {
+      let nextState = transitions[k];
+      let intermediateDisplay = k + nextState.display;
+      let intermediateState = new State(intermediateDisplay);
+      intermediateState.addTransition(k, nextState);
+      newState.addTransition(k, intermediateState);
+    })
+
+    return new StateMachine(newState, base.finalState);
+  }
+
   interface KanaMapping {
     [index: string]: StateMachine
   }
@@ -192,7 +213,11 @@ namespace kana {
     "ぺ": literal('pe'),
     "ぽ": literal('po'),
     "ー": literal('-')
-  }
+  };
+
+  'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter => {
+    SINGLE_KANA_MAPPING[letter] = literal(letter);
+  });
 
   const DOUBLE_KANA_MAPPING: KanaMapping = {
     "きゃ": literal('kya'),
@@ -233,6 +258,34 @@ namespace kana {
     "ぴょ": literal('pyo')
   }
 
+  const TRIPLE_KANA_MAPPING: KanaMapping = {};
+
+  [
+    "か", "き", "く", "け", "こ",
+    "さ", "し", "す", "せ", "そ",
+    "た", "ち", "つ", "て", "と",
+    "は", "ひ", "ふ", "へ", "ほ",
+    "が", "ぎ", "ぐ", "げ", "ご",
+    "ざ", "じ", "ず", "ぜ", "ぞ",
+    "だ", "ぢ", "づ", "で", "ど",
+    "ば", "び", "ぶ", "べ", "ぼ",
+    "ぱ", "ぴ", "ぷ", "ぺ", "ぽ"
+  ].forEach(kana => {
+    DOUBLE_KANA_MAPPING['っ' + kana] = smallTsu(SINGLE_KANA_MAPPING[kana]);
+  });
+  [
+    "きゃ", "きゅ", "きょ",
+    "しゃ", "しゅ", "しょ",
+    "ちゃ", "ちゅ", "ちょ",
+    "ぎゃ", "ぎゅ", "ぎょ",
+    "じゃ", "じゅ", "じょ",
+    "ぢゃ", "ぢゅ", "ぢょ",
+    "びゃ", "びゅ", "びょ",
+    "ぴゃ", "ぴゅ", "ぴょ"
+  ].forEach(kana => {
+    TRIPLE_KANA_MAPPING['っ' + kana] = smallTsu(DOUBLE_KANA_MAPPING[kana]);
+  });
+
   export class KanaInputState {
     kana: string[];
     stateMachines: StateMachine[];
@@ -241,51 +294,39 @@ namespace kana {
     constructor(input: string) {
       let kana: string[] = [];
       let machines: StateMachine[] = [];
-      let prevTsu = false;
 
-      // we pad the input so checking 2 at a time is simpler
-      let remaining = input.toLowerCase() + ' ';
-      while (remaining.length > 1) {
-        let nextOne = remaining.substring(0, 1);
+      // we pad the input so checking 3 at a time is simpler
+      let remaining = input.toLowerCase() + '  ';
+      while (remaining.length > 2) {
+
+        let nextThree = remaining.substring(0, 3);
+        let tripleKana = TRIPLE_KANA_MAPPING[nextThree];
+        if (tripleKana != undefined) {
+          kana.push(nextThree);
+          machines.push(tripleKana.clone());
+          remaining = remaining.substring(3);
+          continue;
+        }
+
         let nextTwo = remaining.substring(0, 2);
         let doubleKana = DOUBLE_KANA_MAPPING[nextTwo];
         if (doubleKana != undefined) {
-          if (prevTsu) {
-            kana.push('っ' + nextTwo);
-            machines.push(doubleKana.extend());
-            prevTsu = false;
-          } else {
-            kana.push(nextTwo);
-            machines.push(doubleKana.clone());
-          }
+          kana.push(nextTwo);
+          machines.push(doubleKana.clone());
           remaining = remaining.substring(2);
-        } else {
-          if (nextOne === 'っ') {
-            prevTsu = true;
-            remaining = remaining.substring(1);
-          } else {
-            let singleKana = SINGLE_KANA_MAPPING[nextOne];
-            if (singleKana != undefined) {
-              if (prevTsu) {
-                kana.push('っ' + nextOne);
-                machines.push(singleKana.extend());
-              } else {
-                kana.push(nextOne);
-                machines.push(singleKana.clone());
-              }
-            } else {
-              kana.push(nextOne);
-              if (/\s/.test(nextOne)) {
-                machines.push(WHITESPACE.clone());
-              } else if (/[a-z]/.test(nextOne)) {
-                machines.push(literal(nextOne));
-              }
-            }
-
-            prevTsu = false;
-            remaining = remaining.substring(1);
-          }
+          continue;
         }
+
+        let nextOne = remaining.substring(0, 1);
+        let singleKana = SINGLE_KANA_MAPPING[nextOne];
+        if (singleKana != undefined) {
+          kana.push(nextOne);
+          machines.push(singleKana.clone());
+        } else if (/\s/.test(nextOne)) {
+          kana.push(nextOne);
+          machines.push(WHITESPACE.clone());
+        }
+        remaining = remaining.substring(1);
       }
 
       this.kana = kana;
