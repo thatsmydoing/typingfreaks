@@ -141,11 +141,97 @@ namespace kana {
     [index: string]: StateMachine
   }
 
+  interface StringMapping {
+    [index: string]: string
+  }
+
   const WHITESPACE = state.buildFromTransitions('_', [
     t('_', '_', ''),
     t('_', ' ', '')
   ]);
 
+  const KATAKANA_MAPPING: StringMapping = {
+    "ア": "あ",
+    "イ": "い",
+    "ウ": "う",
+    "エ": "え",
+    "オ": "お",
+    "カ": "か",
+    "キ": "き",
+    "ク": "く",
+    "ケ": "け",
+    "コ": "こ",
+    "サ": "さ",
+    "シ": "し",
+    "ス": "す",
+    "セ": "せ",
+    "ソ": "そ",
+    "タ": "た",
+    "チ": "ち",
+    "ツ": "つ",
+    "テ": "て",
+    "ト": "と",
+    "ナ": "な",
+    "ニ": "に",
+    "ヌ": "ぬ",
+    "ネ": "ね",
+    "ノ": "の",
+    "ハ": "は",
+    "ヒ": "ひ",
+    "フ": "ふ",
+    "ヘ": "へ",
+    "ホ": "ほ",
+    "マ": "ま",
+    "ミ": "み",
+    "ム": "む",
+    "メ": "め",
+    "モ": "も",
+    "ヤ": "や",
+    "ユ": "ゆ",
+    "ヨ": "よ",
+    "ラ": "ら",
+    "リ": "り",
+    "ル": "る",
+    "レ": "れ",
+    "ロ": "ろ",
+    "ワ": "わ",
+    "ヲ": "を",
+    "ン": "ん",
+    "ガ": "が",
+    "ギ": "ぎ",
+    "グ": "ぐ",
+    "ゲ": "げ",
+    "ゴ": "ご",
+    "ザ": "ざ",
+    "ジ": "じ",
+    "ズ": "ず",
+    "ゼ": "ぜ",
+    "ゾ": "ぞ",
+    "ダ": "だ",
+    "ヂ": "ぢ",
+    "ヅ": "づ",
+    "デ": "で",
+    "ド": "ど",
+    "バ": "ば",
+    "ビ": "び",
+    "ブ": "ぶ",
+    "ベ": "べ",
+    "ボ": "ぼ",
+    "パ": "ぱ",
+    "ピ": "ぴ",
+    "プ": "ぷ",
+    "ペ": "ぺ",
+    "ポ": "ぽ",
+    "ァ": "ぁ",
+    "ィ": "ぃ",
+    "ゥ": "ぅ",
+    "ェ": "ぇ",
+    "ォ": "ぉ",
+    "ャ": "ゃ",
+    "ュ": "ゅ",
+    "ョ": "ょ",
+    "ッ": "っ"
+  }
 
   const SINGLE_KANA_MAPPING: KanaMapping = {
     "あ": literal('a'),
@@ -219,7 +305,8 @@ namespace kana {
     "ぷ": literal('pu'),
     "ぺ": literal('pe'),
     "ぽ": literal('po'),
-    "ー": literal('-')
+    "ー": literal('-'),
+    " ": WHITESPACE
   };
 
   'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter => {
@@ -305,6 +392,25 @@ namespace kana {
     TRIPLE_KANA_MAPPING['っ' + kana] = smallTsu(DOUBLE_KANA_MAPPING[kana]);
   });
 
+  /**
+   * This normalizes input for matching. All alphabet is lower-cased, katakana
+   * is transformed to hiragana. All whitespace is now just a space. We take
+   * care to not change the length of the string as we have to match it
+   * one-for-one so we can display the original source kana.
+   */
+  function normalizeInput(input: string): string {
+    return input.toLowerCase().split('').map(letter => {
+      let transform = KATAKANA_MAPPING[letter];
+      if (transform !== undefined) {
+        return transform;
+      } else if (/\s/.test(letter)) {
+        return ' ';
+      } else {
+        return letter;
+      }
+    }).join('');
+  }
+
   export class KanaInputState {
     kana: string[];
     stateMachines: StateMachine[];
@@ -313,39 +419,32 @@ namespace kana {
     constructor(input: string) {
       let kana: string[] = [];
       let machines: StateMachine[] = [];
+      let position = 0;
+
+      let mappings = [
+        SINGLE_KANA_MAPPING,
+        DOUBLE_KANA_MAPPING,
+        TRIPLE_KANA_MAPPING
+      ]
 
       // we pad the input so checking 3 at a time is simpler
-      let remaining = input.toLowerCase() + '  ';
-      while (remaining.length > 2) {
-
-        let nextThree = remaining.substring(0, 3);
-        let tripleKana = TRIPLE_KANA_MAPPING[nextThree];
-        if (tripleKana != undefined) {
-          kana.push(nextThree);
-          machines.push(tripleKana.clone());
-          remaining = remaining.substring(3);
-          continue;
+      let normalized = normalizeInput(input) + '  ';
+      while (position < input.length) {
+        // we check substrings of length 3, 2, then 1
+        for (let i = 3; i > 0; --i) {
+          let original = input.substr(position, i);
+          let segment = normalized.substr(position, i);
+          let machine = mappings[i - 1][segment];
+          if (machine != undefined) {
+            kana.push(original);
+            machines.push(machine.clone());
+            position += i - 1;
+            break;
+          }
         }
-
-        let nextTwo = remaining.substring(0, 2);
-        let doubleKana = DOUBLE_KANA_MAPPING[nextTwo];
-        if (doubleKana != undefined) {
-          kana.push(nextTwo);
-          machines.push(doubleKana.clone());
-          remaining = remaining.substring(2);
-          continue;
-        }
-
-        let nextOne = remaining.substring(0, 1);
-        let singleKana = SINGLE_KANA_MAPPING[nextOne];
-        if (singleKana != undefined) {
-          kana.push(nextOne);
-          machines.push(singleKana.clone());
-        } else if (/\s/.test(nextOne)) {
-          kana.push(nextOne);
-          machines.push(WHITESPACE.clone());
-        }
-        remaining = remaining.substring(1);
+        // even if we don't find a match, keep progressing
+        // unmapped characters will be ignored
+        position += 1;
       }
 
       this.kana = kana;
