@@ -160,7 +160,7 @@ namespace display {
       this.element = document.createElement('div');
       this.kanaController = new KanaDisplayController();
       this.romajiController = new RomajiDisplayController();
-      this.kanjiHTMLElement = document.createElement('p');
+      this.kanjiHTMLElement = document.createElement('span');
 
       this.element.appendChild(this.kanaController.element);
       this.element.appendChild(this.kanjiHTMLElement);
@@ -339,6 +339,9 @@ namespace display {
       this.element.className = 'progress-bar';
       this.barElement = document.createElement('div');
       this.barElement.className = 'shade';
+      let bgElement = document.createElement('div');
+      bgElement.className = 'bg';
+      this.element.appendChild(bgElement);
       this.element.appendChild(this.barElement);
     }
 

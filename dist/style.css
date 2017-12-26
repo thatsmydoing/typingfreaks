@@ -1,3 +1,22 @@
+#container {
+  --base-color: white;
+  --highlight-color: red;
+
+  position: relative;
+  display: grid;
+  background-color: black;
+  color: var(--base-color);
+  height: 450px;
+  width: 800px;
+  margin: 0 auto;
+}
+
+#container #loading {
+  display: inline-block;
+  align-self: center;
+  justify-self: center;
+}
+
 .kana {
   display: inline-block;
   position: relative;
@@ -10,7 +29,7 @@
   position: absolute;
   left: 0;
   top: 0;
-  color: red;
+  color: var(--highlight-color);
   font-weight: bold;
   overflow: hidden;
   width: 0px;
@@ -50,13 +69,20 @@
 .progress-bar {
   position: relative;
   height: 5px;
-  background-color: lightgrey;
+}
+
+.progress-bar .bg {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  background-color: var(--base-color);
+  opacity: 0.5;
 }
 
 .progress-bar .shade {
   position: absolute;
   height: 5px;
-  background-color: red;
+  background-color: var(--base-color);
   animation-timing-function: linear;
   animation-play-state: paused;
 }
@@ -70,8 +96,8 @@
   }
 }
 
-.level-control.waiting {
-  color: grey;
+.level-control.waiting span {
+  opacity: 0.5;
 }
 
 .level-control.waiting .romaji {

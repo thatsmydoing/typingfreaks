@@ -25,7 +25,17 @@ namespace level {
     levels: Level[]
   }
 
-  export function loadFromJson(url: string): Promise<LevelSet[]> {
+  export interface Config {
+    background: string,
+    selectMusic?: string,
+    selectSound: string,
+    decideSound: string,
+    baseColor: string,
+    highlightColor: string,
+    levelSets: LevelSet[]
+  }
+
+  export function loadFromJson(url: string): Promise<Config> {
     return window.fetch(url)
       .then(response => response.json())
   }
@@ -39,10 +49,41 @@ namespace level {
     });
   }
 
-  export function loadFromTM(base: string): Promise<LevelSet[]> {
-    return window.fetch(base+'/folderlist.xml')
+  export function loadFromTM(base: string): Promise<Config> {
+    let settingsXML = window.fetch(base+'/settings.xml').then(parseXML);
+    let levelSets = window.fetch(base+'/folderlist.xml')
       .then(parseXML)
-      .then(dom => parseTMFolderList(base, dom))
+      .then(dom => parseTMFolderList(base, dom));
+
+    return Promise.all([settingsXML, levelSets]).then(pair => {
+      return parseTMSettings(base, pair[1], pair[0]);
+    })
+  }
+
+  function parseTMSettings(base: string, levelSets: LevelSet[], dom: Document): Config {
+    function getData(tag: string): string | null {
+      let elem = dom.querySelector(tag);
+      if (elem === null) {
+        return null;
+      } else {
+        return base+'/'+elem.getAttribute('src');
+      }
+    }
+
+    let background = getData('background');
+    let selectMusic = getData('selectmusic');
+    let selectSound = getData('selectsound');
+    let decideSound = getData('decidesound');
+
+    return {
+      background,
+      baseColor: 'white',
+      highlightColor: 'blue',
+      selectMusic,
+      selectSound,
+      decideSound,
+      levelSets
+    }
   }
 
   function parseTMFolderList(base: string, dom: Document): Promise<LevelSet[]> {
