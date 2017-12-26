@@ -130,6 +130,13 @@ namespace kana {
     return new StateMachine(newState, base.finalState);
   }
 
+  function smallKana(base: StateMachine): StateMachine {
+    let newState = base.initialState.clone();
+    newState.addTransition('l', base.initialState);
+    newState.addTransition('x', base.initialState);
+    return new StateMachine(newState, base.finalState);
+  }
+
   interface KanaMapping {
     [index: string]: StateMachine
   }
@@ -217,6 +224,18 @@ namespace kana {
 
   'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter => {
     SINGLE_KANA_MAPPING[letter] = literal(letter);
+  });
+
+  [
+    ['ぁ', 'あ'],
+    ['ぃ', 'い'],
+    ['ぅ', 'う'],
+    ['ぇ', 'え'],
+    ['ぉ', 'お'],
+    ['ヵ', 'か']
+  ].forEach(pair => {
+    let [ small, big ] = pair;
+    SINGLE_KANA_MAPPING[small] = smallKana(SINGLE_KANA_MAPPING[big]);
   });
 
   const DOUBLE_KANA_MAPPING: KanaMapping = {

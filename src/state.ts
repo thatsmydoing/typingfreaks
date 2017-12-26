@@ -36,6 +36,12 @@ namespace state {
     transition(input: string): State | null {
       return this.transitions[input];
     }
+
+    clone(): State {
+      let state = new State(this.display);
+      state.transitions = {...this.transitions};
+      return state;
+    }
   }
 
   export class StateMachine {
