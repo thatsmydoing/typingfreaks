@@ -3,7 +3,6 @@
   --highlight-color: red;
 
   position: relative;
-  background-color: black;
   color: var(--base-color);
   height: 450px;
   width: 800px;
@@ -26,6 +25,22 @@
 
 #loading.finished {
   opacity: 0;
+}
+
+#background {
+  background-color: black;
+}
+
+#background div {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.5s linear;
+}
+
+#background div.show {
+  opacity: 1;
 }
 
 .kana {

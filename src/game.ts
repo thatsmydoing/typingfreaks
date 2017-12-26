@@ -1,6 +1,7 @@
 /// <reference path="level.ts" />
 /// <reference path="audio.ts" />
 /// <reference path="display.ts" />
+/// <reference path="background.ts" />
 
 namespace game {
   enum GameState {
@@ -55,6 +56,7 @@ namespace game {
     }
 
     finishLoading(): void {
+      this.controller.bgManager.setBackground(this.controller.config.background);
       let loadingElement = this.controller.container.querySelector('#loading');
       loadingElement.addEventListener('transitionend', (event) => this.controller.onConfigLoad());
       loadingElement.classList.add('finished');
@@ -86,12 +88,14 @@ namespace game {
     configUrl: string;
     config: level.Config | null;
     audioManager: audio.AudioManager;
+    bgManager: background.BackgroundManager;
     assets: GameSounds | null;
 
     constructor(container: HTMLElement, configUrl: string) {
       this.container = container;
       this.configUrl = configUrl;
       this.audioManager = new audio.AudioManager();
+      this.bgManager = new background.BackgroundManager(container.querySelector('#background'));
     }
 
     start(): void {
@@ -101,11 +105,6 @@ namespace game {
 
     onConfigLoad(): void {
       let config = this.config;
-      let background = config.background;
-      if (background.indexOf('.') >= 0) {
-        background = `url(${background}), black`;
-      }
-      this.container.style.background = background;
       this.container.style.setProperty('--base-color', config.baseColor);
       this.container.style.setProperty('--highlight-color', config.highlightColor);
 
