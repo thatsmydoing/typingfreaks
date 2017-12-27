@@ -5,64 +5,12 @@
   position: relative;
   color: var(--base-color);
   font-family: sans;
-  height: 450px;
-  width: 800px;
-  margin: 0 auto;
-  overflow: hidden;
-
-  display: grid;
-  grid-template-columns: [start] auto [right] 300px [end];
-  grid-template-rows: [top] 50px [header] auto [game] 150px [bottom];
 }
 
-#container > div {
-  overflow: hidden;
-  position: relative;
-  transition: top 0.5s, left 0.5s, opacity 0.5s;
-  opacity: 0;
-}
+/* components {{{ */
 
-#loading {
-  grid-column: start / end;
-  grid-row: top / bottom;
-  align-self: center;
-  justify-self: center;
-}
-
-#song-info {
-  grid-column: start / right;
-  grid-row: header / game;
-  display: grid;
-  left: -500px;
-}
-
-#song-list {
-  grid-column: right / end;
-  grid-row: top / bottom;
-  left: 300px;
-}
-
-#folder-info {
-  grid-column: start / right;
-  grid-row: top / header;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  left: -500px;
-}
-
-#game {
-  top: 150px;
-  grid-column: start / end;
-  grid-row: game / bottom;
-}
-
-#container #background {
-  opacity: 1;
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  z-index: -99;
+/* background switcher {{{ */
+#background {
   background-color: black;
 }
 
@@ -77,6 +25,105 @@
 #background div.show {
   opacity: 1;
 }
+/* }}} */
+
+/* progress bar {{{ */
+.progress-bar {
+  position: relative;
+  height: 5px;
+}
+
+.progress-bar .bg {
+  position: absolute;
+  width: 100%;
+  height: 5px;
+  background-color: var(--base-color);
+  opacity: 0.5;
+}
+
+.progress-bar .shade {
+  position: absolute;
+  height: 5px;
+  background-color: var(--base-color);
+  animation-timing-function: linear;
+  animation-play-state: paused;
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* }}} */
+
+/* }}} */
+
+/* main layout {{{ */
+
+/* base {{{ */
+
+#container {
+  display: grid;
+  grid-template-columns: [start] auto [right] 300px [end];
+  grid-template-rows: [top] 50px [header] auto [game] 150px [bottom];
+
+  height: 450px;
+  width: 800px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+#container > div {
+  overflow: hidden;
+  position: relative;
+  transition: top 0.5s, left 0.5s, opacity 0.5s;
+  opacity: 0;
+}
+
+#container #background {
+  opacity: 1;
+  grid-column: start / end;
+  grid-row: top / bottom;
+}
+
+#loading {
+  grid-column: start / end;
+  grid-row: top / bottom;
+  align-self: center;
+  justify-self: center;
+}
+
+#song-info {
+  grid-column: start / right;
+  grid-row: header / game;
+  left: -500px;
+}
+
+#song-list {
+  grid-column: right / end;
+  grid-row: top / bottom;
+  left: 300px;
+}
+
+#folder-info {
+  grid-column: start / right;
+  grid-row: top / header;
+  left: -500px;
+}
+
+#game {
+  top: 150px;
+  grid-column: start / end;
+  grid-row: game / bottom;
+}
+
+/* }}} */
+
+/* loading {{{ */
 
 #container.loading #loading {
   opacity: 1;
@@ -96,6 +143,10 @@
   left: 50px;
 }
 
+/* }}} */
+
+/* select {{{ */
+
 #container.select #song-info,
 #container.select #folder-info {
   opacity: 1;
@@ -107,6 +158,10 @@
   opacity: 1;
   left: 0;
 }
+
+/* }}} */
+
+/* game {{{ */
 
 #container.game #folder-info {
   opacity: 1;
@@ -125,9 +180,33 @@
   top: 0;
 }
 
+/* }}} */
+
+/* }}} */
+
+/* sub layouts {{{ */
+
+/* select-screen {{{ */
+
+/* folder-info {{{ */
+
+#folder-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 #folder-info .left:hover,
 #folder-info .right:hover {
   text-shadow: 0px 0px 5px var(--base-color);
+}
+
+/* }}} */
+
+/* song-info {{{ */
+
+#song-info {
+  display: grid;
 }
 
 .song-info {
@@ -148,6 +227,10 @@
 .song-info .title {
   font-size: 30px;
 }
+
+/* }}} */
+
+/* song-list {{{ */
 
 .song-list {
   margin-left: 20px;
@@ -220,6 +303,12 @@
   font-size: 20px;
 }
 
+/* }}} */
+
+/* }}} */
+
+/* game-screen {{{ */
+
 .kana {
   display: inline-block;
   position: relative;
@@ -269,36 +358,6 @@
   }
 }
 
-.progress-bar {
-  position: relative;
-  height: 5px;
-}
-
-.progress-bar .bg {
-  position: absolute;
-  width: 100%;
-  height: 5px;
-  background-color: var(--base-color);
-  opacity: 0.5;
-}
-
-.progress-bar .shade {
-  position: absolute;
-  height: 5px;
-  background-color: var(--base-color);
-  animation-timing-function: linear;
-  animation-play-state: paused;
-}
-
-@keyframes progress {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}
-
 .level-control.waiting span {
   opacity: 0.5;
 }
@@ -306,3 +365,7 @@
 .level-control.waiting .romaji {
   color: transparent;
 }
+
+/* }}} */
+
+/* }}} */
