@@ -2,6 +2,7 @@
 /// <reference path="audio.ts" />
 /// <reference path="display.ts" />
 /// <reference path="background.ts" />
+/// <reference path="select.ts" />
 
 namespace game {
   enum GameState {
@@ -90,15 +91,34 @@ namespace game {
     audioManager: audio.AudioManager;
     bgManager: background.BackgroundManager;
     assets: GameSounds | null;
+    state: GameState;
+    selectScreen: SelectScreen | null;
+    gameController: display.LevelController | null;
 
     constructor(container: HTMLElement, configUrl: string) {
       this.container = container;
       this.configUrl = configUrl;
       this.audioManager = new audio.AudioManager();
       this.bgManager = new background.BackgroundManager(container.querySelector('#background'));
+      this.state = GameState.LOADING;
+
+      document.addEventListener('keydown', (event) => {
+        if (!event.ctrlKey && !event.metaKey) {
+          if (this.state === GameState.SELECT) {
+            this.selectScreen.handleInput(event.key);
+          } else if (this.state === GameState.PLAYING) {
+            if (event.key === 'Escape') {
+              this.onBackToSelect();
+            } else {
+              this.gameController.handleInput(event.key);
+            }
+          }
+        }
+      });
     }
 
     start(): void {
+      this.container.classList.add('loading');
       let loadingScreen = new LoadingScreen(this);
       loadingScreen.load();
     }
@@ -108,8 +128,29 @@ namespace game {
       this.container.style.setProperty('--base-color', config.baseColor);
       this.container.style.setProperty('--highlight-color', config.highlightColor);
 
-      let controller = new display.LevelController(this.audioManager, this.config.levelSets[0].levels[0]);
-      this.container.querySelector('#game').appendChild(controller.element);
+      this.selectScreen = new SelectScreen(this);
+      this.container.classList.remove('loading');
+      this.container.classList.add('select');
+      this.state = GameState.SELECT;
+    }
+
+    onSongSelect(level: level.Level): void {
+      this.container.classList.remove('select');
+      this.container.classList.add('game');
+      this.gameController = new display.LevelController(this.audioManager, level);
+      let gameContainer = this.container.querySelector('#game');
+      while (gameContainer.lastChild != null) {
+        gameContainer.removeChild(gameContainer.lastChild);
+      }
+      gameContainer.appendChild(this.gameController.element);
+      this.state = GameState.PLAYING;
+    }
+
+    onBackToSelect(): void {
+      this.container.classList.remove('game');
+      this.container.classList.add('select');
+      this.gameController.destroy();
+      this.state = GameState.SELECT;
     }
   }
 }

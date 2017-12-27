@@ -2,14 +2,38 @@
   <head>
     <title>Typing Freaks</title>
     <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   </head>
   <body>
     <div id="container">
       <div id="background"></div>
       <div id="loading">Loading...</div>
-      <div id="select"></div>
+      <div id="folder-info">
+        <i class="left material-icons">chevron_left</i>
+        <i class="material-icons">album</i>
+        <i class="right material-icons">chevron_right</i>
+        <span class="label"></span>
+      </div>
+      <div id="song-info"></div>
+      <div id="song-list"></div>
       <div id="game"></div>
     </div>
+    <template id="song-info-template">
+      <div class="song-info">
+        <div class="genre"></div>
+        <div class="creator"></div>
+        <div class="title"></div>
+      </div>
+    </template>
+    <template id="song-item-template">
+      <div class="song-item">
+        <div class="difficulty-bg normal"></div>
+        <div class="difficulty-bg"></div>
+        <div class="difficulty"></div>
+        <div class="creator"></div>
+        <div class="title"></div>
+      </div>
+    </template>
     <script type="text/javascript" src="bundle.js"></script>
   </body>
 </html>

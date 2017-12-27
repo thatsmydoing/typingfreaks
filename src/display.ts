@@ -197,7 +197,6 @@ namespace display {
     inputState: InputState | null;
     mainAreaController: MainAreaController;
     progressController: TrackProgressController | null;
-    listener: (event: KeyboardEvent) => void;
     state: LevelState;
     track: audio.Track | null;
 
@@ -208,13 +207,11 @@ namespace display {
       this.inputState = null;
       this.mainAreaController = new MainAreaController();
       this.progressController = null;
-      this.listener = event => this.handleInput(event.key);
       this.state = LevelState.LOADING;
       this.track = null;
 
       this.element.className = 'level-control';
       this.element.appendChild(this.mainAreaController.element);
-      document.addEventListener('keydown', this.listener);
 
       if (this.level.audio == null) {
         this.level.lines = this.level.lines.filter(line => line.kana != "@");
@@ -326,7 +323,9 @@ namespace display {
     }
 
     destroy(): void {
-      document.removeEventListener('keydown', this.listener);
+      if (this.track != null) {
+        this.track.stop();
+      }
     }
   }
 

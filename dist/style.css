@@ -4,30 +4,65 @@
 
   position: relative;
   color: var(--base-color);
+  font-family: sans;
   height: 450px;
   width: 800px;
   margin: 0 auto;
   overflow: hidden;
+
+  display: grid;
+  grid-template-columns: [start] auto [right] 300px [end];
+  grid-template-rows: [top] 50px [header] auto [game] 150px [bottom];
 }
 
 #container > div {
-  display: grid;
-  position: absolute;
-  height: 100%;
-  width: 100%;
-}
-
-#loading {
-  align-items: center;
-  justify-items: center;
-  transition: opacity 0.5s;
-}
-
-#loading.finished {
+  overflow: hidden;
+  position: relative;
+  transition: top 0.5s, left 0.5s, opacity 0.5s;
   opacity: 0;
 }
 
-#background {
+#loading {
+  grid-column: start / end;
+  grid-row: top / bottom;
+  align-self: center;
+  justify-self: center;
+}
+
+#song-info {
+  grid-column: start / right;
+  grid-row: header / game;
+  display: grid;
+  left: -500px;
+}
+
+#song-list {
+  grid-column: right / end;
+  grid-row: top / bottom;
+  left: 300px;
+}
+
+#folder-info {
+  grid-column: start / right;
+  grid-row: top / header;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  left: -500px;
+}
+
+#game {
+  top: 150px;
+  grid-column: start / end;
+  grid-row: game / bottom;
+}
+
+#container #background {
+  opacity: 1;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: -99;
   background-color: black;
 }
 
@@ -41,6 +76,148 @@
 
 #background div.show {
   opacity: 1;
+}
+
+#container.loading #loading {
+  opacity: 1;
+}
+
+#container.loading #loading.finished {
+  opacity: 0;
+}
+
+#container.loading #song-info,
+#container.loading #folder-info {
+  top: 50px;
+  left: 0;
+}
+
+#container.loading #song-list {
+  left: 50px;
+}
+
+#container.select #song-info,
+#container.select #folder-info {
+  opacity: 1;
+  top: 0;
+  left: 0;
+}
+
+#container.select #song-list {
+  opacity: 1;
+  left: 0;
+}
+
+#container.game #folder-info {
+  opacity: 1;
+  top: 0;
+  left: 0;
+}
+
+#container.game #song-info {
+  opacity: 1;
+  top: -150px;
+  left: 0;
+}
+
+#container.game #game {
+  opacity: 1;
+  top: 0;
+}
+
+#folder-info .left:hover,
+#folder-info .right:hover {
+  text-shadow: 0px 0px 5px var(--base-color);
+}
+
+.song-info {
+  align-self: end;
+  margin-left: 20px;
+  text-shadow: 0px 0px 5px var(--base-color);
+}
+
+.song-info .genre {
+  font-size: 12px;
+}
+
+.song-info .creator {
+  font-size: 20px;
+  line-height: 0.5;
+}
+
+.song-info .title {
+  font-size: 30px;
+}
+
+.song-list {
+  margin-left: 20px;
+  transition: margin-top 0.2s;
+}
+
+.song-item {
+  height: 40px;
+  display: grid;
+  grid-template-columns: 40px auto;
+  grid-template-rows: 12px 28px;
+  grid-template-areas:
+    "diff creator"
+    "diff title";
+  transition: margin-left 0.2s;
+}
+
+.song-item .difficulty {
+  grid-area: diff;
+  align-self: end;
+  justify-self: end;
+  margin-bottom: 1px;
+  margin-right: 5px;
+  font-style: italic;
+  font-weight: bold;
+}
+
+.song-item .difficulty-bg {
+  grid-area: diff;
+  align-self: center;
+  justify-self: center;
+  height: 30px;
+  width: 30px;
+  background: radial-gradient(circle at 10% 10%, rgba(0, 255, 255, 1), transparent);
+  border-radius: 20%;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.song-item .difficulty-bg.normal {
+  background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.6), transparent);
+  opacity: 1;
+}
+
+.song-item:hover {
+  text-shadow: 0px 0px 5px var(--base-color);
+}
+
+.song-item.selected {
+  margin-left: -10px;
+  text-shadow: 0px 0px 5px var(--base-color);
+}
+
+.song-item.selected .difficulty-bg {
+  opacity: 1;
+  box-shadow: -1px -1px 10px -2px var(--base-color);
+}
+
+.song-item.selected .difficulty-bg.normal {
+  opacity: 0;
+}
+
+.song-item .creator {
+  grid-area: creator;
+  font-size: 12px;
+}
+
+.song-item .title {
+  grid-area: title;
+  font-size: 20px;
 }
 
 .kana {
