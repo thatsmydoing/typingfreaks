@@ -1,9 +1,10 @@
-/// <reference path="game.ts" />
-/// <reference path="util.ts" />
+/// <reference path="typing.ts" />
+/// <reference path="../game.ts" />
+/// <reference path="../util.ts" />
 
 namespace game {
-  export class SelectScreen {
-    controller: MainController;
+  export class SelectScreen implements Screen {
+    readonly name: string = 'select';
     folderInfo: HTMLElement;
     songInfo: HTMLElement;
     songList: HTMLElement;
@@ -24,7 +25,7 @@ namespace game {
       return this.listControllers[this.currentFolderIndex];
     }
 
-    constructor(controller: MainController) {
+    constructor(private controller: MainController) {
       this.controller = controller;
       let container = controller.container;
       this.folderInfo = container.querySelector('#folder-info');
@@ -52,6 +53,10 @@ namespace game {
       this.init = false;
     }
 
+    enter(): void {
+      this.folderController.listeners.attach();
+    }
+
     handleInput(key: string): void {
       this.activeListController.handleInput(key);
       this.folderController.handleInput(key);
@@ -68,7 +73,9 @@ namespace game {
 
     chooseSong(index: number): void {
       this.controller.assets.decideSound.play();
-      this.controller.onSongSelect(this.currentLevelSet.levels[index]);
+      let level = this.currentLevelSet.levels[index];
+      let gameScreen = new game.TypingScreen(this.controller, level, this);
+      this.controller.switchScreen(gameScreen);
     }
 
     selectLevelSet(index: number): void {
@@ -77,6 +84,10 @@ namespace game {
       this.songList.appendChild(this.activeListController.element);
       this.selectSong(this.activeListController.currentIndex);
     }
+
+    exit(): void {
+      this.folderController.listeners.detach();
+    }
   }
 
   class FolderSelectController {
@@ -84,15 +95,25 @@ namespace game {
     levelSets: level.LevelSet[];
     currentIndex: number;
     onFolderChange: (index: number) => void;
+    listeners: util.ListenersManager;
 
     constructor(element: HTMLElement, levelSets: level.LevelSet[], onFolderChange: (index: number) => void) {
       this.labelElement = element.querySelector('.label');
       this.levelSets = levelSets;
       this.currentIndex = 0;
       this.onFolderChange = onFolderChange;
+      this.listeners = new util.ListenersManager();
+      this.listeners.add(
+        element.querySelector('.left'),
+        'click',
+        () => this.scroll(-1)
+      );
+      this.listeners.add(
+        element.querySelector('.right'),
+        'click',
+        () => this.scroll(1)
+      );
 
-      element.querySelector('.left').addEventListener('click', () => this.scroll(-1));
-      element.querySelector('.right').addEventListener('click', () => this.scroll(1));
       this.scroll(0);
     }
 
