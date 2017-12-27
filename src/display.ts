@@ -8,6 +8,7 @@
 /// <reference path="kana.ts" />
 /// <reference path="state.ts" />
 /// <reference path="audio.ts" />
+/// <reference path="util.ts" />
 
 namespace display {
   import InputState = kana.KanaInputState;
@@ -354,8 +355,7 @@ namespace display {
     }
 
     createBar(): HTMLElement {
-      let template: HTMLTemplateElement = document.querySelector('#progress-bar-template');
-      let element = document.importNode(template.content, true);
+      let element = util.loadTemplate('progress-bar');
       let shade: HTMLElement = element.querySelector('.shade');
       this.element.appendChild(element);
       return shade;

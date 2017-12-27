@@ -3,6 +3,7 @@
 /// <reference path="display.ts" />
 /// <reference path="background.ts" />
 /// <reference path="select.ts" />
+/// <reference path="util.ts" />
 
 namespace game {
   enum GameState {
@@ -139,9 +140,7 @@ namespace game {
       this.container.classList.add('game');
       this.gameController = new display.LevelController(this.audioManager, level);
       let gameContainer = this.container.querySelector('#game');
-      while (gameContainer.lastChild != null) {
-        gameContainer.removeChild(gameContainer.lastChild);
-      }
+      util.clearChildren(gameContainer);
       gameContainer.appendChild(this.gameController.element);
       this.state = GameState.PLAYING;
     }

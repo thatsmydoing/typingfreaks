@@ -1,4 +1,5 @@
 /// <reference path="game.ts" />
+/// <reference path="util.ts" />
 
 namespace game {
   export class SelectScreen {
@@ -61,9 +62,7 @@ namespace game {
         this.controller.assets.selectSound.play();
       }
       let songInfoComponent = new SongInfoComponent(this.currentLevelSet.levels[index]);
-      while (this.songInfo.firstChild) {
-        this.songInfo.removeChild(this.songInfo.firstChild);
-      }
+      util.clearChildren(this.songInfo);
       this.songInfo.appendChild(songInfoComponent.element);
     }
 
@@ -74,9 +73,7 @@ namespace game {
 
     selectLevelSet(index: number): void {
       this.currentFolderIndex = index;
-      if (this.songList.lastChild) {
-        this.songList.removeChild(this.songList.lastChild);
-      }
+      util.clearChildren(this.songList);
       this.songList.appendChild(this.activeListController.element);
       this.selectSong(this.activeListController.currentIndex);
     }
@@ -122,8 +119,7 @@ namespace game {
     element: DocumentFragment;
 
     constructor(level: level.Level) {
-      let template: HTMLTemplateElement = document.querySelector('#song-info-template');
-      this.element = document.importNode(template.content, true);
+      this.element = util.loadTemplate('song-info');
       this.element.querySelector('.genre').textContent = level.genre;
       this.element.querySelector('.creator').textContent = level.creator;
       this.element.querySelector('.title').textContent = level.name;
@@ -151,9 +147,8 @@ namespace game {
       this.element.className = 'song-list';
       this.element.style.marginTop = '200px';
 
-      let template: HTMLTemplateElement = document.querySelector('#song-item-template');
       this.levels.forEach((level, index) => {
-        let element = document.importNode(template.content, true);
+        let element = util.loadTemplate('song-item');
         element.querySelector('.creator').textContent = level.creator;
         element.querySelector('.title').textContent = level.name;
         element.querySelector('.difficulty').textContent = level.difficulty;
