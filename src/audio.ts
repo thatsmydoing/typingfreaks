@@ -21,6 +21,21 @@ namespace audio {
         .then(buffer => this.context.decodeAudioData(buffer))
         .then(audioBuffer => new Track(this, audioBuffer))
     }
+
+    loadTrackWithProgress(url: string, listener: EventListener): Promise<Track> {
+      let promise = new Promise<ArrayBuffer>((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.responseType = 'arraybuffer';
+        xhr.onprogress = listener;
+        xhr.onload = () => resolve(xhr.response);
+        xhr.onerror = () => reject();
+        xhr.send();
+      });
+      return promise
+        .then(buffer => this.context.decodeAudioData(buffer))
+        .then(audioBuffer => new Track(this, audioBuffer))
+    }
   }
 
   export class Track {

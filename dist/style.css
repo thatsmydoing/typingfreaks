@@ -121,6 +121,12 @@
   grid-row: game / bottom;
 }
 
+#loader {
+  top: -50px;
+  grid-column: right / end;
+  grid-row: top / header;
+}
+
 /* }}} */
 
 /* loading {{{ */
@@ -175,7 +181,27 @@
   left: 0;
 }
 
-#container.game #game {
+#loader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#loader .progress-bar {
+  width: 80%;
+}
+
+#loader .progress-bar .shade {
+  transition: width 0.2s;
+}
+
+#container.game.game-loading #loader {
+  opacity: 1;
+  top: 0;
+}
+
+#container.game.game-playing #game {
   opacity: 1;
   top: 0;
 }

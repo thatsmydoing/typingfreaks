@@ -21,8 +21,10 @@ namespace game {
         this.activeScreen.exit();
       }
       this.activeScreen = nextScreen;
-      this.activeScreen.enter();
-      this.container.classList.add(this.activeScreen.name);
+      if (nextScreen != null) {
+        this.activeScreen.enter();
+        this.container.classList.add(this.activeScreen.name);
+      }
     }
   }
 

@@ -184,8 +184,6 @@ namespace display {
   }
 
   enum LevelState {
-    LOADING,
-    READY,
     PLAYING,
     WAITING,
     FINISH
@@ -193,30 +191,26 @@ namespace display {
 
   export class LevelController implements Component {
     element: HTMLElement;
-    level: level.Level;
     currentIndex: number;
     inputState: InputState | null;
     mainAreaController: MainAreaController;
     progressController: TrackProgressController | null;
     state: LevelState;
-    track: audio.Track | null;
 
-    constructor(audioManager: audio.AudioManager, level: level.Level) {
+    constructor(readonly level: level.Level, readonly track: audio.Track | null) {
       this.element = document.createElement('div');
       this.level = level;
       this.currentIndex = -1;
       this.inputState = null;
       this.mainAreaController = new MainAreaController();
       this.progressController = null;
-      this.state = LevelState.LOADING;
-      this.track = null;
+      this.state = LevelState.PLAYING;
 
       this.element.className = 'level-control';
       this.element.appendChild(this.mainAreaController.element);
 
       if (this.level.audio == null) {
         this.level.lines = this.level.lines.filter(line => line.kana != "@");
-        this.onReady();
       } else {
         this.progressController = new TrackProgressController(this.level);
         this.element.insertBefore(
@@ -224,16 +218,7 @@ namespace display {
           this.mainAreaController.element
         );
         this.progressController.setListener(event => this.onIntervalEnd());
-        audioManager.loadTrack(this.level.audio).then(track => {
-          this.track = track;
-          this.onReady();
-        })
       }
-
-    }
-
-    onReady(): void {
-      this.setState(LevelState.READY);
     }
 
     onStart(): void {
@@ -281,11 +266,6 @@ namespace display {
 
     handleInput(key: string): void {
       switch (this.state) {
-        case LevelState.READY:
-          if (key == ' ' || key == 'Enter') {
-            this.onStart();
-          }
-          break;
         case LevelState.PLAYING:
           if (this.inputState !== null && /^[-_ a-z]$/.test(key)) {
             if (this.inputState.handleInput(key)) {
