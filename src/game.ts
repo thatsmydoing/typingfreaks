@@ -1,32 +1,29 @@
-/// <reference path="level.ts" />
 /// <reference path="audio.ts" />
 /// <reference path="background.ts" />
-/// <reference path="util.ts" />
+/// <reference path="game/common.ts" />
 /// <reference path="game/loading.ts" />
 
 namespace game {
-  interface GameSounds {
-    selectSound: audio.Track,
-    decideSound: audio.Track
-  }
+  export class MainController extends ScreenManager {
+    loadingScreen: Screen;
 
-  export interface Screen {
-    readonly name: string;
-    handleInput(key: string): void;
-    enter(): void;
-    exit(): void;
-  }
+    constructor(container: HTMLElement, configUrl: string) {
+      super(container);
 
-  export class MainController {
-    config: level.Config | null;
-    audioManager: audio.AudioManager;
-    bgManager: background.BackgroundManager;
-    assets: GameSounds | null;
-    activeScreen: Screen | null = null;
+      let self = this;
+      let bgLayer: HTMLElement = container.querySelector('#background');
+      let gameContext: GameContext = {
+        container: container,
+        audioManager: new audio.AudioManager(),
+        bgManager: new background.BackgroundManager(bgLayer),
+        assets: null,
+        config: null,
+        switchScreen(screen: Screen): void {
+          self.switchScreen(screen);
+        }
+      }
 
-    constructor(readonly container: HTMLElement, readonly configUrl: string) {
-      this.audioManager = new audio.AudioManager();
-      this.bgManager = new background.BackgroundManager(container.querySelector('#background'));
+      this.loadingScreen = new LoadingScreen(gameContext, configUrl);
 
       document.addEventListener('keydown', (event) => {
         if (!event.ctrlKey && !event.metaKey) {
@@ -35,18 +32,8 @@ namespace game {
       });
     }
 
-    switchScreen(nextScreen: Screen): void {
-      if (this.activeScreen != null) {
-        this.container.classList.remove(this.activeScreen.name);
-        this.activeScreen.exit();
-      }
-      this.activeScreen = nextScreen;
-      this.activeScreen.enter();
-      this.container.classList.add(this.activeScreen.name);
-    }
-
     start(): void {
-      this.switchScreen(new LoadingScreen(this));
+      this.switchScreen(this.loadingScreen);
     }
   }
 }

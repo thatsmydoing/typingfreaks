@@ -1,23 +1,25 @@
 /// <reference path="../display.ts" />
-/// <reference path="../game.ts" />
+/// <reference path="common.ts" />
 
 namespace game {
   import Level = level.Level;
 
-  export class TypingScreen implements Screen {
+  export class TypingScreen extends ScreenManager implements Screen {
     readonly name: string = 'game';
     gameController: display.LevelController;
 
     constructor(
-      readonly controller: MainController,
+      readonly context: GameContext,
       readonly level: Level,
       readonly prevScreen: Screen
-    ) {}
+    ) {
+      super(context.container);
+    }
 
     enter(): void {
-      let gameContainer = this.controller.container.querySelector('#game');
+      let gameContainer = this.context.container.querySelector('#game');
       util.clearChildren(gameContainer);
-      this.gameController = new display.LevelController(this.controller.audioManager, this.level);
+      this.gameController = new display.LevelController(this.context.audioManager, this.level);
       gameContainer.appendChild(this.gameController.element);
     }
 
@@ -30,7 +32,7 @@ namespace game {
     }
 
     returnToSelect(): void {
-      this.controller.switchScreen(this.prevScreen);
+      this.context.switchScreen(this.prevScreen);
     }
 
     exit(): void {

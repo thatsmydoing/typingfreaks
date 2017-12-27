@@ -1,29 +1,28 @@
 /// <reference path="select.ts" />
-/// <reference path="../game.ts" />
+/// <reference path="common.ts" />
 
 namespace game {
   export class LoadingScreen implements Screen {
     readonly name: string = 'loading';
 
-    constructor(private controller: MainController) {}
+    constructor(private context: GameContext, private configUrl: string) {}
 
     enter(): void {
       console.log('Loading assets...');
-      let configUrl = this.controller.configUrl;
       let configPromise;
-      if (configUrl.endsWith('.json')) {
-        configPromise = level.loadFromJson(configUrl);
+      if (this.configUrl.endsWith('.json')) {
+        configPromise = level.loadFromJson(this.configUrl);
       } else {
-        configPromise = level.loadFromTM(configUrl);
+        configPromise = level.loadFromTM(this.configUrl);
       }
       configPromise.then(config => {
-        this.controller.config = config;
+        this.context.config = config;
         this.loadAssets();
       })
     }
 
     loadAssets(): void {
-      let config = this.controller.config;
+      let config = this.context.config;
 
       Promise.all([
         this.loadImage(config.background),
@@ -32,7 +31,7 @@ namespace game {
       ]).then(v => {
         console.log('Loaded assets.');
         let [background, selectSound, decideSound] = v;
-        this.controller.assets = {
+        this.context.assets = {
           selectSound,
           decideSound
         }
@@ -41,8 +40,8 @@ namespace game {
     }
 
     finishLoading(): void {
-      this.controller.bgManager.setBackground(this.controller.config.background);
-      let loadingElement = this.controller.container.querySelector('#loading');
+      this.context.bgManager.setBackground(this.context.config.background);
+      let loadingElement = this.context.container.querySelector('#loading');
       loadingElement.addEventListener('transitionend', (event) => this.switchToSelect());
       loadingElement.classList.add('finished');
     }
@@ -51,7 +50,7 @@ namespace game {
       if (url == null) {
         return Promise.resolve(null);
       } else {
-        return this.controller.audioManager.loadTrack(url);
+        return this.context.audioManager.loadTrack(url);
       }
     }
 
@@ -68,15 +67,15 @@ namespace game {
     }
 
     switchToSelect(): void {
-      let selectScreen = new SelectScreen(this.controller);
-      this.controller.switchScreen(selectScreen);
+      let selectScreen = new SelectScreen(this.context);
+      this.context.switchScreen(selectScreen);
     }
 
     handleInput(key: string): void {}
 
     exit(): void {
-      let config = this.controller.config;
-      let containerStyle = this.controller.container.style;
+      let config = this.context.config;
+      let containerStyle = this.context.container.style;
       containerStyle.setProperty('--base-color', config.baseColor);
       containerStyle.setProperty('--highlight-color', config.highlightColor);
     }

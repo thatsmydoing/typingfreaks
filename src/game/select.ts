@@ -1,5 +1,5 @@
+/// <reference path="common.ts" />
 /// <reference path="typing.ts" />
-/// <reference path="../game.ts" />
 /// <reference path="../util.ts" />
 
 namespace game {
@@ -14,7 +14,7 @@ namespace game {
     init: boolean;
 
     get levelSets() {
-      return this.controller.config.levelSets;
+      return this.context.config.levelSets;
     }
 
     get currentLevelSet() {
@@ -25,9 +25,8 @@ namespace game {
       return this.listControllers[this.currentFolderIndex];
     }
 
-    constructor(private controller: MainController) {
-      this.controller = controller;
-      let container = controller.container;
+    constructor(private context: GameContext) {
+      let container = context.container;
       this.folderInfo = container.querySelector('#folder-info');
       this.songInfo = container.querySelector('#song-info');
       this.songList = container.querySelector('#song-list');
@@ -64,7 +63,7 @@ namespace game {
 
     selectSong(index: number): void {
       if (!this.init) {
-        this.controller.assets.selectSound.play();
+        this.context.assets.selectSound.play();
       }
       let songInfoComponent = new SongInfoComponent(this.currentLevelSet.levels[index]);
       util.clearChildren(this.songInfo);
@@ -72,10 +71,10 @@ namespace game {
     }
 
     chooseSong(index: number): void {
-      this.controller.assets.decideSound.play();
+      this.context.assets.decideSound.play();
       let level = this.currentLevelSet.levels[index];
-      let gameScreen = new game.TypingScreen(this.controller, level, this);
-      this.controller.switchScreen(gameScreen);
+      let gameScreen = new game.TypingScreen(this.context, level, this);
+      this.context.switchScreen(gameScreen);
     }
 
     selectLevelSet(index: number): void {
