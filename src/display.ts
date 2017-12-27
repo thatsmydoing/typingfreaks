@@ -329,39 +329,15 @@ namespace display {
     }
   }
 
-  class ProgressBar implements Component {
-    element: HTMLElement;
-    barElement: HTMLElement;
-
-    constructor() {
-      this.element = document.createElement('div');
-      this.element.className = 'progress-bar';
-      this.barElement = document.createElement('div');
-      this.barElement.className = 'shade';
-      let bgElement = document.createElement('div');
-      bgElement.className = 'bg';
-      this.element.appendChild(bgElement);
-      this.element.appendChild(this.barElement);
-    }
-
-    get style() {
-      return this.barElement.style;
-    }
-
-    destroy(): void {}
-  }
-
   class TrackProgressController implements Component {
     element: HTMLElement;
-    totalBar: ProgressBar;
-    intervalBar: ProgressBar;
+    totalBar: HTMLElement;
+    intervalBar: HTMLElement;
 
     constructor(level: level.Level) {
       this.element = document.createElement('div');
-      this.totalBar = new ProgressBar();
-      this.intervalBar = new ProgressBar();
-      this.element.appendChild(this.totalBar.element);
-      this.element.appendChild(this.intervalBar.element);
+      this.totalBar = this.createBar();
+      this.intervalBar = this.createBar();
 
       let lines = level.lines;
 
@@ -377,6 +353,14 @@ namespace display {
       this.intervalBar.style.animationDuration = durations;
     }
 
+    createBar(): HTMLElement {
+      let template: HTMLTemplateElement = document.querySelector('#progress-bar-template');
+      let element = document.importNode(template.content, true);
+      let shade: HTMLElement = element.querySelector('.shade');
+      this.element.appendChild(element);
+      return shade;
+    }
+
     start(): void {
       this.intervalBar.style.width = '100%';
       this.totalBar.style.width = '100%';
@@ -386,7 +370,7 @@ namespace display {
     }
 
     setListener(func: (event: AnimationEvent) => void): void {
-      this.intervalBar.element.addEventListener('animationend', func);
+      this.intervalBar.addEventListener('animationend', func);
     }
 
     destroy(): void {}
