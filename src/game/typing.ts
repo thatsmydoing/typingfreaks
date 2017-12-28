@@ -7,7 +7,7 @@ namespace game {
   import Level = level.Level;
 
   class TypingScreenContext {
-    track: audio.Track | null;
+    track: audio.Track | null = null;
 
     constructor(
       readonly context: GameContext,
@@ -76,9 +76,9 @@ namespace game {
     constructor(readonly context: TypingScreenContext) {}
 
     enter(): void {
+      this.readyElement = this.context.container.querySelector('#ready');
       if (this.context.level.audio != null) {
         let loader = this.context.container.querySelector('#loader');
-        this.readyElement = this.context.container.querySelector('#ready');
 
         if (loader.firstChild == null) {
           let progressBar = util.loadTemplate('progress-bar');
@@ -109,14 +109,18 @@ namespace game {
           this.context.track = track;
           this.barElement.style.width = '100%';
           this.textElement.textContent = 'music loaded';
-          this.readyElement.querySelector('.status').textContent = 'Ready';
-          this.readyElement.querySelector('.message').textContent = 'press space to start';
-          this.isReady = true;
+          this.setReady();
         });
 
       } else {
-        this.isReady = true;
+        this.setReady();
       }
+    }
+
+    setReady(): void {
+      this.readyElement.querySelector('.status').textContent = 'Ready';
+      this.readyElement.querySelector('.message').textContent = 'press space to start';
+      this.isReady = true;
     }
 
     handleInput(key: string): void {
