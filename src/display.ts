@@ -135,6 +135,7 @@ namespace display {
   export class TrackProgressController {
     totalBar: HTMLElement;
     intervalBar: HTMLElement;
+    listener: (event: AnimationEvent) => void;
 
     constructor(private element: HTMLElement, lines: level.Line[]) {
       this.totalBar = element.querySelector('.total .shade');
@@ -161,10 +162,17 @@ namespace display {
     }
 
     setListener(func: (event: AnimationEvent) => void): void {
+      if (this.listener) {
+        this.intervalBar.removeEventListener('animationend', func);
+      }
       this.intervalBar.addEventListener('animationend', func);
+      this.listener = func;
     }
 
     destroy(): void {
+      if (this.listener) {
+        this.intervalBar.removeEventListener('animationend', this.listener);
+      }
       this.intervalBar.style.animationName = '';
       this.totalBar.style.animationName = '';
     }
