@@ -70,6 +70,7 @@ namespace game {
     readonly name: string = 'game-loading';
     barElement: HTMLElement;
     textElement: HTMLElement;
+    readyElement: HTMLElement;
     isReady: boolean = false;
 
     constructor(readonly context: TypingScreenContext) {}
@@ -77,6 +78,7 @@ namespace game {
     enter(): void {
       if (this.context.level.audio != null) {
         let loader = this.context.container.querySelector('#loader');
+        this.readyElement = this.context.container.querySelector('#ready');
 
         if (loader.firstChild == null) {
           let progressBar = util.loadTemplate('progress-bar');
@@ -88,8 +90,11 @@ namespace game {
           this.barElement = loader.querySelector('.shade');
           this.textElement = loader.querySelector('span');
         }
+
         this.barElement.style.width = '0%';
         this.textElement.textContent = 'music loading';
+        this.readyElement.querySelector('.status').textContent = 'Loading';
+        this.readyElement.querySelector('.message').textContent = 'please wait';
 
         this.context.audioManager.loadTrackWithProgress(
           this.context.level.audio,
@@ -104,6 +109,8 @@ namespace game {
           this.context.track = track;
           this.barElement.style.width = '100%';
           this.textElement.textContent = 'music loaded';
+          this.readyElement.querySelector('.status').textContent = 'Ready';
+          this.readyElement.querySelector('.message').textContent = 'press space to start';
           this.isReady = true;
         });
 

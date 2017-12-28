@@ -127,6 +127,13 @@
   grid-row: top / header;
 }
 
+#ready {
+  grid-column: start / end;
+  grid-row: top / bottom;
+  align-self: center;
+  justify-self: center;
+}
+
 /* }}} */
 
 /* loading {{{ */
@@ -181,24 +188,13 @@
   left: 0;
 }
 
-#loader {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-#loader .progress-bar {
-  width: 80%;
-}
-
-#loader .progress-bar .shade {
-  transition: width 0.2s;
-}
-
 #container.game.game-loading #loader {
   opacity: 1;
   top: 0;
+}
+
+#container.game.game-loading #ready {
+  opacity: 1;
 }
 
 #container.game.game-playing #game {
@@ -334,6 +330,39 @@
 /* }}} */
 
 /* game-screen {{{ */
+
+/* loading-screen {{{ */
+
+#loader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#loader .progress-bar {
+  width: 80%;
+}
+
+#loader .progress-bar .shade {
+  transition: width 0.2s;
+}
+
+#ready {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#ready .status {
+  font-size: 30px;
+}
+
+#ready .message {
+  font-size: 14px;
+}
+
+/* }}} */
 
 .kana {
   display: inline-block;
