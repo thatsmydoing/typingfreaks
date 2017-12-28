@@ -8,6 +8,8 @@
     <div id="container" class="loading">
       <div id="background"></div>
       <div id="loading">Loading...</div>
+    </div>
+    <template id="base-template">
       <div id="folder-info">
         <i class="left material-icons">chevron_left</i>
         <i class="material-icons">album</i>
@@ -17,17 +19,23 @@
       <div id="song-info"></div>
       <div id="song-list"></div>
       <div id="game">
-        <div class="track-progress"></div>
+        <div class="track-progress">
+          <template class="total" name="progress-bar"></template>
+          <template class="interval" name="progress-bar"></template>
+        </div>
         <div class="kana-line"></div>
         <div class="kanji-line"></div>
         <div class="romaji-line"></div>
       </div>
-      <div id="loader"></div>
+      <div id="loader">
+        <template name="progress-bar"></template>
+        <span class="label"></span>
+      </div>
       <div id="ready">
         <div class="status"></div>
         <div class="message"></div>
       </div>
-    </div>
+    </template>
     <template id="song-info-template">
       <div class="song-info">
         <div class="genre"></div>

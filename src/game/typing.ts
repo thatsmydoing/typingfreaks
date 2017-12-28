@@ -77,20 +77,12 @@ namespace game {
     constructor(readonly context: TypingScreenContext) {}
 
     enter(): void {
+      let loader: HTMLElement = this.context.container.querySelector('#loader');
       this.readyElement = this.context.container.querySelector('#ready');
       if (this.context.level.audio != null) {
-        let loader = this.context.container.querySelector('#loader');
-
-        if (loader.firstChild == null) {
-          let progressBar = util.loadTemplate('progress-bar');
-          this.barElement = progressBar.querySelector('.shade');
-          this.textElement = document.createElement('span');
-          loader.appendChild(progressBar);
-          loader.appendChild(this.textElement);
-        } else {
-          this.barElement = loader.querySelector('.shade');
-          this.textElement = loader.querySelector('span');
-        }
+        loader.style.visibility = 'visible';
+        this.barElement = loader.querySelector('.progress-bar .shade');
+        this.textElement = loader.querySelector('.label');
 
         this.barElement.style.width = '0%';
         this.textElement.textContent = 'music loading';
@@ -114,6 +106,7 @@ namespace game {
         });
 
       } else {
+        loader.style.visibility = 'hidden';
         this.setReady();
       }
     }
@@ -161,11 +154,14 @@ namespace game {
     }
 
     enter(): void {
+      let progressElement: HTMLElement = this.gameContainer.querySelector('.track-progress');
       if (this.context.level.audio == null) {
+        progressElement.style.visibility = 'hidden';
         this.lines = this.context.level.lines.filter(line => line.kana != "@");
       } else {
+        progressElement.style.visibility = 'visible';
         this.progressController = new display.TrackProgressController(
-          this.gameContainer.querySelector('.track-progress'),
+          progressElement,
           this.lines
         );
         this.progressController.setListener(event => this.onIntervalEnd());

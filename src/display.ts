@@ -150,13 +150,8 @@ namespace display {
     intervalBar: HTMLElement;
 
     constructor(private element: HTMLElement, lines: level.Line[]) {
-      if (element.firstChild === null) {
-        this.totalBar = this.createBar();
-        this.intervalBar = this.createBar();
-      } else {
-        this.totalBar = element.children[0].querySelector('.shade');
-        this.intervalBar = element.children[1].querySelector('.shade');
-      }
+      this.totalBar = element.querySelector('.total .shade');
+      this.intervalBar = element.querySelector('.interval .shade');
 
       let totalDuration = lines[lines.length - 1].end;
       this.totalBar.style.animationName = 'progress';
@@ -168,13 +163,6 @@ namespace display {
       this.intervalBar.style.animationName = names;
       this.intervalBar.style.animationDelay = delays;
       this.intervalBar.style.animationDuration = durations;
-    }
-
-    createBar(): HTMLElement {
-      let element = util.loadTemplate('progress-bar');
-      let shade: HTMLElement = element.querySelector('.shade');
-      this.element.appendChild(element);
-      return shade;
     }
 
     start(): void {
