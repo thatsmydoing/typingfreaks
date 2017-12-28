@@ -142,20 +142,20 @@ namespace editor {
       let kana = '';
 
       lines.forEach(line => {
-        kanji += line.kanji + '<br>';
-        kana += line.kana + '<br>';
+        kanji += line.kanji + '\n';
+        kana += line.kana + '\n';
         if (line.end != undefined) {
           this.insertMarker(line.end);
         }
       });
 
-      this.kanjiElement.innerHTML = kanji;
-      this.kanaElement.innerHTML = kana;
+      this.kanjiElement.value = kanji;
+      this.kanaElement.value = kana;
     }
 
     export(): void {
-      let kanji = this.kanjiElement.innerHTML.split('<br>');
-      let kana = this.kanaElement.innerHTML.split('<br>');
+      let kanji = this.kanjiElement.value.split('\n');
+      let kana = this.kanaElement.value.split('\n');
       kanji.pop();
       kana.pop();
       let length = Math.max(kanji.length, kana.length, this.markers.length);
