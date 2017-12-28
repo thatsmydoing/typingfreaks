@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <title>Typing Freaks Editor</title>
+    <link rel="stylesheet" href="editor.css" />
+  </head>
+  <body>
+    <div id="#container">
+      <input id="audio" type="file" />
+
+      <button id="play">Play</button>
+      <button id="pause">Pause</button>
+      <button id="insert-marker">Insert Marker</button>
+      <div class="scrubber">
+        <div class="bar">
+          <div class="bar-overlay"></div>
+        </div>
+        <div class="markers">
+        </div>
+      </div>
+
+      <div class="text-areas">
+        <span id="intervals-label">Intervals</span>
+        <span id="kanji-label">Kanji</span>
+        <span id="kana-label">Kana</span>
+        <ul id="intervals"></ul>
+        <div id="kanji" contentEditable></div>
+        <div id="kana" contentEditable></div>
+      </div>
+
+      <div>
+        <textarea id="json" placeholder="JSON"></textarea>
+      </div>
+      <div>
+        <button id="import">Import</button>
+        <button id="export">Export</button>
+      </div>
+    </div>
+    <template id="interval-template">
+      <li>
+        <input class="interval" type="number" step="0.1">
+        <button class="play-section">Play</button>
+        <button class="remove-section">Remove</button>
+      </li>
+    </template>
+    <script type="text/javascript" src="bundle.js"></script>
+    <script type="text/javascript">
+      let e = new editor.Editor();
+      e.start();
+    </script>
+  </body>
+</html>

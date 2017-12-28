@@ -22,6 +22,17 @@ namespace audio {
         .then(audioBuffer => new Track(this, audioBuffer))
     }
 
+    loadTrackFromFile(file: File): Promise<Track> {
+      let promise = new Promise<ArrayBuffer>((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsArrayBuffer(file);
+      });
+      return promise
+        .then(buffer => this.context.decodeAudioData(buffer))
+        .then(audioBuffer => new Track(this, audioBuffer))
+    }
+
     loadTrackWithProgress(url: string, listener: EventListener): Promise<Track> {
       let promise = new Promise<ArrayBuffer>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
@@ -43,6 +54,7 @@ namespace audio {
     buffer: AudioBuffer;
     source: AudioBufferSourceNode | null;
     playStartTime: number;
+    resumeTime: number;
     hasStarted: boolean;
     isFinished: boolean;
 
@@ -50,6 +62,7 @@ namespace audio {
       this.manager = manager;
       this.buffer = buffer;
       this.playStartTime = 0;
+      this.resumeTime = 0;
       this.hasStarted = false;
       this.isFinished = false;
     }
@@ -58,25 +71,60 @@ namespace audio {
       this.source = this.manager.context.createBufferSource();
       this.source.buffer = this.buffer;
       this.source.connect(this.manager.output);
-      this.source.onended = () => {
-        this.isFinished = true;
-      }
+      this.playStartTime = this.manager.getTime();
       this.isFinished = false;
       this.hasStarted = true;
-      this.playStartTime = this.manager.getTime();
       this.source.start();
     }
 
-    stop(): void {
+    start(duration: number = undefined): void {
+      this.source = this.manager.context.createBufferSource();
+      this.source.buffer = this.buffer;
+      this.source.connect(this.manager.output);
+      this.source.onended = (event) => {
+        if (this.source == event.target) {
+          this.isFinished = true;
+          if (duration > 0) {
+            this.resumeTime += duration;
+            if (this.resumeTime > this.getDuration()) {
+              this.resumeTime = 0;
+            }
+          }
+        }
+      }
+      this.isFinished = false;
+      this.hasStarted = true;
+      this.playStartTime = this.manager.getTime() - this.resumeTime;
+      this.source.start(0, this.resumeTime, duration);
+    }
+
+    pause(): void {
+      this.resumeTime = this.manager.getTime() - this.playStartTime;
       this.isFinished = true;
       if (this.source) {
         this.source.stop();
       }
     }
 
+    stop(): void {
+      this.resumeTime = 0;
+      this.isFinished = true;
+      if (this.source) {
+        this.source.stop();
+      }
+    }
+
+    isPlaying(): boolean {
+      return this.hasStarted && !this.isFinished;
+    }
+
     getTime(): number {
       if (this.isFinished) {
-        return this.getDuration();
+        if (this.resumeTime > 0) {
+          return this.resumeTime;
+        } else {
+          return this.getDuration();
+        }
       } else if (!this.hasStarted) {
         return 0;
       } else {
