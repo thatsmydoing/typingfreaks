@@ -62,5 +62,12 @@
       </div>
     </template>
     <script type="text/javascript" src="bundle.js"></script>
+    <script type="text/javascript">
+      util.loadBase();
+      new game.MainController(
+        document.querySelector('#container'),
+        'levels.json'
+      ).start();
+    </script>
   </body>
 </html>
