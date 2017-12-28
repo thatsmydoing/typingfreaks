@@ -413,11 +413,12 @@
   }
 }
 
-.level-control.waiting span {
+#game.waiting .kana-line,
+#game.waiting .kanji-line {
   opacity: 0.5;
 }
 
-.level-control.waiting .romaji {
+#game.waiting .romaji {
   color: transparent;
 }
 

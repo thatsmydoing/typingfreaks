@@ -7,7 +7,6 @@
 
 /// <reference path="kana.ts" />
 /// <reference path="state.ts" />
-/// <reference path="audio.ts" />
 /// <reference path="util.ts" />
 
 namespace display {
@@ -51,12 +50,10 @@ namespace display {
     }
   }
 
-  class KanaDisplayController implements Component {
-    element: HTMLElement;
+  export class KanaDisplayController implements Component {
     children: KanaDisplayComponent[];
 
-    constructor() {
-      this.element = document.createElement('div');
+    constructor(readonly element: HTMLElement) {
       this.children = [];
     }
 
@@ -117,12 +114,10 @@ namespace display {
     }
   }
 
-  class RomajiDisplayController implements Component {
-    element: HTMLElement;
+  export class RomajiDisplayController implements Component {
     children: KanaDisplayComponent[];
 
-    constructor() {
-      this.element = document.createElement('div');
+    constructor(readonly element: HTMLElement) {
       this.children = [];
     }
 
@@ -150,177 +145,18 @@ namespace display {
     }
   }
 
-  class MainAreaController implements Component {
-    element: HTMLElement;
-    inputState: InputState | null;
-    kanaController: KanaDisplayController;
-    romajiController: RomajiDisplayController;
-    kanjiHTMLElement: HTMLElement;
-
-    constructor() {
-      this.element = document.createElement('div');
-      this.kanaController = new KanaDisplayController();
-      this.romajiController = new RomajiDisplayController();
-      this.kanjiHTMLElement = document.createElement('span');
-
-      this.element.appendChild(this.kanaController.element);
-      this.element.appendChild(this.kanjiHTMLElement);
-      this.element.appendChild(this.romajiController.element);
-    }
-
-    setData(kanji: string, kana: InputState) {
-      this.kanjiHTMLElement.textContent = kanji;
-      this.kanaController.setInputState(kana);
-      this.romajiController.setInputState(kana);
-    }
-
-    destroy(): void {
-      this.kanaController.destroy();
-      this.romajiController.destroy();
-      this.element.removeChild(this.kanaController.element);
-      this.element.removeChild(this.kanjiHTMLElement);
-      this.element.removeChild(this.romajiController.element);
-    }
-  }
-
-  enum LevelState {
-    PLAYING,
-    WAITING,
-    FINISH
-  }
-
-  export class LevelController implements Component {
-    element: HTMLElement;
-    currentIndex: number;
-    inputState: InputState | null;
-    mainAreaController: MainAreaController;
-    progressController: TrackProgressController | null;
-    state: LevelState;
-
-    constructor(readonly level: level.Level, readonly track: audio.Track | null) {
-      this.element = document.createElement('div');
-      this.level = level;
-      this.currentIndex = -1;
-      this.inputState = null;
-      this.mainAreaController = new MainAreaController();
-      this.progressController = null;
-      this.state = LevelState.PLAYING;
-
-      this.element.className = 'level-control';
-      this.element.appendChild(this.mainAreaController.element);
-
-      if (this.level.audio == null) {
-        this.level.lines = this.level.lines.filter(line => line.kana != "@");
-      } else {
-        this.progressController = new TrackProgressController(this.level);
-        this.element.insertBefore(
-          this.progressController.element,
-          this.mainAreaController.element
-        );
-        this.progressController.setListener(event => this.onIntervalEnd());
-      }
-    }
-
-    onStart(): void {
-      this.nextLine();
-      if (this.track !== null) {
-        this.progressController.start();
-        this.track.play();
-      }
-
-      this.setState(LevelState.PLAYING);
-      this.checkComplete();
-    }
-
-    checkComplete(): void {
-      let currentLine = this.level.lines[this.currentIndex];
-      if (currentLine.kana == '@' && currentLine.kanji == '@') {
-        this.onComplete();
-      }
-    }
-
-    onIntervalEnd(): void {
-      if (this.state === LevelState.WAITING) {
-        this.setState(LevelState.PLAYING);
-      } else if (this.state === LevelState.PLAYING) {
-        this.nextLine();
-      }
-      this.checkComplete();
-    }
-
-    onComplete(): void {
-      this.nextLine();
-      if (this.track !== null) {
-        this.setState(LevelState.WAITING);
-      }
-    }
-
-    setState(state: LevelState): void {
-      if (state === LevelState.WAITING) {
-        this.element.classList.add('waiting');
-      } else {
-        this.element.classList.remove('waiting');
-      }
-      this.state = state;
-    }
-
-    handleInput(key: string): void {
-      switch (this.state) {
-        case LevelState.PLAYING:
-          if (this.inputState !== null && /^[-_ a-z]$/.test(key)) {
-            if (this.inputState.handleInput(key)) {
-              this.onComplete();
-            }
-          }
-          break;
-      }
-    }
-
-    nextLine(): void {
-      if (this.currentIndex + 1 < this.level.lines.length) {
-        this.currentIndex += 1;
-        this.setLine(this.level.lines[this.currentIndex]);
-      } else {
-        this.setLine({ kanji: '@', kana: '@' });
-      }
-    }
-
-    setLine(line: level.Line): void {
-      let kanji, inputState;
-      if (line.kanji === '@') {
-        kanji = '';
-      } else {
-        kanji = line.kanji;
-      }
-
-      if (line.kana === '@') {
-        inputState = null;
-      } else {
-        inputState = new InputState(line.kana);
-      }
-
-      this.inputState = inputState;
-      this.mainAreaController.setData(kanji, inputState);
-    }
-
-    destroy(): void {
-      if (this.track != null) {
-        this.track.stop();
-      }
-    }
-  }
-
-  class TrackProgressController implements Component {
-    element: HTMLElement;
+  export class TrackProgressController {
     totalBar: HTMLElement;
     intervalBar: HTMLElement;
 
-    constructor(level: level.Level) {
-      this.element = document.createElement('div');
-      this.totalBar = this.createBar();
-      this.intervalBar = this.createBar();
-
-      let lines = level.lines;
+    constructor(private element: HTMLElement, lines: level.Line[]) {
+      if (element.firstChild === null) {
+        this.totalBar = this.createBar();
+        this.intervalBar = this.createBar();
+      } else {
+        this.totalBar = element.children[0].querySelector('.shade');
+        this.intervalBar = element.children[1].querySelector('.shade');
+      }
 
       let totalDuration = lines[lines.length - 1].end;
       this.totalBar.style.animationName = 'progress';
@@ -353,6 +189,9 @@ namespace display {
       this.intervalBar.addEventListener('animationend', func);
     }
 
-    destroy(): void {}
+    destroy(): void {
+      this.intervalBar.style.animationName = '';
+      this.totalBar.style.animationName = '';
+    }
   }
 }

@@ -1,4 +1,5 @@
 /// <reference path="../audio.ts" />
+/// <reference path="../kana.ts" />
 /// <reference path="../level.ts" />
 /// <reference path="../display.ts" />
 /// <reference path="common.ts" />
@@ -134,24 +135,129 @@ namespace game {
 
   class TypingPlayingScreen implements Screen {
     readonly name: string = 'game-playing';
-    gameController: display.LevelController;
+    gameContainer: HTMLElement;
+    currentIndex: number;
+    inputState: kana.KanaInputState | null;
+    isWaiting: boolean;
+    kanjiElement: HTMLElement;
+    kanaController: display.KanaDisplayController;
+    romajiController: display.RomajiDisplayController;
+    progressController: display.TrackProgressController | null;
+    lines: level.Line[];
 
-    constructor(readonly context: TypingScreenContext) {}
+    constructor(readonly context: TypingScreenContext) {
+      this.gameContainer = this.context.container.querySelector('#game');
+      this.currentIndex = -1;
+      this.inputState = null;
+      this.kanjiElement = this.gameContainer.querySelector('.kanji-line');
+      this.romajiController = new display.RomajiDisplayController(
+        this.gameContainer.querySelector('.romaji-line')
+      );
+      this.kanaController = new display.KanaDisplayController(
+        this.gameContainer.querySelector('.kana-line')
+      );
+      this.progressController = null;
+      this.lines = this.context.level.lines;
+    }
 
     enter(): void {
-      let gameContainer = this.context.container.querySelector('#game');
-      util.clearChildren(gameContainer);
-      this.gameController = new display.LevelController(this.context.level, this.context.track);
-      gameContainer.appendChild(this.gameController.element);
-      this.gameController.onStart();
+      if (this.context.level.audio == null) {
+        this.lines = this.context.level.lines.filter(line => line.kana != "@");
+      } else {
+        this.progressController = new display.TrackProgressController(
+          this.gameContainer.querySelector('.track-progress'),
+          this.lines
+        );
+        this.progressController.setListener(event => this.onIntervalEnd());
+      }
+      this.onStart();
+    }
+
+    setWaiting(waiting: boolean): void {
+      this.gameContainer.classList.toggle('waiting', waiting);
+      this.isWaiting = waiting;
+    }
+
+    onStart(): void {
+      this.nextLine();
+      if (this.context.track !== null) {
+        this.progressController.start();
+        this.context.track.play();
+      }
+
+      this.setWaiting(false);
+      this.checkComplete();
+    }
+
+    checkComplete(): void {
+      let currentLine = this.lines[this.currentIndex];
+      if (currentLine.kana == '@' && currentLine.kanji == '@') {
+        this.onComplete();
+      }
+    }
+
+    onIntervalEnd(): void {
+      if (this.isWaiting) {
+        this.setWaiting(false);
+      } else {
+        this.nextLine();
+      }
+      this.checkComplete();
+    }
+
+    onComplete(): void {
+      this.nextLine();
+      if (this.context.track !== null) {
+        this.setWaiting(true);
+      }
     }
 
     handleInput(key: string): void {
-      this.gameController.handleInput(key);
+      if (!this.isWaiting) {
+        if (this.inputState !== null && /^[-_ a-z]$/.test(key)) {
+          if (this.inputState.handleInput(key)) {
+            this.onComplete();
+          }
+        }
+      }
+    }
+
+    nextLine(): void {
+      if (this.currentIndex + 1 < this.lines.length) {
+        this.currentIndex += 1;
+        this.setLine(this.lines[this.currentIndex]);
+      } else {
+        this.setLine({ kanji: '@', kana: '@' });
+      }
+    }
+
+    setLine(line: level.Line): void {
+      let kanji, inputState;
+      if (line.kanji === '@') {
+        kanji = '';
+      } else {
+        kanji = line.kanji;
+      }
+
+      if (line.kana === '@') {
+        inputState = null;
+      } else {
+        inputState = new kana.KanaInputState(line.kana);
+      }
+
+      this.inputState = inputState;
+      this.kanjiElement.textContent = kanji;
+      this.kanaController.setInputState(this.inputState);
+      this.romajiController.setInputState(this.inputState);
     }
 
     exit(): void {
-      this.gameController.destroy();
+      if (this.context.track !== null) {
+        this.kanaController.destroy();
+        this.romajiController.destroy();
+        this.progressController.destroy();
+        this.context.track.stop();
+      }
     }
   }
 }
