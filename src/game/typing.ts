@@ -150,6 +150,7 @@ namespace game {
       this.inputState = null;
       this.kanjiElement = this.gameContainer.querySelector('.kanji-line');
       this.romajiController = new display.RomajiDisplayController(
+        this.gameContainer.querySelector('.romaji-first'),
         this.gameContainer.querySelector('.romaji-line')
       );
       this.kanaController = new display.KanaDisplayController(

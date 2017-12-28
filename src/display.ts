@@ -22,6 +22,7 @@ namespace display {
     element: HTMLElement;
     state: state.StateMachine;
     observer: state.Observer;
+    remove: () => void;
 
     constructor(kana: string, state: state.StateMachine) {
       this.state = state;
@@ -81,67 +82,53 @@ namespace display {
     }
   }
 
-  class RomajiDisplayComponent implements Component {
-    element: HTMLElement;
-    state: state.StateMachine;
+  export class RomajiDisplayController {
     observer: state.Observer;
+    inputState: InputState | null;
 
-    constructor(state: state.StateMachine) {
-      this.state = state;
-      this.observer = result => this.rerender(result);
-      this.state.addObserver(this.observer);
-      this.element = document.createElement('span');
-      this.element.classList.add('romaji');
-      this.element.textContent = this.state.getDisplay();
-    }
-
-    rerender(result: TransitionResult): void {
-      switch (result) {
-        case TransitionResult.FAILED:
-          this.element.classList.remove('error');
-          this.element.offsetHeight; // trigger reflow
-          this.element.classList.add('error');
-          break;
-        case TransitionResult.SUCCESS:
-        case TransitionResult.FINISHED:
-          this.element.textContent = this.state.getDisplay();
-          break;
-      }
-    }
-
-    destroy(): void {
-      this.state.removeObserver(this.observer);
-    }
-  }
-
-  export class RomajiDisplayController implements Component {
-    children: KanaDisplayComponent[];
-
-    constructor(readonly element: HTMLElement) {
-      this.children = [];
+    constructor(
+      readonly firstElement: HTMLElement,
+      readonly restElement: HTMLElement
+    ) {
+      this.observer = (result) => this.rerender(result);
     }
 
     setInputState(inputState: InputState) {
-      this.clearChildren();
-      if (inputState == null) {
-        this.children = [];
-      } else {
-        this.children = inputState.map((_, machine) => {
-          return new RomajiDisplayComponent(machine);
+      this.clearObservers();
+      this.inputState = inputState;
+      if (this.inputState != null) {
+        this.inputState.map((_, machine) => {
+          machine.addObserver(this.observer);
         });
-        this.children.forEach(child => this.element.appendChild(child.element));
+        this.rerender(TransitionResult.SUCCESS);
+      } else {
+        this.firstElement.textContent = '';
+        this.restElement.textContent = '';
       }
     }
 
-    private clearChildren(): void {
-      this.children.forEach(child => {
-        child.destroy();
-        this.element.removeChild(child.element);
-      });
+    private clearObservers(): void {
+      if (this.inputState != null) {
+        this.inputState.map((_, machine) => {
+          machine.removeObserver(this.observer);
+        });
+      }
+    }
+
+    rerender(result: TransitionResult): void {
+      if (result === TransitionResult.FAILED) {
+        this.firstElement.classList.remove('error');
+        this.firstElement.offsetHeight; // trigger reflow
+        this.firstElement.classList.add('error');
+      } else {
+        let remaining = this.inputState.getRemainingInput();
+        this.firstElement.textContent = remaining.charAt(0);
+        this.restElement.textContent = remaining.substring(1);
+      }
     }
 
     destroy(): void {
-      this.clearChildren();
+      this.clearObservers();
     }
   }
 
