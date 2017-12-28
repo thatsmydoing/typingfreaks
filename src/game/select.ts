@@ -87,6 +87,8 @@ namespace game {
     exit(): void {
       this.folderController.listeners.detach();
     }
+
+    transitionExit(): void {}
   }
 
   class FolderSelectController {

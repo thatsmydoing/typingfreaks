@@ -8,16 +8,30 @@ namespace game {
     handleInput(key: string): void;
     enter(): void;
     exit(): void;
+    transitionExit(): void;
   }
 
   export class ScreenManager {
     activeScreen: Screen | null = null;
+    lastScreen: Screen | null = null;
+    pendingExit: boolean = false;
 
-    constructor(readonly container: HTMLElement) {}
+    constructor(readonly container: HTMLElement) {
+      this.container.addEventListener('transitionend', (event: TransitionEvent) => {
+        if (this.pendingExit && event.propertyName === 'opacity') {
+          if (this.lastScreen !== null) {
+            this.lastScreen.transitionExit();
+            this.lastScreen = null;
+          }
+        }
+      });
+    }
 
     switchScreen(nextScreen: Screen): void {
       if (this.activeScreen != null) {
         this.container.classList.remove(this.activeScreen.name);
+        this.pendingExit = true;
+        this.lastScreen = this.activeScreen;
         this.activeScreen.exit();
       }
       this.activeScreen = nextScreen;

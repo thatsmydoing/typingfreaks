@@ -41,8 +41,11 @@ namespace game {
 
     finishLoading(): void {
       this.context.bgManager.setBackground(this.context.config.background);
-      let loadingElement = this.context.container.querySelector('#loading');
-      loadingElement.addEventListener('transitionend', (event) => this.switchToSelect());
+      let loadingElement: HTMLElement = this.context.container.querySelector('#loading');
+      loadingElement.addEventListener('transitionend', (event) => {
+        loadingElement.style.display = 'none';
+        this.switchToSelect()
+      });
       loadingElement.classList.add('finished');
     }
 
@@ -79,5 +82,7 @@ namespace game {
       containerStyle.setProperty('--base-color', config.baseColor);
       containerStyle.setProperty('--highlight-color', config.highlightColor);
     }
+
+    transitionExit(): void {}
   }
 }

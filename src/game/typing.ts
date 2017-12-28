@@ -65,6 +65,8 @@ namespace game {
     exit(): void {
       this.switchScreen(null);
     }
+
+    transitionExit(): void {}
   }
 
   class TypingLoadingScreen implements Screen {
@@ -124,6 +126,10 @@ namespace game {
     }
 
     exit(): void {}
+
+    transitionExit(): void {
+      this.barElement.style.width = '0%';
+    }
   }
 
   class TypingPlayingScreen implements Screen {
@@ -249,10 +255,15 @@ namespace game {
 
     exit(): void {
       if (this.context.track !== null) {
+        this.context.track.stop();
+      }
+    }
+
+    transitionExit(): void {
+      if (this.context.track !== null) {
         this.kanaController.destroy();
         this.romajiController.destroy();
         this.progressController.destroy();
-        this.context.track.stop();
       }
     }
   }
