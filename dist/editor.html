@@ -4,18 +4,24 @@
     <link rel="stylesheet" href="editor.css" />
   </head>
   <body>
-    <div id="#container">
-      <input id="audio" type="file" />
-
-      <button id="play">Play</button>
-      <button id="pause">Pause</button>
-      <button id="insert-marker">Insert Marker</button>
-      <div class="scrubber">
-        <div class="bar">
-          <div class="bar-overlay"></div>
+    <div id="container">
+      <div id="controls">
+        <input id="audio" type="file" />
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+        <button id="insert-marker">Insert Marker</button>
+        <div class="scrubber">
+          <div class="bar">
+            <div class="bar-overlay"></div>
+          </div>
+          <div class="markers">
+          </div>
         </div>
-        <div class="markers">
+        <div class="waveform-container">
+          <canvas id="waveform"></canvas>
+          <canvas id="waveform-overlay"></canvas>
         </div>
+        <div id="display"></div>
       </div>
 
       <div class="text-areas">

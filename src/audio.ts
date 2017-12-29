@@ -64,7 +64,7 @@ namespace audio {
       this.playStartTime = 0;
       this.resumeTime = 0;
       this.hasStarted = false;
-      this.isFinished = false;
+      this.isFinished = true;
     }
 
     play(): void {
@@ -84,11 +84,9 @@ namespace audio {
       this.source.onended = (event) => {
         if (this.source == event.target) {
           this.isFinished = true;
-          if (duration > 0) {
-            this.resumeTime += duration;
-            if (this.resumeTime > this.getDuration()) {
-              this.resumeTime = 0;
-            }
+          this.resumeTime = this.manager.getTime() - this.playStartTime;
+          if (this.resumeTime > this.getDuration()) {
+            this.resumeTime = 0;
           }
         }
       }
@@ -99,6 +97,7 @@ namespace audio {
     }
 
     pause(): void {
+      if (this.isFinished) return;
       this.resumeTime = this.manager.getTime() - this.playStartTime;
       this.isFinished = true;
       if (this.source) {
@@ -119,14 +118,15 @@ namespace audio {
     }
 
     getTime(): number {
-      if (this.isFinished) {
+      if (!this.hasStarted) {
+        return 0;
+      }
+      else if (this.isFinished) {
         if (this.resumeTime > 0) {
           return this.resumeTime;
         } else {
           return this.getDuration();
         }
-      } else if (!this.hasStarted) {
-        return 0;
       } else {
         return this.manager.getTime() - this.playStartTime;
       }
