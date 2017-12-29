@@ -6,7 +6,7 @@
  * that particular state.
  */
 namespace state {
-  export enum TransitionResult { FAILED, SUCCESS, FINISHED }
+  export enum TransitionResult { FAILED, SUCCESS, SKIPPED }
 
   interface StateMap {
     [index: string]: State
@@ -49,12 +49,14 @@ namespace state {
     finalState: State;
     currentState: State;
     observers: Set<Observer>;
+    nextMachine: StateMachine | null;
 
     constructor(initialState: State, finalState: State) {
       this.initialState = initialState;
       this.currentState = initialState;
       this.finalState = finalState;
       this.observers = new Set();
+      this.nextMachine = null;
     }
 
     transition(input: string): TransitionResult {
@@ -66,15 +68,40 @@ namespace state {
     private _transition(input: string): TransitionResult {
       let newState = this.currentState.transition(input);
       if (newState == null) {
-        return TransitionResult.FAILED;
+        if (this.skipTransition(input)) {
+          return TransitionResult.SKIPPED;
+        } else {
+          return TransitionResult.FAILED;
+        }
       } else {
         this.currentState = newState;
-        if (this.finalState === newState) {
-          return TransitionResult.FINISHED;
+        return TransitionResult.SUCCESS;
+      }
+    }
+
+    private skipTransition(input: string): boolean {
+      let potentialNextStates: State[] = Object.keys(this.currentState.transitions).map(k => this.currentState.transitions[k]);
+      for (let i = 0; i < potentialNextStates.length; ++i) {
+        let state = potentialNextStates[i];
+        if (state === this.finalState) {
+          if (this.nextMachine != null) {
+            let result = this.nextMachine.initialState.transition(input);
+            if (result != null) {
+              this.currentState = state;
+              this.nextMachine.currentState = result;
+              this.nextMachine.notify(TransitionResult.SUCCESS);
+              return true;
+            }
+          }
         } else {
-          return TransitionResult.SUCCESS;
+          let result = state.transition(input);
+          if (result != null) {
+            this.currentState = result;
+            return true;
+          }
         }
       }
+      return false;
     }
 
     isNew(): boolean {

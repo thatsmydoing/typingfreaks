@@ -35,14 +35,13 @@ namespace display {
     }
 
     rerender(result: TransitionResult): void {
-      switch (result) {
-        case TransitionResult.SUCCESS:
-          this.element.classList.add('half');
-          break;
-        case TransitionResult.FINISHED:
+      if (result != TransitionResult.FAILED) {
+        if (this.state.isFinished()) {
           this.element.classList.remove('half');
           this.element.classList.add('full');
-          break;
+        } else {
+          this.element.classList.add('half');
+        }
       }
     }
 

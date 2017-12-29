@@ -450,7 +450,12 @@ namespace kana {
           let machine = mappings[i - 1][segment];
           if (machine != undefined) {
             kana.push(original);
-            machines.push(machine.clone());
+            let nextMachine = machine.clone();
+            if (machines.length > 0) {
+              let prevMachine = machines[machines.length - 1];
+              prevMachine.nextMachine = nextMachine;
+            }
+            machines.push(nextMachine);
             position += i - 1;
             break;
           }
@@ -478,8 +483,12 @@ namespace kana {
 
       let currentMachine = this.stateMachines[this.currentIndex];
       let result = currentMachine.transition(input);
-      if (result === TransitionResult.FINISHED) {
+      while (currentMachine.isFinished()) {
         this.currentIndex += 1;
+        currentMachine = this.stateMachines[this.currentIndex];
+        if (currentMachine == null) {
+          return true;
+        }
       }
       return this.currentIndex >= this.stateMachines.length;
     }
