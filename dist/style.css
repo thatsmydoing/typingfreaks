@@ -263,11 +263,18 @@
   height: 40px;
   display: grid;
   grid-template-columns: 40px auto;
-  grid-template-rows: 12px 28px;
+  grid-template-rows: 16px 24px;
   grid-template-areas:
     "diff creator"
     "diff title";
   transition: margin-left 0.2s;
+}
+
+.song-item div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
 }
 
 .song-item .difficulty {
