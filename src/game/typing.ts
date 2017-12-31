@@ -142,6 +142,7 @@ namespace game {
     kanaController: display.KanaDisplayController;
     romajiController: display.RomajiDisplayController;
     progressController: display.TrackProgressController | null;
+    scoreController: display.ScoreController;
     lines: level.Line[];
 
     constructor(readonly context: TypingScreenContext) {
@@ -157,6 +158,10 @@ namespace game {
         this.gameContainer.querySelector('.kana-line')
       );
       this.progressController = null;
+      this.scoreController = new display.ScoreController(
+        this.gameContainer.querySelector('.score-line'),
+        this.gameContainer.querySelector('.stats-line')
+      );
       this.lines = this.context.level.lines;
     }
 
@@ -195,7 +200,7 @@ namespace game {
     checkComplete(): void {
       let currentLine = this.lines[this.currentIndex];
       if (currentLine.kana == '@' && currentLine.kanji == '@') {
-        this.onComplete();
+        this.onComplete(true);
       }
     }
 
@@ -204,12 +209,16 @@ namespace game {
         this.setWaiting(false);
       } else {
         this.nextLine();
+        this.scoreController.intervalEnd(false);
       }
       this.checkComplete();
     }
 
-    onComplete(): void {
+    onComplete(autoComplete: boolean = false): void {
       this.nextLine();
+      if (!autoComplete) {
+        this.scoreController.intervalEnd(true);
+      }
       if (this.context.track !== null) {
         this.setWaiting(true);
       }
@@ -252,6 +261,7 @@ namespace game {
       this.kanjiElement.textContent = kanji;
       this.kanaController.setInputState(this.inputState);
       this.romajiController.setInputState(this.inputState);
+      this.scoreController.setInputState(this.inputState);
     }
 
     exit(): void {
@@ -266,6 +276,7 @@ namespace game {
         this.romajiController.destroy();
         this.progressController.destroy();
       }
+      this.scoreController.destroy();
     }
   }
 }

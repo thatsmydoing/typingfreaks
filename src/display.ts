@@ -176,4 +176,103 @@ namespace display {
       this.totalBar.style.animationName = '';
     }
   }
+
+  export class ScoreController {
+    comboElement: HTMLElement;
+    scoreElement: HTMLElement;
+    maxComboElement: HTMLElement;
+    finishedElement: HTMLElement;
+    hitElement: HTMLElement;
+    missedElement: HTMLElement;
+    skippedElement: HTMLElement;
+
+    inputState: InputState | null;
+    observer: state.Observer;
+
+    combo: number = 0;
+    score: number = 0;
+    maxCombo: number = 0;
+    finished: number = 0;
+    hit: number = 0;
+    missed: number = 0;
+    skipped: number = 0;
+
+    constructor(
+      private scoreContainer: HTMLElement,
+      private statsContainer: HTMLElement
+    ) {
+      this.comboElement = scoreContainer.querySelector('.combo');
+      this.scoreElement = scoreContainer.querySelector('.score');
+      this.maxComboElement = scoreContainer.querySelector('.max-combo');
+      this.finishedElement = scoreContainer.querySelector('.finished');
+      this.hitElement = statsContainer.querySelector('.hit');
+      this.missedElement = statsContainer.querySelector('.missed');
+      this.skippedElement = statsContainer.querySelector('.skipped');
+      this.observer = result => this.update(result);
+      this.setValues();
+    }
+
+    setInputState(inputState: InputState): void {
+      this.clearObservers();
+      this.inputState = inputState;
+      if (this.inputState != null) {
+        this.inputState.map((_, m) => {
+          m.addObserver(this.observer);
+        });
+      }
+    }
+
+    intervalEnd(finished: boolean): void {
+      if (finished) {
+        this.finished += 1;
+      } else {
+        this.combo = 0;
+      }
+      this.setValues();
+    }
+
+    update(result: TransitionResult): void {
+      switch (result) {
+        case TransitionResult.SUCCESS:
+          this.hit += 1;
+          this.score += 100 + this.combo;
+          this.combo += 1;
+          break;
+        case TransitionResult.FAILED:
+          this.missed += 1;
+          this.combo = 0;
+          break;
+        case TransitionResult.SKIPPED:
+          this.skipped += 1;
+          this.combo = 0;
+          break;
+      }
+      if (this.combo > this.maxCombo) {
+        this.maxCombo = this.combo;
+      }
+      this.setValues();
+    }
+
+    setValues(): void {
+      this.comboElement.textContent = this.combo == 0 ? '' : this.combo+' combo';
+      this.scoreElement.textContent = this.score+'';
+      this.maxComboElement.textContent = this.maxCombo+'';
+      this.finishedElement.textContent = this.finished+'';
+      this.hitElement.textContent = this.hit+'';
+      this.missedElement.textContent = this.missed+'';
+      this.skippedElement.textContent = this.skipped+'';
+    }
+
+    private clearObservers(): void {
+      if (this.inputState != null) {
+        this.inputState.map((_, machine) => {
+          machine.removeObserver(this.observer);
+        });
+      }
+    }
+
+    destroy(): void {
+      this.clearObservers();
+    }
+  }
 }
