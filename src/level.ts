@@ -17,6 +17,7 @@ namespace level {
     genre?: string,
     difficulty?: string,
     audio?: string,
+    background?: string,
     lines: Line[]
   }
 

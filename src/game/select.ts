@@ -53,6 +53,7 @@ namespace game {
     }
 
     enter(): void {
+      this.context.bgManager.setBackground(this.context.config.background);
       this.folderController.listeners.attach();
     }
 
@@ -65,7 +66,8 @@ namespace game {
       if (!this.init) {
         this.context.assets.selectSound.play();
       }
-      let songInfoComponent = new SongInfoComponent(this.currentLevelSet.levels[index]);
+      let song = this.currentLevelSet.levels[index];
+      let songInfoComponent = new SongInfoComponent(song);
       util.clearChildren(this.songInfo);
       this.songInfo.appendChild(songInfoComponent.element);
     }

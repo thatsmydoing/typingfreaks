@@ -40,7 +40,6 @@ namespace game {
     }
 
     finishLoading(): void {
-      this.context.bgManager.setBackground(this.context.config.background);
       let loadingElement: HTMLElement = this.context.container.querySelector('#loading');
       loadingElement.addEventListener('transitionend', (event) => {
         loadingElement.style.display = 'none';

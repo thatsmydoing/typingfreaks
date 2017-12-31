@@ -438,6 +438,7 @@
     ". . stats";
   grid-row-gap: 2px;
   padding: 2px 20px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
 }
 
 #game .track-progress {

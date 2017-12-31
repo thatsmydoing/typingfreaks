@@ -45,6 +45,9 @@ namespace game {
     }
 
     enter(): void {
+      if (this.level.background) {
+        this.context.bgManager.setBackground(this.level.background);
+      }
       let context = new TypingScreenContext(this.context, this.level, (screen) => this.switchScreen(screen));
       let loadingScreen = new TypingLoadingScreen(context);
       this.switchScreen(loadingScreen);

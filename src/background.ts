@@ -1,21 +1,27 @@
 namespace background {
   export class BackgroundManager {
     element: HTMLElement;
+    filter: HTMLElement;
     last: HTMLElement | null;
     next: HTMLElement;
 
     constructor(element: HTMLElement) {
       this.element = element;
       this.last = null;
+      this.filter = document.createElement('div');
+      this.filter.className = 'filter';
       this.next = document.createElement('div');
+      this.element.appendChild(this.filter);
       this.element.appendChild(this.next);
     }
 
     setBackground(background: string) {
       if (background.indexOf('.') >= 0) {
-        background = `url(${background}), black`;
+        this.next.style.background = `url(${background}), black`;
+        this.next.style.filter = 'contrast(70%) brightness(70%)';
+      } else {
+        this.next.style.background = background;
       }
-      this.next.style.background = background;
       this.next.classList.add('show');
       if (this.last != null) {
         this.last.classList.remove('show');
