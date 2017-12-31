@@ -51,20 +51,17 @@ namespace game {
     }
 
     handleInput(key: string): void {
-      if (key === 'Escape') {
-        this.returnToSelect();
-      } else {
-        this.activeScreen.handleInput(key);
+      this.activeScreen.handleInput(key);
+    }
+
+    switchScreen(screen: Screen): void {
+      super.switchScreen(screen);
+      if (screen == null) {
+        this.context.switchScreen(this.prevScreen);
       }
     }
 
-    returnToSelect(): void {
-      this.context.switchScreen(this.prevScreen);
-    }
-
-    exit(): void {
-      this.switchScreen(null);
-    }
+    exit(): void {}
 
     transitionExit(): void {}
   }
@@ -120,7 +117,9 @@ namespace game {
     }
 
     handleInput(key: string): void {
-      if (this.isReady && key === ' ') {
+      if (key == 'Escape') {
+        this.context.switchScreen(null);
+      } else if (this.isReady && key === ' ') {
         this.context.switchScreen(new TypingPlayingScreen(this.context));
       }
     }
@@ -199,7 +198,7 @@ namespace game {
 
     checkComplete(): void {
       let currentLine = this.lines[this.currentIndex];
-      if (currentLine.kana == '@' && currentLine.kanji == '@') {
+      if (currentLine != null && currentLine.kana == '@' && currentLine.kanji == '@') {
         this.onComplete(true);
       }
     }
@@ -210,6 +209,9 @@ namespace game {
       } else {
         this.nextLine();
         this.scoreController.intervalEnd(false);
+      }
+      if (this.currentIndex >= this.lines.length) {
+        this.finish();
       }
       this.checkComplete();
     }
@@ -225,7 +227,9 @@ namespace game {
     }
 
     handleInput(key: string): void {
-      if (!this.isWaiting) {
+      if (key === 'Escape') {
+        this.finish();
+      } else if (!this.isWaiting) {
         if (this.inputState !== null && /^[-_ a-z]$/.test(key)) {
           if (this.inputState.handleInput(key)) {
             this.onComplete();
@@ -235,8 +239,10 @@ namespace game {
     }
 
     nextLine(): void {
-      if (this.currentIndex + 1 < this.lines.length) {
+      if (this.currentIndex < this.lines.length) {
         this.currentIndex += 1;
+      }
+      if (this.currentIndex < this.lines.length) {
         this.setLine(this.lines[this.currentIndex]);
       } else {
         this.setLine({ kanji: '@', kana: '@' });
@@ -264,11 +270,14 @@ namespace game {
       this.scoreController.setInputState(this.inputState);
     }
 
-    exit(): void {
-      if (this.context.track !== null) {
-        this.context.track.stop();
-      }
+    finish(): void {
+      this.context.switchScreen(new TypingFinishScreen(
+        this.context,
+        this.scoreController.score
+      ));
     }
+
+    exit(): void {}
 
     transitionExit(): void {
       if (this.context.track !== null) {
@@ -278,5 +287,38 @@ namespace game {
       }
       this.scoreController.destroy();
     }
+  }
+
+  class TypingFinishScreen implements Screen {
+    name: string = 'game-finished';
+
+    constructor(
+      readonly context: TypingScreenContext,
+      readonly score: display.Score
+    ) {
+      let container = this.context.container.querySelector('#score');
+      container.querySelector('.score').textContent = this.score.score+'';
+      container.querySelector('.max-combo').textContent = this.score.maxCombo+'';
+      container.querySelector('.finished').textContent = this.score.finished+'';
+      container.querySelector('.hit').textContent = this.score.hit+'';
+      container.querySelector('.missed').textContent = this.score.missed+'';
+      container.querySelector('.skipped').textContent = this.score.skipped+'';
+    }
+
+    enter(): void {}
+
+    handleInput(key: string): void {
+      if (key === ' ' || key === 'Escape') {
+        this.context.switchScreen(null);
+      }
+    }
+
+    exit(): void {
+      if (this.context.track !== null) {
+        this.context.track.stop();
+      }
+    }
+
+    transitionExit(): void {}
   }
 }

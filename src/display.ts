@@ -177,18 +177,7 @@ namespace display {
     }
   }
 
-  export class ScoreController {
-    comboElement: HTMLElement;
-    scoreElement: HTMLElement;
-    maxComboElement: HTMLElement;
-    finishedElement: HTMLElement;
-    hitElement: HTMLElement;
-    missedElement: HTMLElement;
-    skippedElement: HTMLElement;
-
-    inputState: InputState | null;
-    observer: state.Observer;
-
+  export class Score {
     combo: number = 0;
     score: number = 0;
     maxCombo: number = 0;
@@ -197,38 +186,12 @@ namespace display {
     missed: number = 0;
     skipped: number = 0;
 
-    constructor(
-      private scoreContainer: HTMLElement,
-      private statsContainer: HTMLElement
-    ) {
-      this.comboElement = scoreContainer.querySelector('.combo');
-      this.scoreElement = scoreContainer.querySelector('.score');
-      this.maxComboElement = scoreContainer.querySelector('.max-combo');
-      this.finishedElement = scoreContainer.querySelector('.finished');
-      this.hitElement = statsContainer.querySelector('.hit');
-      this.missedElement = statsContainer.querySelector('.missed');
-      this.skippedElement = statsContainer.querySelector('.skipped');
-      this.observer = result => this.update(result);
-      this.setValues();
-    }
-
-    setInputState(inputState: InputState): void {
-      this.clearObservers();
-      this.inputState = inputState;
-      if (this.inputState != null) {
-        this.inputState.map((_, m) => {
-          m.addObserver(this.observer);
-        });
-      }
-    }
-
     intervalEnd(finished: boolean): void {
       if (finished) {
         this.finished += 1;
       } else {
         this.combo = 0;
       }
-      this.setValues();
     }
 
     update(result: TransitionResult): void {
@@ -250,17 +213,67 @@ namespace display {
       if (this.combo > this.maxCombo) {
         this.maxCombo = this.combo;
       }
+    }
+  }
+
+  export class ScoreController {
+    comboElement: HTMLElement;
+    scoreElement: HTMLElement;
+    maxComboElement: HTMLElement;
+    finishedElement: HTMLElement;
+    hitElement: HTMLElement;
+    missedElement: HTMLElement;
+    skippedElement: HTMLElement;
+
+    inputState: InputState | null;
+    observer: state.Observer;
+    score: Score;
+
+
+    constructor(
+      private scoreContainer: HTMLElement,
+      private statsContainer: HTMLElement
+    ) {
+      this.comboElement = scoreContainer.querySelector('.combo');
+      this.scoreElement = scoreContainer.querySelector('.score');
+      this.maxComboElement = scoreContainer.querySelector('.max-combo');
+      this.finishedElement = scoreContainer.querySelector('.finished');
+      this.hitElement = statsContainer.querySelector('.hit');
+      this.missedElement = statsContainer.querySelector('.missed');
+      this.skippedElement = statsContainer.querySelector('.skipped');
+      this.observer = result => this.update(result);
+      this.score = new Score();
+      this.setValues();
+    }
+
+    setInputState(inputState: InputState): void {
+      this.clearObservers();
+      this.inputState = inputState;
+      if (this.inputState != null) {
+        this.inputState.map((_, m) => {
+          m.addObserver(this.observer);
+        });
+      }
+    }
+
+    intervalEnd(finished: boolean): void {
+      this.score.intervalEnd(finished);
+      this.setValues();
+    }
+
+    update(result: TransitionResult): void {
+      this.score.update(result);
       this.setValues();
     }
 
     setValues(): void {
-      this.comboElement.textContent = this.combo == 0 ? '' : this.combo+' combo';
-      this.scoreElement.textContent = this.score+'';
-      this.maxComboElement.textContent = this.maxCombo+'';
-      this.finishedElement.textContent = this.finished+'';
-      this.hitElement.textContent = this.hit+'';
-      this.missedElement.textContent = this.missed+'';
-      this.skippedElement.textContent = this.skipped+'';
+      this.comboElement.textContent = this.score.combo == 0 ? '' : this.score.combo+' combo';
+      this.scoreElement.textContent = this.score.score+'';
+      this.maxComboElement.textContent = this.score.maxCombo+'';
+      this.finishedElement.textContent = this.score.finished+'';
+      this.hitElement.textContent = this.score.hit+'';
+      this.missedElement.textContent = this.score.missed+'';
+      this.skippedElement.textContent = this.score.skipped+'';
     }
 
     private clearObservers(): void {
