@@ -199,8 +199,17 @@
   top: 0;
 }
 
+#container #ready {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0s ease 0.5s, top 0.5s, left 0.5s, opacity 0.5s;
+}
+
 #container.game.game-loading #ready {
   opacity: 1;
+
+  max-height: 100%;
+  transition: max-height 0s, top 0.5s, left 0.5s, opacity 0.5s;
 }
 
 #container.game.game-playing #game {
