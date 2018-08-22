@@ -22,7 +22,6 @@ namespace display {
     element: HTMLElement;
     state: state.StateMachine;
     observer: state.Observer;
-    remove: () => void;
 
     constructor(kana: string, state: state.StateMachine) {
       this.state = state;
@@ -57,7 +56,7 @@ namespace display {
       this.children = [];
     }
 
-    setInputState(inputState: InputState) {
+    setInputState(inputState: InputState | null) {
       this.clearChildren();
       if (inputState == null) {
         this.children = [];
@@ -90,9 +89,10 @@ namespace display {
       readonly restElement: HTMLElement
     ) {
       this.observer = (result) => this.rerender(result);
+      this.inputState = null;
     }
 
-    setInputState(inputState: InputState) {
+    setInputState(inputState: InputState | null) {
       this.clearObservers();
       this.inputState = inputState;
       if (this.inputState != null) {
@@ -119,10 +119,13 @@ namespace display {
         this.firstElement.classList.remove('error');
         this.firstElement.offsetHeight; // trigger reflow
         this.firstElement.classList.add('error');
-      } else {
+      } else if (this.inputState !== null) {
         let remaining = this.inputState.getRemainingInput();
         this.firstElement.textContent = remaining.charAt(0);
         this.restElement.textContent = remaining.substring(1);
+      } else {
+        this.firstElement.textContent = '';
+        this.restElement.textContent = '';
       }
     }
 
@@ -134,11 +137,12 @@ namespace display {
   export class TrackProgressController {
     totalBar: HTMLElement;
     intervalBar: HTMLElement;
-    listener: (event: AnimationEvent) => void;
+    listener: ((event: AnimationEvent) => void) | null;
 
     constructor(private element: HTMLElement, lines: level.Line[]) {
-      this.totalBar = element.querySelector('.total .shade');
-      this.intervalBar = element.querySelector('.interval .shade');
+      this.totalBar = util.getElement(element, '.total .shade');
+      this.intervalBar = util.getElement(element, '.interval .shade');
+      this.listener = null;
 
       let totalDuration = lines[lines.length - 1].end;
       this.totalBar.style.animationName = 'progress';
@@ -146,7 +150,7 @@ namespace display {
 
       let names = lines.map(line => 'progress').join(',');
       let delays = lines.map(line => line.start + 's').join(',');
-      let durations = lines.map(line => (line.end - line.start) + 's').join(',');
+      let durations = lines.map(line => (line.end! - line.start!) + 's').join(',');
       this.intervalBar.style.animationName = names;
       this.intervalBar.style.animationDelay = delays;
       this.intervalBar.style.animationDuration = durations;
@@ -225,7 +229,7 @@ namespace display {
     missedElement: HTMLElement;
     skippedElement: HTMLElement;
 
-    inputState: InputState | null;
+    inputState: InputState | null = null;
     observer: state.Observer;
     score: Score;
 
@@ -234,19 +238,19 @@ namespace display {
       private scoreContainer: HTMLElement,
       private statsContainer: HTMLElement
     ) {
-      this.comboElement = scoreContainer.querySelector('.combo');
-      this.scoreElement = scoreContainer.querySelector('.score');
-      this.maxComboElement = scoreContainer.querySelector('.max-combo');
-      this.finishedElement = scoreContainer.querySelector('.finished');
-      this.hitElement = statsContainer.querySelector('.hit');
-      this.missedElement = statsContainer.querySelector('.missed');
-      this.skippedElement = statsContainer.querySelector('.skipped');
+      this.comboElement = util.getElement(scoreContainer, '.combo');
+      this.scoreElement = util.getElement(scoreContainer, '.score');
+      this.maxComboElement = util.getElement(scoreContainer, '.max-combo');
+      this.finishedElement = util.getElement(scoreContainer, '.finished');
+      this.hitElement = util.getElement(statsContainer, '.hit');
+      this.missedElement = util.getElement(statsContainer, '.missed');
+      this.skippedElement = util.getElement(statsContainer, '.skipped');
       this.observer = result => this.update(result);
       this.score = new Score();
       this.setValues();
     }
 
-    setInputState(inputState: InputState): void {
+    setInputState(inputState: InputState | null): void {
       this.clearObservers();
       this.inputState = inputState;
       if (this.inputState != null) {

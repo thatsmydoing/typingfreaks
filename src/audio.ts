@@ -33,7 +33,7 @@ namespace audio {
         .then(audioBuffer => new Track(this, audioBuffer))
     }
 
-    loadTrackWithProgress(url: string, listener: EventListener): Promise<Track> {
+    loadTrackWithProgress(url: string, listener: (event: ProgressEvent) => any): Promise<Track> {
       let promise = new Promise<ArrayBuffer>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         xhr.open('GET', url);
@@ -61,6 +61,7 @@ namespace audio {
     constructor(manager: AudioManager, buffer: AudioBuffer) {
       this.manager = manager;
       this.buffer = buffer;
+      this.source = null;
       this.playStartTime = 0;
       this.resumeTime = 0;
       this.hasStarted = false;
@@ -77,7 +78,7 @@ namespace audio {
       this.source.start();
     }
 
-    start(duration: number = undefined): void {
+    start(duration?: number): void {
       this.source = this.manager.context.createBufferSource();
       this.source.buffer = this.buffer;
       this.source.connect(this.manager.output);

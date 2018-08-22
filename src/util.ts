@@ -1,14 +1,23 @@
 namespace util {
   export function loadBase(): void {
     let container = document.querySelector('#container');
+    if (container === null) {
+      throw new Error('Container not found');
+    }
 
     let baseTemplate = loadTemplate('base');
     baseTemplate.querySelectorAll('template').forEach(t => {
-      let parent = t.parentNode;
-      let template = loadTemplate(t.getAttribute('name'));
+      let parent = t.parentNode as Node;
+      const templateName = t.getAttribute('name');
+      if (templateName === null) {
+        return;
+      }
+      let template = loadTemplate(templateName);
       let firstElement = template.querySelector('*');
-      for (let i = 0; i < t.classList.length; ++i) {
-        firstElement.classList.add(t.classList[i]);
+      if (firstElement !== null) {
+        for (let i = 0; i < t.classList.length; ++i) {
+          firstElement.classList.add(t.classList[i]);
+        }
       }
       parent.insertBefore(template, t);
       parent.removeChild(t);
@@ -18,14 +27,26 @@ namespace util {
   }
 
   export function loadTemplate(id: string): DocumentFragment {
-    let template: HTMLTemplateElement = document.querySelector(`#${id}-template`);
-    return document.importNode(template.content, true);
+    let template = document.querySelector(`#${id}-template`);
+    if (template !== null && template instanceof HTMLTemplateElement) {
+      return document.importNode(template.content, true);
+    } else {
+      throw new Error(`#${id}-template is not a template`);
+    }
   }
 
   export function clearChildren(node: Node): void {
     while (node.lastChild !== null) {
       node.removeChild(node.lastChild);
     }
+  }
+
+  export function getElement<E extends HTMLElement>(element: ParentNode, selector: string): E {
+    const e = element.querySelector(selector);
+    if (e === null) {
+      throw new Error(`Could not find required element ${selector}`);
+    }
+    return e as E;
   }
 
   class ListenerManager {

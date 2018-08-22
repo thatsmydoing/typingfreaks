@@ -15,42 +15,41 @@ namespace editor {
     jsonElement: HTMLInputElement;
     track: audio.Track | null = null;
     markers: Marker[] = [];
-    rafId: number;
     waveForm: WaveForm;
-    currentMarker: Marker;
+    currentMarker: Marker | null = null;
 
     constructor() {
       this.audioManager = new audio.AudioManager();
-      this.audioElement = document.querySelector('#audio');
+      this.audioElement = util.getElement(document, '#audio');
       this.audioElement.addEventListener('change', event => {
         this.loadAudio();
       });
-      this.barElement = document.querySelector('.bar-overlay');
-      this.markerListElement = document.querySelector('.markers');
-      this.intervalListElement = document.querySelector('#intervals');
-      this.kanaElement = document.querySelector('#kana');
-      this.kanjiElement = document.querySelector('#kanji');
-      this.displayElement = document.querySelector('#display');
-      this.jsonElement = document.querySelector('#json');
+      this.barElement = util.getElement(document, '.bar-overlay');
+      this.markerListElement = util.getElement(document, '.markers');
+      this.intervalListElement = util.getElement(document, '#intervals');
+      this.kanaElement = util.getElement(document, '#kana');
+      this.kanjiElement = util.getElement(document, '#kanji');
+      this.displayElement = util.getElement(document, '#display');
+      this.jsonElement = util.getElement(document, '#json');
       this.waveForm = new WaveForm(
-        document.querySelector('#waveform'),
-        document.querySelector('#waveform-overlay'),
+        util.getElement(document, '#waveform'),
+        util.getElement(document, '#waveform-overlay'),
         (time: number) => this.play(time)
       );
 
       this.markerListElement.addEventListener('click', (event: MouseEvent) => this.markersClick(event));
-      document.querySelector('#play').addEventListener('click', () => this.play());
-      document.querySelector('#pause').addEventListener('click', () => this.pause());
-      document.querySelector('#insert-marker').addEventListener('click', () => this.insertMarker());
-      document.querySelector('.bar').addEventListener('click', (event: MouseEvent) => this.scrubberClick(event));
-      document.querySelector('#import').addEventListener('click', () => this.import());
-      document.querySelector('#export').addEventListener('click', () => this.export());
+      document.querySelector('#play')!.addEventListener('click', () => this.play());
+      document.querySelector('#pause')!.addEventListener('click', () => this.pause());
+      document.querySelector('#insert-marker')!.addEventListener('click', () => this.insertMarker());
+      document.querySelector<HTMLElement>('.bar')!.addEventListener('click', (event: MouseEvent) => this.scrubberClick(event));
+      document.querySelector('#import')!.addEventListener('click', () => this.import());
+      document.querySelector('#export')!.addEventListener('click', () => this.export());
 
       this.update();
     }
 
     loadAudio(): void {
-      let file = this.audioElement.files[0];
+      let file = this.audioElement.files![0];
       if (file != null) {
         if (this.track != null) {
           this.track.stop();
@@ -71,7 +70,7 @@ namespace editor {
         if (this.currentMarker) {
           this.currentMarker.liElement.className = '';
         }
-        let index = this.markers.findIndex(m => m.time > this.track.getTime());
+        let index = this.markers.findIndex(m => m.time > this.track!.getTime());
         if (index < 0) index = 0;
         this.currentMarker = this.markers[index - 1];
         if (this.currentMarker) {
@@ -87,27 +86,27 @@ namespace editor {
       let pos = event.clientX - 10;
       console.log(pos);
       let percentage = pos / this.markerListElement.clientWidth;
-      let targetTime = percentage * this.track.getDuration();
+      let targetTime = percentage * this.track!.getDuration();
       this.play(targetTime);
     }
 
     markersClick(event: MouseEvent): void {
       let pos = event.clientX - 10;
       let percentage = pos / this.markerListElement.clientWidth;
-      let targetTime = percentage * this.track.getDuration();
+      let targetTime = percentage * this.track!.getDuration();
       this.insertMarker(targetTime);
     }
 
-    insertMarker(time: number = undefined): void {
+    insertMarker(time?: number): void {
       let marker = new Marker(
-        this.track.getDuration(),
+        this.track!.getDuration(),
         (marker: Marker) => this.removeMarker(marker),
         (marker: Marker) => this.playMarker(marker)
       );
       if (time !== undefined) {
         marker.time = time;
       } else {
-        marker.time = this.track.getTime();
+        marker.time = this.track!.getTime();
       }
       let insertIndex = this.markers.findIndex(m => m.time > marker.time);
       if (insertIndex >= 0) {
@@ -123,21 +122,21 @@ namespace editor {
       }
     }
 
-    play(start: number = undefined, duration: number = undefined): void {
-      this.track.pause();
+    play(start?: number, duration?: number): void {
+      this.track!.pause();
       if (start != undefined) {
-        this.track.resumeTime = start;
+        this.track!.resumeTime = start;
       }
-      this.track.start(duration);
+      this.track!.start(duration);
     }
 
     pause(): void {
-      this.track.pause();
+      this.track!.pause();
     }
 
     playMarker(marker: Marker): void {
       let start = marker.time;
-      let end = this.track.getDuration();
+      let end = this.track!.getDuration();
       let index = this.markers.findIndex(m => m == marker);
       if (index < this.markers.length - 1) {
         end = this.markers[index + 1].time;
@@ -234,14 +233,14 @@ namespace editor {
       this.markerElement.className = 'marker';
 
       let fragment = util.loadTemplate('interval');
-      this.liElement = fragment.querySelector('*');
-      this.inputElement = fragment.querySelector('.interval');
+      this.liElement = util.getElement(fragment, '*');
+      this.inputElement = util.getElement(fragment, '.interval');
       this.inputElement.addEventListener('change', () => {
         this.time = parseFloat(this.inputElement.value);
       });
 
-      fragment.querySelector('.play-section').addEventListener('click', () => play(this));
-      fragment.querySelector('.remove-section').addEventListener('click', () => remove(this));
+      fragment.querySelector('.play-section')!.addEventListener('click', () => play(this));
+      fragment.querySelector('.remove-section')!.addEventListener('click', () => remove(this));
     }
 
     get time(): number {
@@ -258,10 +257,10 @@ namespace editor {
   class WaveForm {
     ctx: CanvasRenderingContext2D;
     overlayCtx: CanvasRenderingContext2D;
-    track: audio.Track | null;
-    data: Float32Array | null;
-    stride: number;
-    currentSection: number;
+    track: audio.Track | null = null;
+    data: Float32Array | null = null;
+    stride: number = 0;
+    currentSection: number = -1;
 
     constructor(
       readonly canvas: HTMLCanvasElement,
@@ -272,8 +271,8 @@ namespace editor {
       canvas.width = canvas.clientWidth;
       overlay.height = overlay.clientHeight;
       overlay.width = overlay.clientWidth;
-      this.ctx = canvas.getContext('2d');
-      this.overlayCtx = overlay.getContext('2d');
+      this.ctx = canvas.getContext('2d')!;
+      this.overlayCtx = overlay.getContext('2d')!;
 
       this.overlayCtx.fillStyle = 'rgba(255, 0, 0, 0.5)';
 
@@ -296,11 +295,11 @@ namespace editor {
     }
 
     update(markers: Marker[]): void {
-      let section = Math.floor(this.track.getTime() / 5);
+      let section = Math.floor(this.track!.getTime() / 5);
 
       let height = this.canvas.height;
       if (this.currentSection != section) {
-        this.data = this.track.buffer.getChannelData(0);
+        this.data = this.track!.buffer.getChannelData(0);
         this.ctx.clearRect(0, 0, this.canvas.width, height);
         this.ctx.beginPath();
         this.ctx.moveTo(0, height / 2);
@@ -314,7 +313,7 @@ namespace editor {
         this.currentSection = section;
       }
 
-      let marker = this.timeToX(this.track.getTime());
+      let marker = this.timeToX(this.track!.getTime());
       this.overlayCtx.clearRect(0, 0, this.canvas.width, height);
       this.overlayCtx.fillRect(0, 0, marker, height);
       markers.forEach(m => {

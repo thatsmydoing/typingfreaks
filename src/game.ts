@@ -11,7 +11,7 @@ namespace game {
       super(container);
 
       let self = this;
-      let bgLayer: HTMLElement = container.querySelector('#background');
+      let bgLayer: HTMLElement = util.getElement(container, '#background');
       let gameContext: GameContext = {
         container: container,
         audioManager: new audio.AudioManager(),
@@ -26,7 +26,7 @@ namespace game {
       this.loadingScreen = new LoadingScreen(gameContext, configUrl);
 
       document.addEventListener('keydown', (event) => {
-        if (!event.ctrlKey && !event.metaKey) {
+        if (this.activeScreen !== null && !event.ctrlKey && !event.metaKey) {
           this.activeScreen.handleInput(event.key);
         }
       });

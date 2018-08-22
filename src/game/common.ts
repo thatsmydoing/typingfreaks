@@ -27,7 +27,7 @@ namespace game {
       });
     }
 
-    switchScreen(nextScreen: Screen): void {
+    switchScreen(nextScreen: Screen | null): void {
       if (this.activeScreen != null) {
         this.container.classList.remove(this.activeScreen.name);
         this.pendingExit = true;
@@ -36,15 +36,15 @@ namespace game {
       }
       this.activeScreen = nextScreen;
       if (nextScreen != null) {
-        this.activeScreen.enter();
-        this.container.classList.add(this.activeScreen.name);
+        nextScreen.enter();
+        this.container.classList.add(nextScreen.name);
       }
     }
   }
 
   interface GameSounds {
-    selectSound: audio.Track,
-    decideSound: audio.Track
+    selectSound: audio.Track | null,
+    decideSound: audio.Track | null
   }
 
   export interface GameContext {

@@ -13,11 +13,11 @@ namespace level {
 
   export interface Level {
     name: string,
-    creator?: string,
-    genre?: string,
-    difficulty?: string,
-    audio?: string,
-    background?: string,
+    creator: string | null,
+    genre: string | null,
+    difficulty: string | null,
+    audio: string | null,
+    background?: string | null,
     lines: Line[]
   }
 
@@ -28,7 +28,7 @@ namespace level {
 
   export interface Config {
     background: string,
-    selectMusic?: string,
+    selectMusic: string | null,
     selectSound: string,
     decideSound: string,
     baseColor: string,
@@ -76,6 +76,16 @@ namespace level {
     let selectSound = getData('selectsound');
     let decideSound = getData('decidesound');
 
+    if (background === null) {
+      throw new Error('background is not set');
+    }
+    if (decideSound === null) {
+      throw new Error('decidesound is not set');
+    }
+    if (selectSound === null) {
+      throw new Error('selectsound is not set');
+    }
+
     return {
       background,
       baseColor: 'white',
@@ -95,9 +105,14 @@ namespace level {
       let name = folder.getAttribute('name');
       let path = folder.getAttribute('path');
 
+      if (name === null || path === null) {
+        console.warn(`Invalid folder entry ${name} with path ${path}`);
+        continue;
+      }
+
       let promise = window.fetch(base+'/'+path)
         .then(parseXML)
-        .then(dom => parseTMFolder(base, name, dom))
+        .then(dom => parseTMFolder(base, name!, dom))
 
       promises.push(promise);
     }
@@ -121,7 +136,7 @@ namespace level {
         }
       }
 
-      let name = getData('musicname');
+      let name = getData('musicname') || '[Unknown]';
       let creator = getData('artist');
       let genre = getData('genre');
       let difficulty = getData('level');
@@ -157,11 +172,15 @@ namespace level {
     let time = 0;
     for (let i = 0; i < intervalList.length; ++i) {
       let start = time;
-      time += parseInt(intervalList[i].textContent) / 1000
+      const interval = intervalList[i].textContent;
+      if (interval === null) {
+        throw new Error(`Invalid interval: ${interval}`);
+      }
+      time += parseInt(interval) / 1000
 
       lines.push({
-        kanji: kanjiList[i].textContent,
-        kana: kanaList[i].textContent,
+        kanji: kanjiList[i].textContent || '',
+        kana: kanaList[i].textContent || '',
         start: start,
         end: time
       })

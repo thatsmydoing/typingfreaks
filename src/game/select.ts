@@ -14,7 +14,7 @@ namespace game {
     init: boolean;
 
     get levelSets() {
-      return this.context.config.levelSets;
+      return this.context.config!.levelSets;
     }
 
     get currentLevelSet() {
@@ -27,9 +27,10 @@ namespace game {
 
     constructor(private context: GameContext) {
       let container = context.container;
-      this.folderInfo = container.querySelector('#folder-info');
-      this.songInfo = container.querySelector('#song-info');
-      this.songList = container.querySelector('#song-list');
+      this.folderInfo = util.getElement(container, '#folder-info');
+      this.currentFolderIndex = 0;
+      this.songInfo = util.getElement(container, '#song-info');
+      this.songList = util.getElement(container, '#song-list');
 
       this.listControllers = [];
       this.levelSets.forEach(levelSet => {
@@ -53,7 +54,7 @@ namespace game {
     }
 
     enter(): void {
-      this.context.bgManager.setBackground(this.context.config.background);
+      this.context.bgManager.setBackground(this.context.config!.background);
       this.folderController.listeners.attach();
     }
 
@@ -63,8 +64,9 @@ namespace game {
     }
 
     selectSong(index: number): void {
-      if (!this.init) {
-        this.context.assets.selectSound.play();
+      const { selectSound } = this.context.assets!;
+      if (!this.init && selectSound !== null) {
+        selectSound.play();
       }
       let song = this.currentLevelSet.levels[index];
       let songInfoComponent = new SongInfoComponent(song);
@@ -73,7 +75,10 @@ namespace game {
     }
 
     chooseSong(index: number): void {
-      this.context.assets.decideSound.play();
+      const { decideSound } = this.context.assets!;
+      if (decideSound !== null) {
+        decideSound.play();
+      }
       let level = this.currentLevelSet.levels[index];
       let gameScreen = new game.TypingScreen(this.context, level, this);
       this.context.switchScreen(gameScreen);
@@ -101,18 +106,18 @@ namespace game {
     listeners: util.ListenersManager;
 
     constructor(element: HTMLElement, levelSets: level.LevelSet[], onFolderChange: (index: number) => void) {
-      this.labelElement = element.querySelector('.label');
+      this.labelElement = util.getElement(element, '.label');
       this.levelSets = levelSets;
       this.currentIndex = 0;
       this.onFolderChange = onFolderChange;
       this.listeners = new util.ListenersManager();
       this.listeners.add(
-        element.querySelector('.left'),
+        element.querySelector('.left')!,
         'click',
         () => this.scroll(-1)
       );
       this.listeners.add(
-        element.querySelector('.right'),
+        element.querySelector('.right')!,
         'click',
         () => this.scroll(1)
       );
@@ -144,9 +149,9 @@ namespace game {
 
     constructor(level: level.Level) {
       this.element = util.loadTemplate('song-info');
-      this.element.querySelector('.genre').textContent = level.genre;
-      this.element.querySelector('.creator').textContent = level.creator;
-      this.element.querySelector('.title').textContent = level.name;
+      this.element.querySelector('.genre')!.textContent = level.genre;
+      this.element.querySelector('.creator')!.textContent = level.creator;
+      this.element.querySelector('.title')!.textContent = level.name;
     }
   }
 
@@ -173,10 +178,10 @@ namespace game {
 
       this.levels.forEach((level, index) => {
         let element = util.loadTemplate('song-item');
-        element.querySelector('.creator').textContent = level.creator;
-        element.querySelector('.title').textContent = level.name;
-        element.querySelector('.difficulty').textContent = level.difficulty;
-        element.querySelector('.song-item').addEventListener('click', (event) => this.click(index));
+        element.querySelector('.creator')!.textContent = level.creator;
+        element.querySelector('.title')!.textContent = level.name;
+        element.querySelector('.difficulty')!.textContent = level.difficulty;
+        element.querySelector('.song-item')!.addEventListener('click', (event) => this.click(index));
         this.element.appendChild(element);
       });
       this.element.children[0].classList.add('selected');

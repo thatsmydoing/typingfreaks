@@ -22,7 +22,7 @@ namespace game {
     }
 
     loadAssets(): void {
-      let config = this.context.config;
+      let config = this.context.config!;
 
       Promise.all([
         this.loadImage(config.background),
@@ -40,7 +40,7 @@ namespace game {
     }
 
     finishLoading(): void {
-      let loadingElement: HTMLElement = this.context.container.querySelector('#loading');
+      let loadingElement: HTMLElement = util.getElement(this.context.container, '#loading');
       loadingElement.addEventListener('transitionend', (event) => {
         loadingElement.style.display = 'none';
         this.switchToSelect()
@@ -48,7 +48,7 @@ namespace game {
       loadingElement.classList.add('finished');
     }
 
-    loadTrack(url: string): Promise<audio.Track> {
+    loadTrack(url: string): Promise<audio.Track | null> {
       if (url == null) {
         return Promise.resolve(null);
       } else {
@@ -76,7 +76,7 @@ namespace game {
     handleInput(key: string): void {}
 
     exit(): void {
-      let config = this.context.config;
+      let config = this.context.config!;
       let containerStyle = this.context.container.style;
       containerStyle.setProperty('--base-color', config.baseColor);
       containerStyle.setProperty('--highlight-color', config.highlightColor);

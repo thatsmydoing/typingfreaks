@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "noImplicitAny": true,
+    "strict": true,
     "removeComments": true,
     "sourceMap": true,
     "outFile": "dist/bundle.js",

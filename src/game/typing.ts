@@ -13,7 +13,7 @@ namespace game {
     constructor(
       readonly context: GameContext,
       readonly level: Level,
-      readonly switchClosure: (screen: Screen) => void
+      readonly switchClosure: (screen: Screen | null) => void
     ) {}
 
     get container() {
@@ -28,7 +28,7 @@ namespace game {
       return this.context.bgManager;
     }
 
-    switchScreen(screen: Screen): void {
+    switchScreen(screen: Screen | null): void {
       this.switchClosure(screen);
     }
   }
@@ -54,10 +54,12 @@ namespace game {
     }
 
     handleInput(key: string): void {
-      this.activeScreen.handleInput(key);
+      if (this.activeScreen !== null) {
+        this.activeScreen.handleInput(key);
+      }
     }
 
-    switchScreen(screen: Screen): void {
+    switchScreen(screen: Screen | null): void {
       super.switchScreen(screen);
       if (screen == null) {
         this.context.switchScreen(this.prevScreen);
@@ -71,25 +73,25 @@ namespace game {
 
   class TypingLoadingScreen implements Screen {
     readonly name: string = 'game-loading';
-    barElement: HTMLElement;
-    textElement: HTMLElement;
-    readyElement: HTMLElement;
+    barElement: HTMLElement | null = null;
+    textElement: HTMLElement | null = null;
+    readyElement: HTMLElement | null = null;
     isReady: boolean = false;
 
     constructor(readonly context: TypingScreenContext) {}
 
     enter(): void {
-      let loader: HTMLElement = this.context.container.querySelector('#loader');
-      this.readyElement = this.context.container.querySelector('#ready');
+      let loader: HTMLElement = util.getElement(this.context.container, '#loader');
+      this.readyElement = util.getElement(this.context.container, '#ready');
       if (this.context.level.audio != null) {
         loader.style.visibility = 'visible';
-        this.barElement = loader.querySelector('.progress-bar .shade');
-        this.textElement = loader.querySelector('.label');
+        this.barElement = util.getElement(loader, '.progress-bar .shade');
+        this.textElement = util.getElement(loader, '.label');
 
         this.barElement.style.width = '0%';
         this.textElement.textContent = 'music loading';
-        this.readyElement.querySelector('.status').textContent = 'Loading';
-        this.readyElement.querySelector('.message').textContent = 'please wait';
+        this.readyElement.querySelector('.status')!.textContent = 'Loading';
+        this.readyElement.querySelector('.message')!.textContent = 'please wait';
 
         this.context.audioManager.loadTrackWithProgress(
           this.context.level.audio,
@@ -97,13 +99,13 @@ namespace game {
             if (event.lengthComputable) {
               // only up to 80 to factor in decoding time
               let percentage = event.loaded / event.total * 80;
-              this.barElement.style.width = `${percentage}%`;
+              this.barElement!.style.width = `${percentage}%`;
             }
           }
         ).then(track => {
           this.context.track = track;
-          this.barElement.style.width = '100%';
-          this.textElement.textContent = 'music loaded';
+          this.barElement!.style.width = '100%';
+          this.textElement!.textContent = 'music loaded';
           this.setReady();
         });
 
@@ -114,8 +116,8 @@ namespace game {
     }
 
     setReady(): void {
-      this.readyElement.querySelector('.status').textContent = 'Ready';
-      this.readyElement.querySelector('.message').textContent = 'press space to start';
+      this.readyElement!.querySelector('.status')!.textContent = 'Ready';
+      this.readyElement!.querySelector('.message')!.textContent = 'press space to start';
       this.isReady = true;
     }
 
@@ -130,7 +132,9 @@ namespace game {
     exit(): void {}
 
     transitionExit(): void {
-      this.barElement.style.width = '0%';
+      if (this.barElement) {
+        this.barElement.style.width = '0%';
+      }
     }
   }
 
@@ -148,27 +152,28 @@ namespace game {
     lines: level.Line[];
 
     constructor(readonly context: TypingScreenContext) {
-      this.gameContainer = this.context.container.querySelector('#game');
+      this.gameContainer = util.getElement(this.context.container, '#game');
       this.currentIndex = -1;
       this.inputState = null;
-      this.kanjiElement = this.gameContainer.querySelector('.kanji-line');
+      this.isWaiting = false;
+      this.kanjiElement = util.getElement(this.gameContainer, '.kanji-line');
       this.romajiController = new display.RomajiDisplayController(
-        this.gameContainer.querySelector('.romaji-first'),
-        this.gameContainer.querySelector('.romaji-line')
+        util.getElement(this.gameContainer, '.romaji-first'),
+        util.getElement(this.gameContainer, '.romaji-line')
       );
       this.kanaController = new display.KanaDisplayController(
-        this.gameContainer.querySelector('.kana-line')
+        util.getElement(this.gameContainer, '.kana-line')
       );
       this.progressController = null;
       this.scoreController = new display.ScoreController(
-        this.gameContainer.querySelector('.score-line'),
-        this.gameContainer.querySelector('.stats-line')
+        util.getElement(this.gameContainer, '.score-line'),
+        util.getElement(this.gameContainer, '.stats-line')
       );
       this.lines = this.context.level.lines;
     }
 
     enter(): void {
-      let progressElement: HTMLElement = this.gameContainer.querySelector('.track-progress');
+      let progressElement: HTMLElement = this.gameContainer.querySelector<HTMLElement>('.track-progress')!;
       if (this.context.level.audio == null) {
         progressElement.style.visibility = 'hidden';
         this.lines = this.context.level.lines.filter(line => line.kana != "@");
@@ -191,7 +196,7 @@ namespace game {
     onStart(): void {
       this.nextLine();
       if (this.context.track !== null) {
-        this.progressController.start();
+        this.progressController!.start();
         this.context.track.play();
       }
 
@@ -286,7 +291,7 @@ namespace game {
       if (this.context.track !== null) {
         this.kanaController.destroy();
         this.romajiController.destroy();
-        this.progressController.destroy();
+        this.progressController!.destroy();
       }
       this.scoreController.destroy();
     }
@@ -299,13 +304,13 @@ namespace game {
       readonly context: TypingScreenContext,
       readonly score: display.Score
     ) {
-      let container = this.context.container.querySelector('#score');
-      container.querySelector('.score').textContent = this.score.score+'';
-      container.querySelector('.max-combo').textContent = this.score.maxCombo+'';
-      container.querySelector('.finished').textContent = this.score.finished+'';
-      container.querySelector('.hit').textContent = this.score.hit+'';
-      container.querySelector('.missed').textContent = this.score.missed+'';
-      container.querySelector('.skipped').textContent = this.score.skipped+'';
+      let container = this.context.container.querySelector('#score')!;
+      container.querySelector('.score')!.textContent = this.score.score+'';
+      container.querySelector('.max-combo')!.textContent = this.score.maxCombo+'';
+      container.querySelector('.finished')!.textContent = this.score.finished+'';
+      container.querySelector('.hit')!.textContent = this.score.hit+'';
+      container.querySelector('.missed')!.textContent = this.score.missed+'';
+      container.querySelector('.skipped')!.textContent = this.score.skipped+'';
     }
 
     enter(): void {}
