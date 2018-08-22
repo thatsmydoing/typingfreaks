@@ -25,7 +25,7 @@ namespace audio {
     loadTrackFromFile(file: File): Promise<Track> {
       let promise = new Promise<ArrayBuffer>((resolve, reject) => {
         let reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
+        reader.onload = () => resolve(reader.result as ArrayBuffer);
         reader.readAsArrayBuffer(file);
       });
       return promise
