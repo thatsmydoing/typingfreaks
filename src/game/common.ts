@@ -19,15 +19,15 @@ namespace game {
     constructor(readonly container: HTMLElement) {
       this.container.addEventListener('transitionend', (event: TransitionEvent) => {
         if (this.pendingExit && event.propertyName === 'opacity') {
-          if (this.lastScreen !== null) {
-            this.lastScreen.transitionExit();
-            this.lastScreen = null;
-          }
+          this.finishExit();
         }
       });
     }
 
     switchScreen(nextScreen: Screen | null): void {
+      if (this.pendingExit) {
+        this.finishExit();
+      }
       if (this.activeScreen != null) {
         this.container.classList.remove(this.activeScreen.name);
         this.pendingExit = true;
@@ -38,6 +38,14 @@ namespace game {
       if (nextScreen != null) {
         nextScreen.enter();
         this.container.classList.add(nextScreen.name);
+      }
+    }
+
+    finishExit() {
+      this.pendingExit = false;
+      if (this.lastScreen !== null) {
+        this.lastScreen.transitionExit();
+        this.lastScreen = null;
       }
     }
   }
