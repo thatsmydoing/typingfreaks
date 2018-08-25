@@ -212,6 +212,8 @@ namespace display {
     hit: number = 0;
     missed: number = 0;
     skipped: number = 0;
+    lastMissed: boolean = false;
+    lastSkipped: boolean = false;
 
     intervalEnd(finished: boolean): void {
       if (finished) {
@@ -222,21 +224,32 @@ namespace display {
     }
 
     update(result: TransitionResult, boundary: boolean): void {
-      switch (result) {
-        case TransitionResult.FAILED:
-          this.missed += 1;
-          this.combo = 0;
-          break;
-        case TransitionResult.SKIPPED:
-          this.skipped += 1;
-          this.combo = 0;
-          break;
+      if (result === TransitionResult.FAILED) {
+        this.missed += 1;
+        this.lastMissed = true;
+        this.combo = 0;
+      } else if (result === TransitionResult.SKIPPED) {
+        this.skipped += 1;
+        this.lastSkipped = true;
+        this.combo = 0;
       }
+
       if (boundary) {
-        this.hit += 1;
-        this.score += 100 + this.combo;
+        if (this.lastSkipped) {
+          // no points if we've skipped
+          this.lastSkipped = false;
+          return;
+        } else if (this.lastMissed) {
+          this.hit += 1;
+          this.score += 50;
+          this.lastMissed = false;
+        } else {
+          this.hit += 1;
+          this.score += 100 + this.combo;
+        }
         this.combo += 1;
       }
+
       if (this.combo > this.maxCombo) {
         this.maxCombo = this.combo;
       }
