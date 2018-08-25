@@ -25,7 +25,7 @@ namespace game {
       let config = this.context.config!;
 
       Promise.all([
-        this.loadImage(config.background),
+        util.loadBackground(config.background),
         this.loadTrack(config.selectSound),
         this.loadTrack(config.decideSound)
       ]).then(v => {
@@ -53,18 +53,6 @@ namespace game {
         return Promise.resolve(null);
       } else {
         return this.context.audioManager.loadTrack(url);
-      }
-    }
-
-    loadImage(url: string): Promise<void> {
-      if (url.includes('.')) {
-        return new Promise((resolve, reject) => {
-          let image = new Image();
-          image.onload = (event) => resolve();
-          image.src = url;
-        });
-      } else {
-        return Promise.resolve();
       }
     }
 

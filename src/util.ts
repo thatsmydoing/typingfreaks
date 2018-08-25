@@ -49,6 +49,18 @@ namespace util {
     return e as E;
   }
 
+  export function loadBackground(url: string): Promise<void> {
+    if (url.includes('.')) {
+      return new Promise((resolve, reject) => {
+        let image = new Image();
+        image.onload = (event) => resolve();
+        image.src = url;
+      });
+    } else {
+      return Promise.resolve();
+    }
+  }
+
   class ListenerManager {
     constructor(
       private target: EventTarget,
@@ -82,6 +94,24 @@ namespace util {
 
     detach(): void {
       this.listeners.forEach(l => l.detach());
+    }
+  }
+
+  export class FnContext {
+    current: Symbol = Symbol();
+
+    invalidate() {
+      this.current = Symbol();
+    }
+
+    wrap<T extends Function>(fn: T): T {
+      const id = this.current;
+      const wrappedFn = (...args: any[]) => {
+        if (this.current === id) {
+          return fn(...args);
+        }
+      };
+      return wrappedFn as any as T;
     }
   }
 }

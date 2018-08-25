@@ -77,6 +77,7 @@ namespace game {
     textElement: HTMLElement | null = null;
     readyElement: HTMLElement | null = null;
     isReady: boolean = false;
+    fnContext: util.FnContext = new util.FnContext();
 
     constructor(readonly context: TypingScreenContext) {}
 
@@ -93,21 +94,22 @@ namespace game {
         this.readyElement.querySelector('.status')!.textContent = 'Loading';
         this.readyElement.querySelector('.message')!.textContent = 'please wait';
 
+        this.fnContext.invalidate();
         this.context.audioManager.loadTrackWithProgress(
           this.context.level.audio,
-          (event: ProgressEvent) => {
+          this.fnContext.wrap((event: ProgressEvent) => {
             if (event.lengthComputable) {
               // only up to 80 to factor in decoding time
               let percentage = event.loaded / event.total * 80;
               this.barElement!.style.width = `${percentage}%`;
             }
-          }
-        ).then(track => {
+          })
+        ).then(this.fnContext.wrap((track: audio.Track) => {
           this.context.track = track;
           this.barElement!.style.width = '100%';
           this.textElement!.textContent = 'music loaded';
           this.setReady();
-        });
+        }));
 
       } else {
         loader.style.visibility = 'hidden';
@@ -129,7 +131,9 @@ namespace game {
       }
     }
 
-    exit(): void {}
+    exit(): void {
+      this.fnContext.invalidate();
+    }
 
     transitionExit(): void {
       if (this.barElement) {

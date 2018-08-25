@@ -4,6 +4,7 @@ namespace background {
     filter: HTMLElement;
     last: HTMLElement | null;
     next: HTMLElement;
+    fnContext: util.FnContext = new util.FnContext();
 
     constructor(element: HTMLElement) {
       this.element = element;
@@ -16,6 +17,13 @@ namespace background {
     }
 
     setBackground(background: string) {
+      this.fnContext.invalidate();
+      util.loadBackground(background).then(this.fnContext.wrap(
+        () => this.setBackgroundActual(background)
+      ));
+    }
+
+    private setBackgroundActual(background: string) {
       if (background.indexOf('.') >= 0) {
         this.next.style.background = `url(${background}), black`;
         this.next.style.filter = 'contrast(70%) brightness(70%)';
