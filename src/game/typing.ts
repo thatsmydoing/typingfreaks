@@ -235,6 +235,10 @@ namespace game {
       }
       if (this.context.track !== null) {
         this.setWaiting(true);
+      } else {
+        if (this.currentIndex >= this.lines.length) {
+          this.finish();
+        }
       }
     }
 
