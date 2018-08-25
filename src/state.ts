@@ -13,11 +13,11 @@ namespace state {
   }
 
   interface StateTransitionList {
-    [index: string]: State
+    [index: string]: [State, boolean]
   }
 
   export interface Observer {
-    (result: TransitionResult): void
+    (result: TransitionResult, boundary: boolean): void;
   }
 
   export class State {
@@ -29,11 +29,11 @@ namespace state {
       this.transitions = {};
     }
 
-    addTransition(input: string, state: State): void {
-      this.transitions[input] = state;
+    addTransition(input: string, state: State, boundary: boolean = false): void {
+      this.transitions[input] = [state, boundary];
     }
 
-    transition(input: string): State | null {
+    transition(input: string): [State, boolean] | null {
       return this.transitions[input];
     }
 
@@ -59,48 +59,45 @@ namespace state {
       this.nextMachine = null;
     }
 
-    transition(input: string): TransitionResult {
-      let result = this._transition(input);
-      this.notify(result);
-      return result;
-    }
-
-    private _transition(input: string): TransitionResult {
-      let newState = this.currentState.transition(input);
-      if (newState == null) {
-        if (this.skipTransition(input)) {
-          return TransitionResult.SKIPPED;
-        } else {
-          return TransitionResult.FAILED;
-        }
+    transition(input: string) {
+      let result = this.currentState.transition(input);
+      if (result == null) {
+        this.skipTransition(input);
       } else {
+        let [newState, boundary] = result;
         this.currentState = newState;
-        return TransitionResult.SUCCESS;
+        this.notifyResult(TransitionResult.SUCCESS, boundary);
       }
     }
 
     private skipTransition(input: string): boolean {
-      let potentialNextStates: State[] = Object.keys(this.currentState.transitions).map(k => this.currentState.transitions[k]);
+      let potentialNextStates: Array<[State, boolean]> = Object.keys(this.currentState.transitions).map(k => this.currentState.transitions[k]);
       for (let i = 0; i < potentialNextStates.length; ++i) {
-        let state = potentialNextStates[i];
+        let [state, skippedBoundary] = potentialNextStates[i];
         if (state === this.finalState) {
           if (this.nextMachine != null) {
             let result = this.nextMachine.initialState.transition(input);
             if (result != null) {
+              const [newState, boundary] = result;
               this.currentState = state;
-              this.nextMachine.currentState = result;
-              this.nextMachine.notify(TransitionResult.SUCCESS);
+              this.nextMachine.currentState = newState;
+              this.notifyResult(TransitionResult.SKIPPED, skippedBoundary);
+              this.nextMachine.notifyResult(TransitionResult.SUCCESS, boundary);
               return true;
             }
           }
         } else {
           let result = state.transition(input);
           if (result != null) {
-            this.currentState = result;
+            let [newState, boundary] = result;
+            this.currentState = newState;
+            this.notifyResult(TransitionResult.SKIPPED, skippedBoundary);
+            this.notifyResult(TransitionResult.SUCCESS, boundary);
             return true;
           }
         }
       }
+      this.notifyResult(TransitionResult.FAILED, false);
       return false;
     }
 
@@ -136,15 +133,16 @@ namespace state {
       this.observers.delete(observer);
     }
 
-    notify(result: TransitionResult): void {
-      this.observers.forEach(o => o(result));
+    notifyResult(result: TransitionResult, boundary: boolean): void {
+      this.observers.forEach(o => o(result, boundary));
     }
   }
 
-  interface Transition {
+  export interface Transition {
     from: string,
     input: string,
-    to: string
+    to: string,
+    boundary: boolean
   }
 
   export function buildFromTransitions(initial: string, transitions: Transition[]): StateMachine {
@@ -158,14 +156,19 @@ namespace state {
     transitions.forEach(t => {
       let fromState = getState(t.from);
       let toState = getState(t.to);
-      fromState.addTransition(t.input, toState);
+      fromState.addTransition(t.input, toState, t.boundary);
     })
     let initialState = getState(initial);
     let finalState = getState('');
     return new StateMachine(initialState, finalState);
   }
 
-  export function makeTransition(from: string, input: string, to: string): Transition {
-    return { from, input, to };
+  export function makeTransition(
+    from: string,
+    input: string,
+    to: string,
+    boundary: boolean = false
+  ): Transition {
+    return { from, input, to, boundary };
   }
 }

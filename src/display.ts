@@ -13,34 +13,53 @@ namespace display {
   import InputState = kana.KanaInputState;
   import TransitionResult = state.TransitionResult;
 
-  interface Component {
+  class SingleKanaDisplayComponent {
     element: HTMLElement;
-    destroy(): void;
-  }
+    finished: boolean;
 
-  class KanaDisplayComponent implements Component {
-    element: HTMLElement;
-    state: state.StateMachine;
-    observer: state.Observer;
-
-    constructor(kana: string, state: state.StateMachine) {
-      this.state = state;
-      this.observer = result => this.rerender(result);
-      this.state.addObserver(this.observer);
+    constructor(kana: string) {
       this.element = document.createElement('span');
       this.element.classList.add('kana');
       this.element.textContent = kana;
       this.element.setAttribute('data-text', kana);
+      this.finished = false;
     }
 
-    rerender(result: TransitionResult): void {
-      if (result != TransitionResult.FAILED) {
-        if (this.state.isFinished()) {
-          this.element.classList.remove('half');
-          this.element.classList.add('full');
-        } else {
-          this.element.classList.add('half');
-        }
+    setPartial() {
+      if (!this.finished) {
+        this.element.classList.add('half');
+      }
+    }
+
+    setFull() {
+      this.finished = true;
+      this.element.classList.remove('half');
+      this.element.classList.add('full');
+    }
+  }
+
+  class KanaMachineController {
+    state: state.StateMachine;
+    children: SingleKanaDisplayComponent[];
+    current: number;
+
+    get elements() {
+      return this.children.map(kanaComponent => kanaComponent.element);
+    }
+
+    constructor(kana: string, state: state.StateMachine) {
+      this.state = state;
+      this.current = 0;
+      this.state.addObserver(this.observer);
+      this.children = kana.split('').map(c => new SingleKanaDisplayComponent(c));
+    }
+
+    observer: state.Observer = (result, boundary) => {
+      if (boundary) {
+        this.children[this.current].setFull();
+        this.current += 1;
+      } else if (result != TransitionResult.FAILED) {
+        this.children[this.current].setPartial();
       }
     }
 
@@ -49,8 +68,8 @@ namespace display {
     }
   }
 
-  export class KanaDisplayController implements Component {
-    children: KanaDisplayComponent[];
+  export class KanaDisplayController {
+    children: KanaMachineController[];
 
     constructor(readonly element: HTMLElement) {
       this.children = [];
@@ -62,15 +81,21 @@ namespace display {
         this.children = [];
       } else {
         this.children = inputState.map((kana, machine) => {
-          return new KanaDisplayComponent(kana, machine);
+          return new KanaMachineController(kana, machine);
         });
-        this.children.forEach(child => this.element.appendChild(child.element));
+        this.children.forEach(child => {
+          child.elements.forEach(kanaElement => {
+            this.element.appendChild(kanaElement);
+          });
+        });
       }
     }
 
     private clearChildren(): void {
       this.children.forEach(child => {
-        this.element.removeChild(child.element);
+        child.elements.forEach(kanaElement => {
+          this.element.removeChild(kanaElement);
+        });
         child.destroy();
       });
     }
@@ -81,14 +106,12 @@ namespace display {
   }
 
   export class RomajiDisplayController {
-    observer: state.Observer;
     inputState: InputState | null;
 
     constructor(
       readonly firstElement: HTMLElement,
       readonly restElement: HTMLElement
     ) {
-      this.observer = (result) => this.rerender(result);
       this.inputState = null;
     }
 
@@ -99,7 +122,7 @@ namespace display {
         this.inputState.map((_, machine) => {
           machine.addObserver(this.observer);
         });
-        this.rerender(TransitionResult.SUCCESS);
+        this.observer(TransitionResult.SUCCESS, false);
       } else {
         this.firstElement.textContent = '';
         this.restElement.textContent = '';
@@ -114,7 +137,7 @@ namespace display {
       }
     }
 
-    rerender(result: TransitionResult): void {
+    observer: state.Observer = (result) => {
       if (result === TransitionResult.FAILED) {
         this.firstElement.classList.remove('error');
         this.firstElement.offsetHeight; // trigger reflow
@@ -198,13 +221,8 @@ namespace display {
       }
     }
 
-    update(result: TransitionResult): void {
+    update(result: TransitionResult, boundary: boolean): void {
       switch (result) {
-        case TransitionResult.SUCCESS:
-          this.hit += 1;
-          this.score += 100 + this.combo;
-          this.combo += 1;
-          break;
         case TransitionResult.FAILED:
           this.missed += 1;
           this.combo = 0;
@@ -213,6 +231,11 @@ namespace display {
           this.skipped += 1;
           this.combo = 0;
           break;
+      }
+      if (boundary) {
+        this.hit += 1;
+        this.score += 100 + this.combo;
+        this.combo += 1;
       }
       if (this.combo > this.maxCombo) {
         this.maxCombo = this.combo;
@@ -230,9 +253,7 @@ namespace display {
     skippedElement: HTMLElement;
 
     inputState: InputState | null = null;
-    observer: state.Observer;
     score: Score;
-
 
     constructor(
       private scoreContainer: HTMLElement,
@@ -245,7 +266,6 @@ namespace display {
       this.hitElement = util.getElement(statsContainer, '.hit');
       this.missedElement = util.getElement(statsContainer, '.missed');
       this.skippedElement = util.getElement(statsContainer, '.skipped');
-      this.observer = result => this.update(result);
       this.score = new Score();
       this.setValues();
     }
@@ -265,8 +285,8 @@ namespace display {
       this.setValues();
     }
 
-    update(result: TransitionResult): void {
-      this.score.update(result);
+    observer: state.Observer = (result, boundary) => {
+      this.score.update(result, boundary);
       this.setValues();
     }
 

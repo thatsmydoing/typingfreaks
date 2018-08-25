@@ -23,13 +23,14 @@ namespace kana {
   import TransitionResult = state.TransitionResult;
   import t = state.makeTransition;
 
-  function literal(source: string): StateMachine {
-    let transitions = [];
+  function literal(source: string, ...extraBoundaries: number[]): StateMachine {
+    let transitions: state.Transition[] = [];
     for (let i = 0; i < source.length; ++i) {
       let from = source.substring(i);
       let input = source.charAt(i);
       let to = source.substring(i+1);
-      transitions.push(t(from, input, to));
+      let boundary = i === (source.length - 1) || extraBoundaries.indexOf(i) >= 0;
+      transitions.push(t(from, input, to, boundary));
     }
     return state.buildFromTransitions(source, transitions);
   }
@@ -38,8 +39,8 @@ namespace kana {
     return state.buildFromTransitions('shi', [
       t('shi', 's', 'hi'),
       t('hi', 'h', 'i'),
-      t('hi', 'i', ''),
-      t('i', 'i', '')
+      t('hi', 'i', '', true),
+      t('i', 'i', '', true)
     ]);
   }
 
@@ -48,7 +49,7 @@ namespace kana {
       t('chi', 'c', 'hi'),
       t('chi', 't', 'i'),
       t('hi', 'h', 'i'),
-      t('i', 'i', '')
+      t('i', 'i', '', true)
     ]);
   }
 
@@ -56,8 +57,8 @@ namespace kana {
     return state.buildFromTransitions('tsu', [
       t('tsu', 't', 'su'),
       t('su', 's', 'u'),
-      t('su', 'u', ''),
-      t('u', 'u', '')
+      t('su', 'u', '', true),
+      t('u', 'u', '', true)
     ]);
   }
 
@@ -65,7 +66,7 @@ namespace kana {
     return state.buildFromTransitions('fu', [
       t('fu', 'f', 'u'),
       t('fu', 'h', 'u'),
-      t('u', 'u', '')
+      t('u', 'u', '', true)
     ]);
   }
 
@@ -73,7 +74,7 @@ namespace kana {
     return state.buildFromTransitions('ji', [
       t('ji', 'j', 'i'),
       t('ji', 'z', 'i'),
-      t('i', 'i', '')
+      t('i', 'i', '', true)
     ]);
   }
 
@@ -81,10 +82,10 @@ namespace kana {
     let source = 'sh' + end;
     let middle = 'h' + end;
     return state.buildFromTransitions(source, [
-      t(source, 's', middle),
+      t(source, 's', middle, true),
       t(middle, 'h', end),
       t(middle, 'y', end),
-      t(end, end, '')
+      t(end, end, '', true)
     ]);
   }
 
@@ -95,10 +96,10 @@ namespace kana {
 
     return state.buildFromTransitions(source, [
       t(source, 'c', middle),
-      t(middle, 'h', end),
-      t(source, 't', altMiddle),
+      t(middle, 'h', end, true),
+      t(source, 't', altMiddle, true),
       t(altMiddle, 'y', end),
-      t(end, end, '')
+      t(end, end, '', true)
     ]);
   }
 
@@ -107,11 +108,11 @@ namespace kana {
     let altMiddle = 'y' + end;
 
     return state.buildFromTransitions(source, [
-      t(source, 'j', end),
+      t(source, 'j', end, true),
       t(source, 'z', altMiddle),
       t(end, 'y', end),
-      t(altMiddle, 'y', end),
-      t(end, end, '')
+      t(altMiddle, 'y', end, true),
+      t(end, end, '', true)
     ]);
   }
 
@@ -120,11 +121,11 @@ namespace kana {
 
     let newState = new State(display.charAt(0) + display);
     Object.keys(transitions).forEach(k => {
-      let nextState = transitions[k];
+      let [nextState, _] = transitions[k];
       let intermediateDisplay = k + nextState.display;
       let intermediateState = new State(intermediateDisplay);
       intermediateState.addTransition(k, nextState);
-      newState.addTransition(k, intermediateState);
+      newState.addTransition(k, intermediateState, true);
     })
 
     return new StateMachine(newState, base.finalState);
@@ -328,50 +329,50 @@ namespace kana {
   });
 
   const DOUBLE_KANA_MAPPING: KanaMapping = {
-    "きゃ": literal('kya'),
-    "きゅ": literal('kyu'),
-    "きょ": literal('kyo'),
+    "きゃ": literal('kya', 0),
+    "きゅ": literal('kyu', 0),
+    "きょ": literal('kyo', 0),
     "しゃ": sh('a'),
     "しゅ": sh('u'),
     "しょ": sh('o'),
     "ちゃ": ch('a'),
     "ちゅ": ch('u'),
     "ちょ": ch('o'),
-    "にゃ": literal('nya'),
-    "にゅ": literal('nyu'),
-    "にょ": literal('nyo'),
-    "ひゃ": literal('hya'),
-    "ひゅ": literal('hyu'),
-    "ひょ": literal('hyo'),
-    "みゃ": literal('mya'),
-    "みゅ": literal('myu'),
-    "みょ": literal('myo'),
-    "りゃ": literal('rya'),
-    "りゅ": literal('ryu'),
-    "りょ": literal('ryo'),
-    "ぎゃ": literal('gya'),
-    "ぎゅ": literal('gyu'),
-    "ぎょ": literal('gyo'),
+    "にゃ": literal('nya', 0),
+    "にゅ": literal('nyu', 0),
+    "にょ": literal('nyo', 0),
+    "ひゃ": literal('hya', 0),
+    "ひゅ": literal('hyu', 0),
+    "ひょ": literal('hyo', 0),
+    "みゃ": literal('mya', 0),
+    "みゅ": literal('myu', 0),
+    "みょ": literal('myo', 0),
+    "りゃ": literal('rya', 0),
+    "りゅ": literal('ryu', 0),
+    "りょ": literal('ryo', 0),
+    "ぎゃ": literal('gya', 0),
+    "ぎゅ": literal('gyu', 0),
+    "ぎょ": literal('gyo', 0),
     "じゃ": j('a'),
     "じゅ": j('u'),
     "じょ": j('o'),
-    "ぢゃ": literal('dya'),
-    "ぢゅ": literal('dyu'),
-    "ぢょ": literal('dyo'),
-    "びゃ": literal('bya'),
-    "びゅ": literal('byu'),
-    "びょ": literal('byo'),
-    "ぴゃ": literal('pya'),
-    "ぴゅ": literal('pyu'),
-    "ぴょ": literal('pyo'),
-    "ふぁ": literal('fa'),
-    "ふぃ": literal('fi'),
-    "ふぇ": literal('fe'),
-    "ふぉ": literal('fo'),
-    "ゔぁ": literal('va'),
-    "ゔぃ": literal('vi'),
-    "ゔぇ": literal('ve'),
-    "ゔぉ": literal('vo')
+    "ぢゃ": literal('dya', 0),
+    "ぢゅ": literal('dyu', 0),
+    "ぢょ": literal('dyo', 0),
+    "びゃ": literal('bya', 0),
+    "びゅ": literal('byu', 0),
+    "びょ": literal('byo', 0),
+    "ぴゃ": literal('pya', 0),
+    "ぴゅ": literal('pyu', 0),
+    "ぴょ": literal('pyo', 0),
+    "ふぁ": literal('fa', 0),
+    "ふぃ": literal('fi', 0),
+    "ふぇ": literal('fe', 0),
+    "ふぉ": literal('fo', 0),
+    "ゔぁ": literal('va', 0),
+    "ゔぃ": literal('vi', 0),
+    "ゔぇ": literal('ve', 0),
+    "ゔぉ": literal('vo', 0)
   }
 
   const TRIPLE_KANA_MAPPING: KanaMapping = {};
@@ -482,7 +483,7 @@ namespace kana {
       if (this.currentIndex >= this.stateMachines.length) return false;
 
       let currentMachine = this.stateMachines[this.currentIndex];
-      let result = currentMachine.transition(input);
+      currentMachine.transition(input);
       while (currentMachine.isFinished()) {
         this.currentIndex += 1;
         currentMachine = this.stateMachines[this.currentIndex];
