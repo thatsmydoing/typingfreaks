@@ -292,10 +292,11 @@
   grid-area: diff;
   align-self: end;
   justify-self: end;
-  margin-bottom: 1px;
-  margin-right: 5px;
+  margin-bottom: 6px;
+  margin-right: 6px;
   font-style: italic;
   font-weight: bold;
+  text-shadow: none;
 }
 
 .song-item .difficulty-bg {
