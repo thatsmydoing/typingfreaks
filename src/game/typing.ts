@@ -296,9 +296,9 @@ namespace game {
     exit(): void {}
 
     transitionExit(): void {
+      this.kanaController.destroy();
+      this.romajiController.destroy();
       if (this.context.track !== null) {
-        this.kanaController.destroy();
-        this.romajiController.destroy();
         this.progressController!.destroy();
       }
       this.scoreController.destroy();
