@@ -1,35 +1,25 @@
 namespace util {
-  export function loadBase(): void {
-    let container = document.querySelector('#container');
-    if (container === null) {
-      throw new Error('Container not found');
-    }
-
-    let baseTemplate = loadTemplate('base');
-    baseTemplate.querySelectorAll('template').forEach(t => {
-      let parent = t.parentNode as Node;
-      const templateName = t.getAttribute('name');
-      if (templateName === null) {
-        return;
-      }
-      let template = loadTemplate(templateName);
-      let firstElement = template.querySelector('*');
-      if (firstElement !== null) {
-        for (let i = 0; i < t.classList.length; ++i) {
-          firstElement.classList.add(t.classList[i]);
-        }
-      }
-      parent.insertBefore(template, t);
-      parent.removeChild(t);
-    });
-
-    container.appendChild(baseTemplate);
-  }
-
-  export function loadTemplate(id: string): DocumentFragment {
-    let template = document.querySelector(`#${id}-template`);
+  export function loadTemplate(element: ParentNode, id: string): DocumentFragment {
+    let template = element.querySelector(`#${id}-template`);
     if (template !== null && template instanceof HTMLTemplateElement) {
-      return document.importNode(template.content, true);
+      const fragment = document.importNode(template.content, true);
+      fragment.querySelectorAll('template').forEach(t => {
+        let parent = t.parentNode!;
+        const templateName = t.getAttribute('name');
+        if (templateName === null) {
+          return;
+        }
+        let template = loadTemplate(fragment, templateName);
+        let firstElement = template.querySelector('*');
+        if (firstElement !== null) {
+          for (let i = 0; i < t.classList.length; ++i) {
+            firstElement.classList.add(t.classList[i]);
+          }
+        }
+        parent.insertBefore(template, t);
+        parent.removeChild(t);
+      });
+      return fragment;
     } else {
       throw new Error(`#${id}-template is not a template`);
     }

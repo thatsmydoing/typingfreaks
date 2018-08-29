@@ -8,99 +8,99 @@
     <div id="container" class="loading">
       <div id="background"></div>
       <div id="loading">Loading...</div>
+
+      <template id="base-template">
+        <div id="folder-info">
+          <i class="left material-icons">chevron_left</i>
+          <i class="material-icons">album</i>
+          <i class="right material-icons">chevron_right</i>
+          <span class="label"></span>
+        </div>
+        <div id="song-info">
+          <div class="song-info">
+            <div class="genre"></div>
+            <div class="creator"></div>
+            <div class="title"></div>
+          </div>
+        </div>
+        <div id="song-list"></div>
+        <div id="game">
+          <div class="track-progress">
+            <span class="total-label">Total Time</span>
+            <span class="interval-label">Interval</span>
+            <template class="total" name="progress-bar"></template>
+            <template class="interval" name="progress-bar"></template>
+          </div>
+          <div class="score-line">
+            <span class="combo"></span>
+            <div class="pair">
+              <span class="label">Score</span>
+              <span class="value score"></span>
+            </div>
+            <div class="pair">
+              <span class="label">Max Combo</span>
+              <span class="value max-combo"></span>
+            </div>
+            <div class="pair">
+              <span class="label">Finished</span>
+              <span class="value finished"></span>
+            </div>
+          </div>
+          <div class="kana-line"></div>
+          <div class="kanji-line"></div>
+          <div class="romaji-first"></div>
+          <div class="romaji-line"></div>
+          <div class="stats-line">
+            <div class="pair">
+              <span class="label">Hit</span>
+              <span class="value hit"></span>
+            </div>
+            <div class="pair">
+              <span class="label">Missed</span>
+              <span class="value missed"></span>
+            </div>
+            <div class="pair">
+              <span class="label">Skipped</span>
+              <span class="value skipped"></span>
+            </div>
+          </div>
+        </div>
+        <div id="score">
+          <span>Score</span><div class="score"></div>
+          <span>Max Combo</span><div class="max-combo"></div>
+          <span>Finished</span><div class="finished"></div>
+          <span>Hit</span><div class="hit"></div>
+          <span>Missed</span><div class="missed"></div>
+          <span>Skipped</span><div class="skipped"></div>
+        </div>
+        <div id="loader">
+          <template name="progress-bar"></template>
+          <span class="label"></span>
+        </div>
+        <div id="ready">
+          <div class="status"></div>
+          <div class="message"></div>
+        </div>
+
+        <template id="song-item-template">
+          <div class="song-item">
+            <div class="difficulty-bg normal"></div>
+            <div class="difficulty-bg"></div>
+            <div class="difficulty"></div>
+            <div class="creator"></div>
+            <div class="title"></div>
+          </div>
+        </template>
+        <template id="progress-bar-template">
+          <div class="progress-bar">
+            <div class="bg"></div>
+            <div class="shade"></div>
+          </div>
+        </template>
+      </template>
     </div>
-    <template id="base-template">
-      <div id="folder-info">
-        <i class="left material-icons">chevron_left</i>
-        <i class="material-icons">album</i>
-        <i class="right material-icons">chevron_right</i>
-        <span class="label"></span>
-      </div>
-      <div id="song-info"></div>
-      <div id="song-list"></div>
-      <div id="game">
-        <div class="track-progress">
-          <span class="total-label">Total Time</span>
-          <span class="interval-label">Interval</span>
-          <template class="total" name="progress-bar"></template>
-          <template class="interval" name="progress-bar"></template>
-        </div>
-        <div class="score-line">
-          <span class="combo"></span>
-          <div class="pair">
-            <span class="label">Score</span>
-            <span class="value score"></span>
-          </div>
-          <div class="pair">
-            <span class="label">Max Combo</span>
-            <span class="value max-combo"></span>
-          </div>
-          <div class="pair">
-            <span class="label">Finished</span>
-            <span class="value finished"></span>
-          </div>
-        </div>
-        <div class="kana-line"></div>
-        <div class="kanji-line"></div>
-        <div class="romaji-first"></div>
-        <div class="romaji-line"></div>
-        <div class="stats-line">
-          <div class="pair">
-            <span class="label">Hit</span>
-            <span class="value hit"></span>
-          </div>
-          <div class="pair">
-            <span class="label">Missed</span>
-            <span class="value missed"></span>
-          </div>
-          <div class="pair">
-            <span class="label">Skipped</span>
-            <span class="value skipped"></span>
-          </div>
-        </div>
-      </div>
-      <div id="score">
-        <span>Score</span><div class="score"></div>
-        <span>Max Combo</span><div class="max-combo"></div>
-        <span>Finished</span><div class="finished"></div>
-        <span>Hit</span><div class="hit"></div>
-        <span>Missed</span><div class="missed"></div>
-        <span>Skipped</span><div class="skipped"></div>
-      </div>
-      <div id="loader">
-        <template name="progress-bar"></template>
-        <span class="label"></span>
-      </div>
-      <div id="ready">
-        <div class="status"></div>
-        <div class="message"></div>
-      </div>
-    </template>
-    <template id="song-info-template">
-      <div class="song-info">
-        <div class="genre"></div>
-        <div class="creator"></div>
-        <div class="title"></div>
-      </div>
-    </template>
-    <template id="song-item-template">
-      <div class="song-item">
-        <div class="difficulty-bg normal"></div>
-        <div class="difficulty-bg"></div>
-        <div class="difficulty"></div>
-        <div class="creator"></div>
-        <div class="title"></div>
-      </div>
-    </template>
-    <template id="progress-bar-template">
-      <div class="progress-bar">
-        <div class="bg"></div>
-        <div class="shade"></div>
-      </div>
-    </template>
     <script type="text/javascript" src="bundle.js"></script>
     <script type="text/javascript">
-      util.loadBase();
       new game.MainController(
         document.querySelector('#container'),
         'levels.json'

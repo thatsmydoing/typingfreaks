@@ -10,6 +10,7 @@ namespace game {
 
     constructor(container: HTMLElement, configUrl: string) {
       super(container);
+      container.appendChild(util.loadTemplate(container, 'base'));
 
       let self = this;
       let bgLayer: HTMLElement = util.getElement(container, '#background');
@@ -17,6 +18,7 @@ namespace game {
         container: container,
         audioManager: new audio.AudioManager(),
         bgManager: new background.BackgroundManager(bgLayer),
+        loadTemplate: (id: string) => util.loadTemplate(container, id),
         assets: null,
         config: null,
         switchScreen(screen: Screen): void {

@@ -59,6 +59,7 @@ namespace game {
     container: HTMLElement;
     audioManager: audio.AudioManager;
     bgManager: background.BackgroundManager;
+    loadTemplate: (id: string) => DocumentFragment;
     assets: GameSounds | null;
     config: level.Config | null;
 

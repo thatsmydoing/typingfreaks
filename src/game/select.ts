@@ -35,6 +35,7 @@ namespace game {
       this.listControllers = [];
       this.levelSets.forEach(levelSet => {
         let controller = new SongListController(
+          this.context,
           levelSet.levels,
           (index) => this.selectSong(index),
           (index) => this.chooseSong(index)
@@ -68,10 +69,10 @@ namespace game {
       if (!this.init && selectSound !== null) {
         selectSound.play();
       }
-      let song = this.currentLevelSet.levels[index];
-      let songInfoComponent = new SongInfoComponent(song);
-      util.clearChildren(this.songInfo);
-      this.songInfo.appendChild(songInfoComponent.element);
+      let level = this.currentLevelSet.levels[index];
+      this.songInfo.querySelector('.genre')!.textContent = level.genre;
+      this.songInfo.querySelector('.creator')!.textContent = level.creator;
+      this.songInfo.querySelector('.title')!.textContent = level.name;
     }
 
     chooseSong(index: number): void {
@@ -144,17 +145,6 @@ namespace game {
     }
   }
 
-  class SongInfoComponent {
-    element: DocumentFragment;
-
-    constructor(level: level.Level) {
-      this.element = util.loadTemplate('song-info');
-      this.element.querySelector('.genre')!.textContent = level.genre;
-      this.element.querySelector('.creator')!.textContent = level.creator;
-      this.element.querySelector('.title')!.textContent = level.name;
-    }
-  }
-
   class SongListController {
     element: HTMLElement;
     levels: level.Level[];
@@ -163,6 +153,7 @@ namespace game {
     onSongChoose: (index: number) => void;
 
     constructor(
+      context: GameContext,
       levels: level.Level[],
       onSongChange: (index: number) => void,
       onSongChoose: (index: number) => void
@@ -177,7 +168,7 @@ namespace game {
       this.element.style.marginTop = '12.5em';
 
       this.levels.forEach((level, index) => {
-        let element = util.loadTemplate('song-item');
+        let element = context.loadTemplate('song-item');
         element.querySelector('.creator')!.textContent = level.creator;
         element.querySelector('.title')!.textContent = level.name;
         element.querySelector('.difficulty')!.textContent = level.difficulty;

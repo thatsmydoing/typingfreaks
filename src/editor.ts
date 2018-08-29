@@ -232,7 +232,7 @@ namespace editor {
       this.markerElement = document.createElement('div');
       this.markerElement.className = 'marker';
 
-      let fragment = util.loadTemplate('interval');
+      let fragment = util.loadTemplate(document, 'interval');
       this.liElement = util.getElement(fragment, '*');
       this.inputElement = util.getElement(fragment, '.interval');
       this.inputElement.addEventListener('change', () => {
