@@ -25,10 +25,11 @@ namespace background {
 
     private setBackgroundActual(background: string) {
       if (background.indexOf('.') >= 0) {
-        this.next.style.background = `url(${background}), black`;
+        this.next.style.backgroundImage = `url(${background})`;
+        this.next.style.backgroundColor = 'black';
         this.next.style.filter = 'contrast(70%) brightness(70%)';
       } else {
-        this.next.style.background = background;
+        this.next.style.backgroundColor = background;
       }
       this.next.classList.add('show');
       if (this.last != null) {

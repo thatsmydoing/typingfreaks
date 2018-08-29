@@ -1,5 +1,6 @@
 /// <reference path="audio.ts" />
 /// <reference path="background.ts" />
+/// <reference path="polyfill.ts" />
 /// <reference path="game/common.ts" />
 /// <reference path="game/loading.ts" />
 
@@ -26,14 +27,26 @@ namespace game {
       this.loadingScreen = new LoadingScreen(gameContext, configUrl);
 
       document.addEventListener('keydown', (event) => {
+        if (event.altKey && event.key === 'Enter') {
+          polyfill.fullscreen.request(this.container);
+        }
         if (this.activeScreen !== null && !event.ctrlKey && !event.metaKey) {
           this.activeScreen.handleInput(event.key);
         }
+      });
+
+      polyfill.fullscreen.addEventListener(() => {
+        this.onResize();
       });
     }
 
     start(): void {
       this.switchScreen(this.loadingScreen);
+    }
+
+    onResize(): void {
+      const fontSize = this.container.offsetHeight / 28.125;
+      this.container.style.setProperty('--base-font-size', `${fontSize}px`);
     }
   }
 }

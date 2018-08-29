@@ -1,10 +1,16 @@
 #container {
   --base-color: white;
   --highlight-color: red;
+  --base-font-size: 16px;
 
   position: relative;
   color: var(--base-color);
   font-family: sans;
+}
+
+#container:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
 }
 
 /* components {{{ */
@@ -20,6 +26,7 @@
   width: 100%;
   opacity: 0;
   transition: opacity 0.5s linear;
+  background-size: cover;
 }
 
 #background div.show {
@@ -30,20 +37,20 @@
 /* progress bar {{{ */
 .progress-bar {
   position: relative;
-  height: 5px;
+  height: 0.3125em;
 }
 
 .progress-bar .bg {
   position: absolute;
   width: 100%;
-  height: 5px;
+  height: 0.3125em;
   background-color: var(--base-color);
   opacity: 0.5;
 }
 
 .progress-bar .shade {
   position: absolute;
-  height: 5px;
+  height: 0.3125em;
   background-color: var(--base-color);
   animation-timing-function: linear;
   animation-play-state: paused;
@@ -68,9 +75,10 @@
 
 #container {
   display: grid;
-  grid-template-columns: [start] auto [right] 300px [end];
-  grid-template-rows: [top] 50px [header] auto [game] 180px [bottom];
+  grid-template-columns: [start] 18.75em [left] auto [right] 18.75em [end];
+  grid-template-rows: [top] 3.125em [header] auto [game] 11.25em [bottom];
 
+  font-size: var(--base-font-size);
   height: 450px;
   width: 800px;
   margin: 0 auto;
@@ -100,35 +108,35 @@
 #song-info {
   grid-column: start / right;
   grid-row: header / game;
-  left: -500px;
+  left: -31.25em;
 }
 
 #song-list {
   grid-column: right / end;
   grid-row: top / bottom;
-  left: 300px;
+  left: 18.75em;
 }
 
 #folder-info {
-  grid-column: start / right;
+  grid-column: start / left;
   grid-row: top / header;
-  left: -500px;
+  left: -31.25em;
 }
 
 #game {
-  top: 180px;
+  top: 11.25em;
   grid-column: start / end;
   grid-row: game / bottom;
 }
 
 #score {
-  grid-column: start / right;
+  grid-column: start / left;
   grid-row: header / bottom;
-  left: -500px;
+  left: -18.75em;
 }
 
 #loader {
-  top: -50px;
+  top: -3.125em;
   grid-column: right / end;
   grid-row: top / header;
 }
@@ -154,12 +162,12 @@
 
 #container.loading #song-info,
 #container.loading #folder-info {
-  top: 50px;
+  top: 3.125em;
   left: 0;
 }
 
 #container.loading #song-list {
-  left: 50px;
+  left: 3.125em;
 }
 
 /* }}} */
@@ -190,7 +198,7 @@
 
 #container.game #song-info {
   opacity: 1;
-  top: -150px;
+  top: -9.375em;
   left: 0;
 }
 
@@ -231,7 +239,11 @@
 
 #folder-info .left:hover,
 #folder-info .right:hover {
-  text-shadow: 0px 0px 5px var(--base-color);
+  text-shadow: 0em 0em 0.3125em var(--base-color);
+}
+
+#folder-info .material-icons {
+  font-size: 1.5em;
 }
 
 /* }}} */
@@ -244,21 +256,21 @@
 
 .song-info {
   align-self: end;
-  margin-left: 20px;
-  text-shadow: 0px 0px 5px var(--base-color);
+  margin-left: 1.25em;
+  text-shadow: 0em 0em 0.3125em var(--base-color);
 }
 
 .song-info .genre {
-  font-size: 12px;
+  font-size: 0.75em;
 }
 
 .song-info .creator {
-  font-size: 20px;
+  font-size: 1.25em;
   line-height: 0.5;
 }
 
 .song-info .title {
-  font-size: 30px;
+  font-size: 1.875em;
 }
 
 /* }}} */
@@ -266,15 +278,15 @@
 /* song-list {{{ */
 
 .song-list {
-  margin-left: 20px;
+  margin-left: 1.25em;
   transition: margin-top 0.2s;
 }
 
 .song-item {
-  height: 40px;
+  height: 2.5em;
   display: grid;
-  grid-template-columns: 40px auto;
-  grid-template-rows: 16px 24px;
+  grid-template-columns: 2.5em auto;
+  grid-template-rows: 1em 1.5em;
   grid-template-areas:
     "diff creator"
     "diff title";
@@ -292,8 +304,8 @@
   grid-area: diff;
   align-self: end;
   justify-self: end;
-  margin-bottom: 6px;
-  margin-right: 6px;
+  margin-bottom: 0.375em;
+  margin-right: 0.375em;
   font-style: italic;
   font-weight: bold;
   text-shadow: none;
@@ -303,8 +315,8 @@
   grid-area: diff;
   align-self: center;
   justify-self: center;
-  height: 30px;
-  width: 30px;
+  height: 1.875em;
+  width: 1.875em;
   background: radial-gradient(circle at 10% 10%, rgba(0, 255, 255, 1), transparent);
   border-radius: 20%;
   opacity: 0;
@@ -317,17 +329,17 @@
 }
 
 .song-item:hover {
-  text-shadow: 0px 0px 5px var(--base-color);
+  text-shadow: 0em 0em 0.3125em var(--base-color);
 }
 
 .song-item.selected {
-  margin-left: -10px;
-  text-shadow: 0px 0px 5px var(--base-color);
+  margin-left: -0.625em;
+  text-shadow: 0em 0em 0.3125em var(--base-color);
 }
 
 .song-item.selected .difficulty-bg {
   opacity: 1;
-  box-shadow: -1px -1px 10px -2px var(--base-color);
+  box-shadow: -0.0625em -0.0625em 0.625em -0.125em var(--base-color);
 }
 
 .song-item.selected .difficulty-bg.normal {
@@ -336,12 +348,12 @@
 
 .song-item .creator {
   grid-area: creator;
-  font-size: 12px;
+  font-size: 0.75em;
 }
 
 .song-item .title {
   grid-area: title;
-  font-size: 20px;
+  font-size: 1.25em;
 }
 
 /* }}} */
@@ -374,11 +386,11 @@
 }
 
 #ready .status {
-  font-size: 30px;
+  font-size: 1.875em;
 }
 
 #ready .message {
-  font-size: 14px;
+  font-size: 0.875em;
 }
 
 /* }}} */
@@ -392,7 +404,7 @@
   grid-template-areas:
     "tl tb"
     "il ib";
-  grid-gap: 0px 10px;
+  grid-gap: 0em 0.625em;
   align-items: center;
   align-self: end;
 }
@@ -401,7 +413,7 @@
 .track-progress .interval-label {
   justify-self: right;
   font-variant-caps: small-caps;
-  font-size: 12px;
+  font-size: 0.75em;
 }
 
 .track-progress .total-label {
@@ -428,8 +440,8 @@
 
 #game {
   display: grid;
-  grid-template-columns: 50px 50px auto;
-  grid-template-rows: 40px 24px 12px 30px auto 22px;
+  grid-template-columns: 3.125em 3.125em auto;
+  grid-template-rows: 2.5em 1.5em 0.75em 1.875em auto 1.375em;
   grid-template-areas:
     ". . track"
     "score score score"
@@ -437,8 +449,8 @@
     ". . kanji"
     "romaji-first romaji romaji"
     ". . stats";
-  grid-row-gap: 2px;
-  padding: 2px 20px;
+  grid-row-gap: 0.125em;
+  padding: 0.125em 1.25em;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
 }
 
@@ -452,16 +464,15 @@
 
 #game .kana-line {
   grid-area: kana;
-  font-size: 12px;
-  margin-left: 15px;
+  margin-left: 0.9375em;
 }
 
 #game .kanji-line {
   grid-area: kanji;
-  padding-left: 5px;
-  border-bottom: solid 2px rgba(255, 255, 255, 0.5);
-  border-left: solid 10px rgba(255, 255, 255, 0.5);
-  border-radius: 0px 0px 0px 10px;
+  padding-left: 0.3125em;
+  border-bottom: solid 0.125em rgba(255, 255, 255, 0.5);
+  border-left: solid 0.625em rgba(255, 255, 255, 0.5);
+  border-radius: 0em 0em 0em 0.625em;
 }
 
 #game .stats-line {
@@ -478,13 +489,13 @@
 #game .romaji-first {
   grid-area: romaji-first;
   justify-self: right;
-  font-size: 36px;
-  padding: 0px 2px;
+  font-size: 2.25em;
+  padding: 0em 0.05ex;
 }
 
 #game .romaji-line {
   grid-area: romaji;
-  font-size: 20px;
+  font-size: 1.25em;
 }
 
 #game .romaji-first.error {
@@ -502,20 +513,20 @@
 
 .score-line .pair,
 .stats-line .pair {
-  margin: 0px 4px;
-  border-bottom: solid 2px rgba(255, 255, 255, 0.5);
-  border-radius: 2px;
+  margin: 0em 0.25em;
+  border-bottom: solid 0.125em rgba(255, 255, 255, 0.5);
+  border-radius: 0.125em;
 }
 
 .score-line .pair span,
 .stats-line .pair span {
   text-align: right;
-  padding: 0px 4px;
+  padding: 0em 0.25em;
 }
 
 .score-line .combo {
   flex: none;
-  width: 100px;
+  width: 6.25em;
   text-align: left;
 }
 
@@ -530,12 +541,12 @@
 }
 
 .stats-line .pair span {
-  font-size: 14px;
+  font-size: 0.875em;
 }
 
 .stats-line .pair .value {
   display: inline-block;
-  min-width: 50px;
+  min-width: 3.125em;
 }
 
 /* }}} */
@@ -547,21 +558,21 @@
   grid-template-columns: max-content auto;
   align-items: baseline;
   align-content: end;
-  grid-gap: 5px;
-  padding: 20px;
+  grid-gap: 0.3125em;
+  padding: 1.25em;
 }
 
 #score .class,
 #score .score {
-  text-shadow: 0px 0px 5px var(--highlight-color);
+  text-shadow: 0em 0em 0.3125em var(--highlight-color);
 }
 
 #score .class {
-  font-size: 40px;
+  font-size: 2.5em;
 }
 
 #score .score {
-  font-size: 24px;
+  font-size: 1.5em;
 }
 
 /* }}} */
@@ -570,6 +581,7 @@
   display: inline-block;
   position: relative;
   white-space: pre;
+  font-size: 0.75em;
 }
 
 .kana::after {
@@ -581,7 +593,7 @@
   color: var(--highlight-color);
   font-weight: bold;
   overflow: hidden;
-  width: 0px;
+  width: 0em;
   transition: width 0.1s;
 }
 

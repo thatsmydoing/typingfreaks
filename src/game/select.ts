@@ -174,7 +174,7 @@ namespace game {
       this.onSongChoose = onSongChoose;
 
       this.element.className = 'song-list';
-      this.element.style.marginTop = '200px';
+      this.element.style.marginTop = '12.5em';
 
       this.levels.forEach((level, index) => {
         let element = util.loadTemplate('song-item');
@@ -218,8 +218,8 @@ namespace game {
     select(index: number) {
       if (this.currentIndex === index) return;
 
-      let offset = 200 - index * 40;
-      this.element.style.marginTop = offset+'px';
+      let offset = 12.5 - index * 2.5;
+      this.element.style.marginTop = offset+'em';
 
       let nextElement = this.element.children[index] as HTMLElement;
       let currElement = this.element.children[this.currentIndex] as HTMLElement;
