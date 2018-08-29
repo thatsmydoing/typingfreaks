@@ -29,6 +29,10 @@
   background-size: cover;
 }
 
+#background div.image {
+  filter: brightness(70%) contrast(70%);
+}
+
 #background div.show {
   opacity: 1;
 }
