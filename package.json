@@ -9,7 +9,6 @@
   "author": "Thomas Dy <thatsmydoing@gmail.com",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^3.0.1"
-  },
-  "dependencies": {}
+    "typescript": "^4.0.0"
+  }
 }
