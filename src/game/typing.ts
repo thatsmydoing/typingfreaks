@@ -144,9 +144,9 @@ namespace game {
     }
 
     handleInput(key: string): void {
-      if (key == 'Escape') {
+      if (key === 'Escape' || key === 'Backspace') {
         this.context.switchScreen(null);
-      } else if (this.isReady && key === ' ') {
+      } else if (this.isReady && (key === ' ' || key === 'Enter')) {
         this.context.switchScreen(new TypingPlayingScreen(this.context));
       }
     }
@@ -263,7 +263,7 @@ namespace game {
     }
 
     handleInput(key: string): void {
-      if (key === 'Escape') {
+      if (key === 'Escape' || key === 'Backspace') {
         this.finish();
       } else if (!this.isWaiting) {
         if (this.inputState !== null && /^[-_ a-z]$/.test(key)) {
@@ -344,7 +344,7 @@ namespace game {
     enter(): void {}
 
     handleInput(key: string): void {
-      if (key === ' ' || key === 'Escape') {
+      if (key === ' ' || key === 'Enter' || key === 'Escape' || key === 'Backspace') {
         this.context.switchScreen(null);
       }
     }

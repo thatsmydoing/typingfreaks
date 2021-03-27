@@ -127,9 +127,9 @@ namespace game {
     }
 
     handleInput(key: string): void {
-      if (key === 'ArrowLeft') {
+      if (key === 'ArrowLeft' || key === 'h') {
         this.scroll(-1);
-      } else if (key === 'ArrowRight') {
+      } else if (key === 'ArrowRight' || key === 'l') {
         this.scroll(1);
       }
     }
@@ -179,15 +179,15 @@ namespace game {
     }
 
     handleInput(key: string): void {
-      if (key === 'ArrowUp') {
+      if (key === 'ArrowUp' || key === 'k') {
         this.scroll(-1);
-      } else if (key === 'ArrowDown') {
+      } else if (key === 'ArrowDown' || key === 'j') {
         this.scroll(1);
       } else if (key === 'PageUp') {
         this.scroll(-5);
       } else if (key === 'PageDown') {
         this.scroll(5);
-      } else if (key === ' ') {
+      } else if (key === ' ' || key === 'Enter') {
         this.choose();
       }
     }
