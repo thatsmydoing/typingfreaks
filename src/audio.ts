@@ -15,26 +15,26 @@ namespace audio {
       return this.context.currentTime;
     }
 
-    loadTrack(url: string): Promise<Track> {
-      return window.fetch(url)
-        .then(response => response.arrayBuffer())
-        .then(buffer => this.context.decodeAudioData(buffer))
-        .then(audioBuffer => new Track(this, audioBuffer))
+    async loadTrack(url: string): Promise<Track> {
+      const response = await window.fetch(url);
+      const buffer = await response.arrayBuffer();
+      const audioBuffer = await this.context.decodeAudioData(buffer);
+      return new Track(this, audioBuffer);
     }
 
-    loadTrackFromFile(file: File): Promise<Track> {
-      let promise = new Promise<ArrayBuffer>((resolve, reject) => {
-        let reader = new FileReader();
+    async loadTrackFromFile(file: File): Promise<Track> {
+      const promise = new Promise<ArrayBuffer>((resolve, _) => {
+        const reader = new FileReader();
         reader.onload = () => resolve(reader.result as ArrayBuffer);
         reader.readAsArrayBuffer(file);
       });
-      return promise
-        .then(buffer => this.context.decodeAudioData(buffer))
-        .then(audioBuffer => new Track(this, audioBuffer))
+      const buffer = await promise;
+      const audioBuffer = await this.context.decodeAudioData(buffer);
+      return new Track(this, audioBuffer);
     }
 
-    loadTrackWithProgress(url: string, listener: (event: ProgressEvent) => any): Promise<Track> {
-      let promise = new Promise<ArrayBuffer>((resolve, reject) => {
+    async loadTrackWithProgress(url: string, listener: (event: ProgressEvent) => any): Promise<Track> {
+      const promise = new Promise<ArrayBuffer>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         xhr.open('GET', url);
         xhr.responseType = 'arraybuffer';
@@ -43,9 +43,9 @@ namespace audio {
         xhr.onerror = () => reject();
         xhr.send();
       });
-      return promise
-        .then(buffer => this.context.decodeAudioData(buffer))
-        .then(audioBuffer => new Track(this, audioBuffer))
+      const buffer = await promise;
+      const audioBuffer = await this.context.decodeAudioData(buffer);
+      return new Track(this, audioBuffer);
     }
   }
 

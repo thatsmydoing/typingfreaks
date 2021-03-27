@@ -36,29 +36,27 @@ namespace level {
     levelSets: LevelSet[]
   }
 
-  export function loadFromJson(url: string): Promise<Config> {
-    return window.fetch(url)
-      .then(response => response.json())
+  export async function loadFromJson(url: string): Promise<Config> {
+    const response = await window.fetch(url);
+    return await response.json();
   }
 
   let parser = new DOMParser();
 
-  function parseXML(response: Response): Promise<Document> {
-    return response.text().then(text => {
-      let normalized = text.replace(/[“”]/g, '"');
-      return parser.parseFromString(normalized, "text/xml");
-    });
+  async function parseXML(response: Response): Promise<Document> {
+    const text = await response.text();
+    let normalized = text.replace(/[“”]/g, '"');
+    return parser.parseFromString(normalized, "text/xml");
   }
 
-  export function loadFromTM(base: string): Promise<Config> {
+  export async function loadFromTM(base: string): Promise<Config> {
     let settingsXML = window.fetch(base+'/settings.xml').then(parseXML);
     let levelSets = window.fetch(base+'/folderlist.xml')
       .then(parseXML)
       .then(dom => parseTMFolderList(base, dom));
 
-    return Promise.all([settingsXML, levelSets]).then(pair => {
-      return parseTMSettings(base, pair[1], pair[0]);
-    })
+    const [settings, levels] = await Promise.all([settingsXML, levelSets]);
+    return parseTMSettings(base, levels, settings);
   }
 
   function parseTMSettings(base: string, levelSets: LevelSet[], dom: Document): Config {
@@ -119,7 +117,7 @@ namespace level {
     return Promise.all(promises);
   }
 
-  function parseTMFolder(base: string, name: string, dom: Document): Promise<LevelSet> {
+  async function parseTMFolder(base: string, name: string, dom: Document): Promise<LevelSet> {
     let musicList = dom.querySelectorAll('musicinfo');
     let promises = [];
     for (let i = 0; i < musicList.length; ++i) {
@@ -157,10 +155,8 @@ namespace level {
 
       promises.push(promise);
     }
-    return Promise.all(promises)
-      .then(levels => {
-        return { name, levels }
-      })
+    const levels = await Promise.all(promises);
+    return { name, levels }
   }
 
   function parseTMSong(dom: Document): Line[] {
