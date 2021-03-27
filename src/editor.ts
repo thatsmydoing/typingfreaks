@@ -5,6 +5,8 @@
 namespace editor {
   export class Editor {
     audioManager: audio.AudioManager;
+    urlElement: HTMLInputElement;
+    loadElement: HTMLButtonElement;
     audioElement: HTMLInputElement;
     barElement: HTMLElement;
     markerListElement: HTMLElement;
@@ -13,6 +15,7 @@ namespace editor {
     kanjiElement: HTMLTextAreaElement;
     displayElement: HTMLElement;
     jsonElement: HTMLInputElement;
+    waveFormContainer: HTMLDivElement;
     track: audio.Track | null = null;
     markers: Marker[] = [];
     waveForm: WaveForm;
@@ -20,8 +23,14 @@ namespace editor {
 
     constructor() {
       this.audioManager = new audio.AudioManager();
+      this.urlElement = util.getElement(document, '#url');
+      this.loadElement = util.getElement(document, '#load');
+      this.loadElement.addEventListener('click', event => {
+        this.loadAudio();
+      });
       this.audioElement = util.getElement(document, '#audio');
       this.audioElement.addEventListener('change', event => {
+        this.urlElement.value = '';
         this.loadAudio();
       });
       this.barElement = util.getElement(document, '.bar-overlay');
@@ -31,6 +40,7 @@ namespace editor {
       this.kanjiElement = util.getElement(document, '#kanji');
       this.displayElement = util.getElement(document, '#display');
       this.jsonElement = util.getElement(document, '#json');
+      this.waveFormContainer = util.getElement(document, '.waveform-container');
       this.waveForm = new WaveForm(
         util.getElement(document, '#waveform'),
         util.getElement(document, '#waveform-overlay'),
@@ -49,6 +59,20 @@ namespace editor {
     }
 
     loadAudio(): void {
+      const url = this.urlElement.value;
+      if (url != '') {
+        const videoId = youtube.getVideoId(url);
+        if (videoId !== null) {
+          const element = util.getElement(document, '#youtube');
+          this.audioManager.loadTrackFromYoutube(videoId, element, () => {}).then(t => {
+            this.track = t;
+            this.waveForm.clear();
+            this.waveFormContainer.style.display = 'none';
+          });
+          return;
+        }
+      }
+
       let file = this.audioElement.files![0];
       if (file != null) {
         if (this.track != null) {
@@ -58,6 +82,7 @@ namespace editor {
         this.audioManager.loadTrackFromFile(file).then(t => {
           this.track = t;
           this.waveForm.setTrack(t);
+          this.waveFormContainer.style.display = 'block';
         });
       }
     }
@@ -66,7 +91,9 @@ namespace editor {
       if (this.track != null) {
         let percentage = this.track.getTime() / this.track.getDuration() * 100;
         this.barElement.style.width = `${percentage}%`;
-        this.waveForm.update(this.markers);
+        if (this.track instanceof audio.FileTrack) {
+          this.waveForm.update(this.markers);
+        }
         if (this.currentMarker) {
           this.currentMarker.liElement.className = '';
         }
@@ -124,10 +151,7 @@ namespace editor {
 
     play(start?: number, duration?: number): void {
       this.track!.pause();
-      if (start != undefined) {
-        this.track!.resumeTime = start;
-      }
-      this.track!.start(duration);
+      this.track!.start(start, duration);
     }
 
     pause(): void {
@@ -257,7 +281,7 @@ namespace editor {
   class WaveForm {
     ctx: CanvasRenderingContext2D;
     overlayCtx: CanvasRenderingContext2D;
-    track: audio.Track | null = null;
+    track: audio.FileTrack | null = null;
     data: Float32Array | null = null;
     stride: number = 0;
     currentSection: number = -1;
@@ -284,7 +308,11 @@ namespace editor {
       });
     }
 
-    setTrack(track: audio.Track): void {
+    clear(): void {
+      this.track = null;
+    }
+
+    setTrack(track: audio.FileTrack): void {
       this.track = track;
       this.stride = Math.floor(this.track.buffer.sampleRate / this.canvas.width * 5);
       this.currentSection = -1;

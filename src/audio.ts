@@ -15,14 +15,14 @@ namespace audio {
       return this.context.currentTime;
     }
 
-    async loadTrack(url: string): Promise<Track> {
+    async loadTrack(url: string): Promise<FileTrack> {
       const response = await window.fetch(url);
       const buffer = await response.arrayBuffer();
       const audioBuffer = await this.context.decodeAudioData(buffer);
-      return new Track(this, audioBuffer);
+      return new FileTrack(this, audioBuffer);
     }
 
-    async loadTrackFromFile(file: File): Promise<Track> {
+    async loadTrackFromFile(file: File): Promise<FileTrack> {
       const promise = new Promise<ArrayBuffer>((resolve, _) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as ArrayBuffer);
@@ -30,26 +30,54 @@ namespace audio {
       });
       const buffer = await promise;
       const audioBuffer = await this.context.decodeAudioData(buffer);
-      return new Track(this, audioBuffer);
+      return new FileTrack(this, audioBuffer);
     }
 
-    async loadTrackWithProgress(url: string, listener: (event: ProgressEvent) => any): Promise<Track> {
+    async loadTrackWithProgress(url: string, listener: (percentage: number) => void): Promise<FileTrack> {
       const promise = new Promise<ArrayBuffer>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         xhr.open('GET', url);
         xhr.responseType = 'arraybuffer';
-        xhr.onprogress = listener;
+        xhr.onprogress = (event) => {
+          if (event.lengthComputable) {
+            // only up to 80 to factor in decoding time
+            let percentage = event.loaded / event.total * 80;
+            listener(percentage);
+          }
+        };
         xhr.onload = () => resolve(xhr.response);
         xhr.onerror = () => reject();
         xhr.send();
       });
       const buffer = await promise;
       const audioBuffer = await this.context.decodeAudioData(buffer);
-      return new Track(this, audioBuffer);
+      return new FileTrack(this, audioBuffer);
+    }
+
+    async loadTrackFromYoutube(id: string, element: HTMLElement, listener: (percentage: number) => void): Promise<YoutubeTrack> {
+      await youtube.loadYoutubeApi();
+      listener(30);
+      const player = await youtube.createPlayer(element);
+      listener(60);
+      const track = new YoutubeTrack(player, id);
+      await track.preload();
+      listener(90);
+      return track;
     }
   }
 
-  export class Track {
+  export interface Track {
+    play(): void;
+    start(fromTime?: number, duration?: number): void;
+    pause(): void;
+    stop(): void;
+    exit(): void;
+    isPlaying(): boolean;
+    getTime(): number;
+    getDuration(): number;
+  }
+
+  export class FileTrack implements Track {
     manager: AudioManager;
     buffer: AudioBuffer;
     source: AudioBufferSourceNode | null;
@@ -78,7 +106,10 @@ namespace audio {
       this.source.start();
     }
 
-    start(duration?: number): void {
+    start(fromTime?: number, duration?: number): void {
+      if (fromTime !== undefined) {
+        this.resumeTime = fromTime;
+      }
       this.source = this.manager.context.createBufferSource();
       this.source.buffer = this.buffer;
       this.source.connect(this.manager.output);
@@ -114,6 +145,10 @@ namespace audio {
       }
     }
 
+    exit(): void {
+      this.stop();
+    }
+
     isPlaying(): boolean {
       return this.hasStarted && !this.isFinished;
     }
@@ -135,6 +170,97 @@ namespace audio {
 
     getDuration(): number {
       return this.buffer.duration;
+    }
+  }
+
+  export class YoutubeTrack implements Track {
+    private timeoutHandle?: number;
+    private playDeferred: util.Deferred;
+    private finishDeferred: util.Deferred;
+    readonly fnContext: util.FnContext = new util.FnContext();
+
+    constructor(readonly player: YT.Player, readonly id: string) {
+      this.playDeferred = util.makeDeferred();
+      this.finishDeferred = util.makeDeferred();
+    }
+
+    get playPromise(): Promise<void> {
+      return this.playDeferred.promise;
+    }
+
+    get finishPromise(): Promise<void> {
+      return this.finishDeferred.promise;
+    }
+
+    preload(): Promise<void> {
+      return new Promise((resolve) => {
+        let loaded = false;
+        const onStateChange: YT.PlayerStateChangeListener = ({ data }) => {
+          if (data === YT.PlayerState.PLAYING) {
+            if (!loaded) {
+              loaded = true;
+              this.player.pauseVideo();
+              resolve();
+            }
+          } else if (data === YT.PlayerState.ENDED) {
+            this.finishDeferred.resolve();
+          }
+        };
+        this.player.addEventListener('onStateChange', onStateChange);
+        this.player.loadVideoById(this.id);
+      });
+    }
+
+    play(): void {
+      this.clearTimeout();
+      this.playDeferred.resolve();
+      this.player.playVideo();
+    }
+
+    start(fromTime?: number, duration?: number): void {
+      this.clearTimeout();
+      if (duration) {
+        this.timeoutHandle = setTimeout(() => {
+          this.player.pauseVideo();
+        }, duration * 1000);
+      }
+      if (fromTime !== undefined) {
+        this.player.seekTo(fromTime, true);
+      }
+      this.player.playVideo();
+    }
+
+    pause(): void {
+      this.clearTimeout();
+      this.player.pauseVideo();
+    }
+
+    stop(): void {
+      this.clearTimeout();
+      this.player.stopVideo();
+    }
+
+    exit(): void {
+      // the video will be removed from the background and stop immediately
+      this.fnContext.invalidate();
+    }
+
+    isPlaying(): boolean {
+      return this.player.getPlayerState() === YT.PlayerState.PLAYING;
+    }
+
+    getTime(): number {
+      return this.player.getCurrentTime();
+    }
+
+    getDuration(): number {
+      return this.player.getDuration();
+    }
+
+    private clearTimeout(): void {
+      if (this.timeoutHandle) {
+        clearTimeout(this.timeoutHandle);
+      }
     }
   }
 }

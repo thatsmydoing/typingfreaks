@@ -95,22 +95,42 @@ namespace game {
         this.readyElement.querySelector('.message')!.textContent = 'please wait';
 
         this.fnContext.invalidate();
-        this.context.audioManager.loadTrackWithProgress(
-          this.context.level.audio,
-          this.fnContext.wrap((event: ProgressEvent) => {
-            if (event.lengthComputable) {
-              // only up to 80 to factor in decoding time
-              let percentage = event.loaded / event.total * 80;
-              this.barElement!.style.width = `${percentage}%`;
-            }
-          })
-        ).then(this.fnContext.wrap((track: audio.Track) => {
+
+        const videoId = youtube.getVideoId(this.context.level.audio);
+        const progressListener = this.fnContext.wrap((percentage: number) => {
+          this.barElement!.style.width = `${percentage}%`;
+        });
+        let trackPromise;
+        if (videoId !== null) {
+          const ytElement = document.createElement('div');
+          trackPromise = this.context.audioManager.loadTrackFromYoutube(
+            videoId,
+            ytElement,
+            progressListener,
+          );
+          this.context.bgManager.setVideo(ytElement);
+          if (this.context.level.background == undefined) {
+            trackPromise.then((track) => {
+              track.playPromise.then(track.fnContext.wrap(() => {
+                this.context.bgManager.showVideo();
+              }));
+              track.finishPromise.then(track.fnContext.wrap(() => {
+                this.context.bgManager.hideVideo();
+              }));
+            });
+          }
+        } else {
+          trackPromise = this.context.audioManager.loadTrackWithProgress(
+            this.context.level.audio,
+            progressListener,
+          )
+        }
+        trackPromise.then(this.fnContext.wrap((track: audio.Track) => {
           this.context.track = track;
           this.barElement!.style.width = '100%';
           this.textElement!.textContent = 'music loaded';
           this.setReady();
         }));
-
       } else {
         loader.style.visibility = 'hidden';
         this.setReady();
@@ -331,7 +351,7 @@ namespace game {
 
     exit(): void {
       if (this.context.track !== null) {
-        this.context.track.stop();
+        this.context.track.exit();
       }
     }
 

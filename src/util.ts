@@ -104,4 +104,20 @@ namespace util {
       return wrappedFn as any as T;
     }
   }
+
+  export interface Deferred {
+    promise: Promise<void>;
+    resolve: () => void;
+  }
+
+  export function makeDeferred(): Deferred {
+    let resolve: undefined | (() => void);
+    const promise = new Promise<void>((r) => {
+      resolve = r;
+    });
+    return {
+      promise,
+      resolve: resolve!,
+    }
+  }
 }
