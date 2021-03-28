@@ -200,6 +200,7 @@ namespace audio {
             if (!loaded) {
               loaded = true;
               this.player.pauseVideo();
+              this.player.seekTo(0);
               resolve();
             }
           } else if (data === YT.PlayerState.ENDED) {
