@@ -73,6 +73,14 @@ namespace game {
       this.songInfo.querySelector('.genre')!.textContent = level.genre;
       this.songInfo.querySelector('.creator')!.textContent = level.creator;
       this.songInfo.querySelector('.title')!.textContent = level.name;
+      const linkContainer = this.songInfo.querySelector('.link')!;
+      linkContainer.innerHTML = '';
+      if (level.songLink) {
+        const link = document.createElement('a');
+        link.href = level.songLink;
+        link.textContent = "More info";
+        linkContainer.appendChild(link);
+      }
     }
 
     chooseSong(index: number): void {

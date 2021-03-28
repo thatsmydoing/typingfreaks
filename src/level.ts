@@ -18,6 +18,7 @@ namespace level {
     difficulty: string | null,
     audio: string | null,
     background?: string | null,
+    songLink?: string,
     lines: Line[]
   }
 

@@ -281,6 +281,14 @@
   font-size: 1.875em;
 }
 
+.song-info .link {
+  min-height: 1.5em;
+}
+
+.song-info .link a {
+  color: var(--base-color);
+}
+
 /* }}} */
 
 /* song-list {{{ */
