@@ -10,7 +10,7 @@ namespace background {
       this.element = element;
       this.last = null;
       this.video = document.createElement('div');
-      this.video.classList.add('show');
+      this.video.classList.add('instant');
       this.element.appendChild(this.video);
       this.next = document.createElement('div');
       this.element.appendChild(this.next);
@@ -24,6 +24,7 @@ namespace background {
     }
 
     showVideo() {
+      this.video.classList.add('show');
       this.last?.classList.remove('show');
     }
 
@@ -31,6 +32,7 @@ namespace background {
       if (this.last != null) {
         this.last.classList.add('show');
         this.last.addEventListener('transitionend', () => {
+          this.video.classList.remove('show');
           this.video.innerHTML = '';
         });
       }

@@ -36,6 +36,10 @@
 #background div.show {
   opacity: 1;
 }
+
+#background div.instant {
+  transition: none;
+}
 /* }}} */
 
 /* progress bar {{{ */
