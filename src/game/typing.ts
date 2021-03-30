@@ -100,7 +100,7 @@ namespace game {
         const progressListener = this.fnContext.wrap((percentage: number) => {
           this.barElement!.style.width = `${percentage}%`;
         });
-        let trackPromise;
+        let trackPromise: Promise<audio.Track>;
         if (videoId !== null) {
           const ytElement = document.createElement('div');
           trackPromise = this.context.audioManager.loadTrackFromYoutube(
@@ -111,12 +111,14 @@ namespace game {
           this.context.bgManager.setVideo(ytElement);
           if (this.context.level.background == undefined) {
             trackPromise.then((track) => {
-              track.playPromise.then(track.fnContext.wrap(() => {
-                this.context.bgManager.showVideo();
-              }));
-              track.finishPromise.then(track.fnContext.wrap(() => {
-                this.context.bgManager.hideVideo();
-              }));
+              track.addListener((_, state) => {
+                if (state === audio.PlayState.PLAYING) {
+                  this.context.bgManager.showVideo();
+                }
+                if (state === audio.PlayState.STOPPED) {
+                  this.context.bgManager.hideVideo();
+                }
+              });
             });
           }
         } else {
@@ -198,16 +200,24 @@ namespace game {
 
     enter(): void {
       let progressElement: HTMLElement = this.gameContainer.querySelector<HTMLElement>('.track-progress')!;
-      if (this.context.level.audio == null) {
+      if (this.context.track == null) {
         progressElement.style.visibility = 'hidden';
         this.lines = this.context.level.lines.filter(line => line.kana != "@");
       } else {
         progressElement.style.visibility = 'visible';
-        this.progressController = new display.TrackProgressController(
+        const progressController = new display.TrackProgressController(
           progressElement,
           this.lines
         );
-        this.progressController.setListener(event => this.onIntervalEnd());
+        progressController.setListener(_ => this.onIntervalEnd());
+        this.context.track.addListener((track, state) => {
+          if (state === audio.PlayState.PLAYING) {
+            progressController.start(track.getTime());
+          } else {
+            progressController.pause();
+          }
+        });
+        this.progressController = progressController;
       }
       this.onStart();
     }
@@ -220,7 +230,6 @@ namespace game {
     onStart(): void {
       this.nextLine();
       if (this.context.track !== null) {
-        this.progressController!.start();
         this.context.track.play();
       }
 

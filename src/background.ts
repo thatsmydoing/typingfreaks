@@ -29,13 +29,7 @@ namespace background {
     }
 
     hideVideo() {
-      if (this.last != null) {
-        this.last.classList.add('show');
-        this.last.addEventListener('transitionend', () => {
-          this.video.classList.remove('show');
-          this.video.innerHTML = '';
-        });
-      }
+      this.last?.classList.add('show');
     }
 
     setVideo(element: HTMLElement) {
@@ -67,6 +61,7 @@ namespace background {
         this.last.classList.remove('show');
         this.next.addEventListener('transitionend', () => {
           this.element.removeChild(toRemove);
+          this.video.classList.remove('show');
           this.video.innerHTML = '';
         }, { once: true });
       }

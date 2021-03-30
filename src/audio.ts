@@ -66,34 +66,59 @@ namespace audio {
     }
   }
 
-  export interface Track {
-    play(): void;
-    start(fromTime?: number, duration?: number): void;
-    pause(): void;
-    stop(): void;
-    exit(): void;
-    isPlaying(): boolean;
-    getTime(): number;
-    getDuration(): number;
+  export enum PlayState {
+    UNSTARTED ='unstarted',
+    PLAYING = 'playing',
+    PAUSED = 'paused',
+    STOPPED = 'stopped'
   }
 
-  export class FileTrack implements Track {
+  export type TrackListener = (track: Track, state: PlayState) => void;
+
+  export abstract class Track {
+    private listeners: TrackListener[] = [];
+
+    addListener(listener: TrackListener) {
+      this.listeners.push(listener);
+    }
+
+    clearListeners() {
+      this.listeners = [];
+    }
+
+    emit(state: PlayState) {
+      this.listeners.forEach(l => l(this, state));
+    }
+
+    exit(): void {
+      this.clearListeners();
+    }
+
+    abstract play(): void;
+    abstract start(fromTime?: number, duration?: number): void;
+    abstract pause(): void;
+    abstract stop(): void;
+    abstract getState(): PlayState;
+    abstract getTime(): number;
+    abstract getDuration(): number;
+  }
+
+  export class FileTrack extends Track {
     manager: AudioManager;
     buffer: AudioBuffer;
     source: AudioBufferSourceNode | null;
     playStartTime: number;
     resumeTime: number;
-    hasStarted: boolean;
-    isFinished: boolean;
+    state: PlayState;
 
     constructor(manager: AudioManager, buffer: AudioBuffer) {
+      super();
       this.manager = manager;
       this.buffer = buffer;
       this.source = null;
       this.playStartTime = 0;
       this.resumeTime = 0;
-      this.hasStarted = false;
-      this.isFinished = true;
+      this.state = PlayState.UNSTARTED;
     }
 
     play(): void {
@@ -101,8 +126,7 @@ namespace audio {
       this.source.buffer = this.buffer;
       this.source.connect(this.manager.output);
       this.playStartTime = this.manager.getTime();
-      this.isFinished = false;
-      this.hasStarted = true;
+      this.setState(PlayState.PLAYING);
       this.source.start();
     }
 
@@ -115,49 +139,51 @@ namespace audio {
       this.source.connect(this.manager.output);
       this.source.onended = (event) => {
         if (this.source == event.target) {
-          this.isFinished = true;
           this.resumeTime = this.manager.getTime() - this.playStartTime;
           if (this.resumeTime > this.getDuration()) {
             this.resumeTime = 0;
+            this.setState(PlayState.STOPPED);
+          } else {
+            this.setState(PlayState.PAUSED);
           }
         }
       }
-      this.isFinished = false;
-      this.hasStarted = true;
       this.playStartTime = this.manager.getTime() - this.resumeTime;
+      this.setState(PlayState.PLAYING);
       this.source.start(0, this.resumeTime, duration);
     }
 
     pause(): void {
-      if (this.isFinished) return;
+      if (this.state === PlayState.PAUSED || this.state === PlayState.STOPPED) return;
       this.resumeTime = this.manager.getTime() - this.playStartTime;
-      this.isFinished = true;
       if (this.source) {
         this.source.stop();
       }
+      this.setState(PlayState.PAUSED);
     }
 
     stop(): void {
       this.resumeTime = 0;
-      this.isFinished = true;
       if (this.source) {
         this.source.stop();
       }
+      this.setState(PlayState.STOPPED);
     }
 
     exit(): void {
+      super.exit();
       this.stop();
     }
 
-    isPlaying(): boolean {
-      return this.hasStarted && !this.isFinished;
+    getState(): PlayState {
+      return this.state;
     }
 
     getTime(): number {
-      if (!this.hasStarted) {
+      if (this.state === PlayState.UNSTARTED) {
         return 0;
       }
-      else if (this.isFinished) {
+      else if (this.state === PlayState.PAUSED || this.state === PlayState.STOPPED) {
         if (this.resumeTime > 0) {
           return this.resumeTime;
         } else {
@@ -171,25 +197,18 @@ namespace audio {
     getDuration(): number {
       return this.buffer.duration;
     }
+
+    private setState(state: PlayState): void {
+      this.state = state;
+      this.emit(state);
+    }
   }
 
-  export class YoutubeTrack implements Track {
+  export class YoutubeTrack extends Track {
     private timeoutHandle?: number;
-    private playDeferred: util.Deferred;
-    private finishDeferred: util.Deferred;
-    readonly fnContext: util.FnContext = new util.FnContext();
 
     constructor(readonly player: YT.Player, readonly id: string) {
-      this.playDeferred = util.makeDeferred();
-      this.finishDeferred = util.makeDeferred();
-    }
-
-    get playPromise(): Promise<void> {
-      return this.playDeferred.promise;
-    }
-
-    get finishPromise(): Promise<void> {
-      return this.finishDeferred.promise;
+      super();
     }
 
     preload(): Promise<void> {
@@ -204,9 +223,8 @@ namespace audio {
               this.player.unMute();
               resolve();
             }
-          } else if (data === YT.PlayerState.ENDED) {
-            this.finishDeferred.resolve();
           }
+          this.emit(this.mapState(data));
         };
         this.player.addEventListener('onStateChange', onStateChange);
         this.player.mute();
@@ -216,7 +234,6 @@ namespace audio {
 
     play(): void {
       this.clearTimeout();
-      this.playDeferred.resolve();
       this.player.playVideo();
     }
 
@@ -243,13 +260,8 @@ namespace audio {
       this.player.stopVideo();
     }
 
-    exit(): void {
-      // the video will be removed from the background and stop immediately
-      this.fnContext.invalidate();
-    }
-
-    isPlaying(): boolean {
-      return this.player.getPlayerState() === YT.PlayerState.PLAYING;
+    getState(): PlayState {
+      return this.mapState(this.player.getPlayerState());
     }
 
     getTime(): number {
@@ -263,6 +275,21 @@ namespace audio {
     private clearTimeout(): void {
       if (this.timeoutHandle) {
         clearTimeout(this.timeoutHandle);
+      }
+    }
+
+    private mapState(ytState: YT.PlayerState): PlayState {
+      switch (ytState) {
+        case YT.PlayerState.PLAYING:
+          return PlayState.PLAYING;
+        case YT.PlayerState.ENDED:
+          return PlayState.STOPPED;
+        case YT.PlayerState.UNSTARTED:
+        case YT.PlayerState.CUED:
+          return PlayState.UNSTARTED;
+        case YT.PlayerState.BUFFERING:
+        case YT.PlayerState.PAUSED:
+          return PlayState.PAUSED;
       }
     }
   }
