@@ -160,47 +160,56 @@ namespace display {
   export class TrackProgressController {
     totalBar: HTMLElement;
     intervalBar: HTMLElement;
-    listener: ((event: AnimationEvent) => void) | null;
+    listener: ((event: AnimationPlaybackEvent) => void) | null;
 
-    constructor(private element: HTMLElement, lines: level.Line[]) {
+    constructor(private element: HTMLElement, private lines: level.Line[]) {
       this.totalBar = util.getElement(element, '.total .shade');
       this.intervalBar = util.getElement(element, '.interval .shade');
       this.listener = null;
-
-      let totalDuration = lines[lines.length - 1].end;
-      this.totalBar.style.animationName = 'progress';
-      this.totalBar.style.animationDuration = totalDuration + 's';
-
-      let names = lines.map(line => 'progress').join(',');
-      let delays = lines.map(line => line.start + 's').join(',');
-      let durations = lines.map(line => (line.end! - line.start!) + 's').join(',');
-      this.intervalBar.style.animationName = names;
-      this.intervalBar.style.animationDelay = delays;
-      this.intervalBar.style.animationDuration = durations;
     }
 
-    start(): void {
-      this.intervalBar.style.width = '100%';
-      this.totalBar.style.width = '100%';
+    start(start: number = 0): void {
+      this.clearAnimations();
+      const end = this.lines[this.lines.length - 1].end!;
+      const progress = start / end;
+      this.totalBar.animate({ width: [`${progress * 100}%`, '100%'] }, {
+        duration: (end - start) * 1000
+      });
 
-      this.intervalBar.style.animationPlayState = 'running';
-      this.totalBar.style.animationPlayState = 'running';
-    }
-
-    setListener(func: (event: AnimationEvent) => void): void {
-      if (this.listener) {
-        this.intervalBar.removeEventListener('animationend', func);
+      for (const line of this.lines) {
+        if (line.end! <= start) {
+          continue;
+        }
+        const segmentStart = Math.max(line.start!, start);
+        const segmentLength = line.end! - segmentStart;
+        const fullSegmentLength = line.end! - line.start!;
+        const progress = 1 - segmentLength / fullSegmentLength;
+        const animation = this.intervalBar.animate({ width: [`${progress * 100}%`, '100%'] }, {
+          delay: (segmentStart - start) * 1000,
+          duration: segmentLength * 1000,
+        });
+        if (this.listener) {
+          animation.addEventListener('finish', this.listener);
+        }
       }
-      this.intervalBar.addEventListener('animationend', func);
+    }
+
+    pause(): void {
+      this.totalBar.getAnimations().forEach(anim => anim.pause());
+      this.intervalBar.getAnimations().forEach(anim => anim.pause());
+    }
+
+    setListener(func: (event: AnimationPlaybackEvent) => void): void {
       this.listener = func;
     }
 
     destroy(): void {
-      if (this.listener) {
-        this.intervalBar.removeEventListener('animationend', this.listener);
-      }
-      this.intervalBar.style.animationName = '';
-      this.totalBar.style.animationName = '';
+      this.clearAnimations();
+    }
+
+    private clearAnimations() {
+      this.totalBar.getAnimations().forEach(anim => anim.cancel());
+      this.intervalBar.getAnimations().forEach(anim => anim.cancel());
     }
   }
 

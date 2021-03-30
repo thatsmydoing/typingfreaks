@@ -60,17 +60,6 @@
   position: absolute;
   height: 0.3125em;
   background-color: var(--base-color);
-  animation-timing-function: linear;
-  animation-play-state: paused;
-}
-
-@keyframes progress {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
 }
 
 /* }}} */
