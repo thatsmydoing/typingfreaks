@@ -201,6 +201,7 @@ namespace audio {
               loaded = true;
               this.player.pauseVideo();
               this.player.seekTo(0);
+              this.player.unMute();
               resolve();
             }
           } else if (data === YT.PlayerState.ENDED) {
@@ -208,6 +209,7 @@ namespace audio {
           }
         };
         this.player.addEventListener('onStateChange', onStateChange);
+        this.player.mute();
         this.player.loadVideoById(this.id);
       });
     }

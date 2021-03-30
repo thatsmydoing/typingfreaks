@@ -63,6 +63,12 @@ declare namespace YT {
     getCurrentTime(): number;
     getDuration(): number;
 
+    mute(): void;
+    unMute(): void;
+    isMuted(): boolean;
+    setVolume(volume: number): boolean;
+    getVolume(): number;
+
     addEventListener(event: 'onReady', listener: PlayerReadyListener): void;
     addEventListener(event: 'onStateChange', listener: PlayerStateChangeListener): void;
     addEventListener(event: 'onError', listener: PlayerErrorListener): void;
