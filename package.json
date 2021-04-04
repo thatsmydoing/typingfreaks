@@ -10,7 +10,7 @@
     "test": "uvu -r esm -r esbuild-register tests"
   },
   "author": "Thomas Dy <thatsmydoing@gmail.com",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@snowpack/plugin-typescript": "^1.2.1",
     "esbuild-register": "^2.3.0",
