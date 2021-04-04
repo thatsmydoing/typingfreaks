@@ -2,5 +2,5 @@ import { MainController } from './game';
 
 new MainController(
   document.querySelector('#container')!,
-  'levels.json'
+  document.querySelector('#levels')?.textContent!
 ).start();
