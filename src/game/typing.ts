@@ -115,9 +115,6 @@ namespace game {
                 if (state === audio.PlayState.PLAYING) {
                   this.context.bgManager.showVideo();
                 }
-                if (state === audio.PlayState.STOPPED) {
-                  this.context.bgManager.hideVideo();
-                }
               });
             });
           }
@@ -329,6 +326,7 @@ namespace game {
       this.romajiController.destroy();
       if (this.context.track !== null) {
         this.progressController!.destroy();
+        this.context.track.clearListeners();
       }
       this.scoreController.destroy();
     }
@@ -358,12 +356,12 @@ namespace game {
       }
     }
 
-    exit(): void {
+    exit(): void {}
+
+    transitionExit(): void {
       if (this.context.track !== null) {
         this.context.track.exit();
       }
     }
-
-    transitionExit(): void {}
   }
 }

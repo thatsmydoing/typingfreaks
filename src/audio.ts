@@ -90,14 +90,11 @@ namespace audio {
       this.listeners.forEach(l => l(this, state));
     }
 
-    exit(): void {
-      this.clearListeners();
-    }
-
     abstract play(): void;
     abstract start(fromTime?: number, duration?: number): void;
     abstract pause(): void;
     abstract stop(): void;
+    abstract exit(): void;
     abstract getState(): PlayState;
     abstract getTime(): number;
     abstract getDuration(): number;
@@ -171,7 +168,6 @@ namespace audio {
     }
 
     exit(): void {
-      super.exit();
       this.stop();
     }
 
@@ -258,6 +254,10 @@ namespace audio {
     stop(): void {
       this.clearTimeout();
       this.player.stopVideo();
+    }
+
+    exit(): void {
+      // the element gets removed by the background manager and stops that way
     }
 
     getState(): PlayState {

@@ -13,6 +13,11 @@
   height: 100%;
 }
 
+#container div {
+  pointer-events: none;
+  user-select: none;
+}
+
 /* components {{{ */
 
 /* background switcher {{{ */
@@ -37,8 +42,19 @@
   opacity: 1;
 }
 
-#background div.instant {
+#background div#video {
   transition: none;
+  height: 140%;
+  bottom: -20%;
+}
+
+#background div#video.settled {
+  transition: none;
+  pointer-events: auto;
+  height: 75%;
+  width: 75%;
+  bottom: 0;
+  right: 0;
 }
 /* }}} */
 
@@ -106,6 +122,11 @@
   grid-column: start / right;
   grid-row: header / game;
   left: -31.25em;
+}
+
+#container #song-info div {
+  /* override default */
+  pointer-events: auto;
 }
 
 #song-list {
@@ -190,7 +211,7 @@
 #container.game #folder-info {
   opacity: 1;
   top: 0;
-  left: 0;
+  left: -31.25em;
 }
 
 #container.game #song-info {
@@ -218,6 +239,14 @@
   left: 0;
 }
 
+#container.game.game-finished #background div#video {
+  transition: height 0.5s, width 0.5s, bottom 0.5s;
+  height: 75%;
+  width: 75%;
+  bottom: 0;
+  right: 0;
+}
+
 /* }}} */
 
 /* }}} */
@@ -232,6 +261,12 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+}
+
+#folder-info .left,
+#folder-info .right {
+  /* override default */
+  pointer-events: auto;
 }
 
 #folder-info .left:hover,
@@ -296,6 +331,11 @@
     "diff creator"
     "diff title";
   transition: margin-left 0.2s;
+}
+
+#container div.song-item {
+  /* override default */
+  pointer-events: auto;
 }
 
 .song-item div {

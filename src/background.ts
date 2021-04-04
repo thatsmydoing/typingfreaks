@@ -9,9 +9,10 @@ namespace background {
     constructor(element: HTMLElement) {
       this.element = element;
       this.last = null;
-      this.video = document.createElement('div');
-      this.video.classList.add('instant');
-      this.element.appendChild(this.video);
+      this.video = util.getElement(element, '#video');
+      this.video.addEventListener('transitionend', () => {
+        this.video.classList.add('settled');
+      });
       this.next = document.createElement('div');
       this.element.appendChild(this.next);
     }
@@ -34,17 +35,8 @@ namespace background {
 
     setVideo(element: HTMLElement) {
       this.video.innerHTML = '';
+      this.video.classList.remove('settled');
       this.video.appendChild(element);
-    }
-
-    onResize() {
-      const height = this.element.offsetHeight;
-      const width = this.element.offsetWidth;
-      const iframes = this.element.querySelectorAll('iframe');
-      iframes.forEach((iframe) => {
-        iframe.height = ""+height;
-        iframe.width  = ""+width;
-      });
     }
 
     private setBackgroundActual(background: string) {

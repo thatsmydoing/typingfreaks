@@ -5,8 +5,8 @@ declare var onYouTubeIframeAPIReady: () => void;
 
 declare namespace YT {
   interface PlayerOptions {
-    height: number;
-    width: number;
+    height: number | string;
+    width: number | string;
     videoId?: string;
     events?: Partial<PlayerEvents>;
     playerVars?: Partial<PlayerVars>;

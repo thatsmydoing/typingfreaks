@@ -6,7 +6,6 @@
 
 namespace game {
   export class MainController extends ScreenManager {
-    bgManager: background.BackgroundManager;
     loadingScreen: Screen;
 
     constructor(container: HTMLElement, configUrl: string) {
@@ -15,11 +14,10 @@ namespace game {
 
       let self = this;
       let bgLayer: HTMLElement = util.getElement(container, '#background');
-      this.bgManager = new background.BackgroundManager(bgLayer);
       let gameContext: GameContext = {
         container: container,
         audioManager: new audio.AudioManager(),
-        bgManager: this.bgManager,
+        bgManager: new background.BackgroundManager(bgLayer),
         loadTemplate: (id: string) => util.loadTemplate(container, id),
         assets: null,
         config: null,
@@ -51,7 +49,6 @@ namespace game {
     onResize(): void {
       const fontSize = this.container.offsetHeight / 28.125;
       this.container.style.setProperty('--base-font-size', `${fontSize}px`);
-      this.bgManager.onResize();
     }
   }
 }

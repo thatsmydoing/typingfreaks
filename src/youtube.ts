@@ -23,8 +23,8 @@ namespace youtube {
     console.time('Loading YouTube player');
     return new Promise((resolve, reject) => {
       const player = new YT.Player(element, {
-        height: element.offsetHeight,
-        width: element.offsetWidth,
+        height: '100%',
+        width: '100%',
         events: {
           onReady: () => {
             console.timeEnd('Loading YouTube player');
@@ -35,9 +35,7 @@ namespace youtube {
           }
         },
         playerVars: {
-          controls: 0,
           disablekb: 1,
-          modestbranding: 1,
           rel: 0,
           iv_load_policy: 3,
           fs: 0
