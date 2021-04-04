@@ -18,7 +18,8 @@ body {
   height: 60px;
 }
 
-#waveform, #waveform-overlay {
+#waveform,
+#waveform-overlay {
   position: absolute;
   height: 100%;
   width: 100%;
@@ -75,7 +76,9 @@ li.highlight {
   grid-row: 1 / 2;
 }
 
-#intervals, #kana, #kanji {
+#intervals,
+#kana,
+#kanji {
   grid-row: 2 / 3;
 }
 
@@ -92,14 +95,15 @@ li.highlight {
 
 #kanji,
 #kanji-label {
-  grid-columN: 3 / 4;
+  grid-column: 3 / 4;
 }
 
 #intervals input {
   width: 100px;
 }
 
-#kanji, #kana {
+#kanji,
+#kana {
   border: solid 1px lightgrey;
   min-height: 200px;
   white-space: pre;

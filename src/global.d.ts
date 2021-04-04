@@ -33,18 +33,18 @@ declare namespace YT {
 
   enum PlayerState {
     UNSTARTED = -1,
-    ENDED     = 0,
-    PLAYING   = 1,
-    PAUSED    = 2,
+    ENDED = 0,
+    PLAYING = 1,
+    PAUSED = 2,
     BUFFERING = 3,
-    CUED      = 5,
+    CUED = 5,
   }
 
   enum PlayerError {
-    INVALID_PARAM    = 2,
-    PLAYBACK_ERROR   = 5,
-    NOT_FOUND        = 100,
-    CANNOT_EMBED     = 101,
+    INVALID_PARAM = 2,
+    PLAYBACK_ERROR = 5,
+    NOT_FOUND = 100,
+    CANNOT_EMBED = 101,
     CANNOT_EMBED_ALT = 150,
   }
 
@@ -70,7 +70,10 @@ declare namespace YT {
     getVolume(): number;
 
     addEventListener(event: 'onReady', listener: PlayerReadyListener): void;
-    addEventListener(event: 'onStateChange', listener: PlayerStateChangeListener): void;
+    addEventListener(
+      event: 'onStateChange',
+      listener: PlayerStateChangeListener
+    ): void;
     addEventListener(event: 'onError', listener: PlayerErrorListener): void;
   }
 }

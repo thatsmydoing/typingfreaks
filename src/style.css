@@ -328,8 +328,8 @@
   grid-template-columns: 2.5em auto;
   grid-template-rows: 1em 1.5em;
   grid-template-areas:
-    "diff creator"
-    "diff title";
+    'diff creator'
+    'diff title';
   transition: margin-left 0.2s;
 }
 
@@ -362,14 +362,22 @@
   justify-self: center;
   height: 1.875em;
   width: 1.875em;
-  background: radial-gradient(circle at 10% 10%, rgba(0, 255, 255, 1), transparent);
+  background: radial-gradient(
+    circle at 10% 10%,
+    rgba(0, 255, 255, 1),
+    transparent
+  );
   border-radius: 20%;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 }
 
 .song-item .difficulty-bg.normal {
-  background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.6), transparent);
+  background: radial-gradient(
+    circle at 10% 10%,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
   opacity: 1;
 }
 
@@ -447,8 +455,8 @@
   grid-template-columns: max-content auto;
   grid-template-rows: 50% 50%;
   grid-template-areas:
-    "tl tb"
-    "il ib";
+    'tl tb'
+    'il ib';
   grid-gap: 0em 0.625em;
   align-items: center;
   align-self: end;
@@ -478,7 +486,6 @@
   grid-area: ib;
 }
 
-
 /* }}} */
 
 /* typing area {{{ */
@@ -488,12 +495,12 @@
   grid-template-columns: 3.125em 3.125em auto;
   grid-template-rows: 2.5em 1.5em 0.75em 1.875em auto 1.375em;
   grid-template-areas:
-    ". . track"
-    "score score score"
-    ". . kana"
-    ". . kanji"
-    "romaji-first romaji romaji"
-    ". . stats";
+    '. . track'
+    'score score score'
+    '. . kana'
+    '. . kanji'
+    'romaji-first romaji romaji'
+    '. . stats';
   grid-row-gap: 0.125em;
   padding: 0.125em 1.25em;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
@@ -546,7 +553,6 @@
 #game .romaji-first.error {
   animation: pulse 0.2s;
 }
-
 
 /* }}} */
 
