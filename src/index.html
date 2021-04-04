@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
   <head>
     <title>Typing Freaks</title>
@@ -103,12 +104,6 @@
         </template>
       </template>
     </div>
-    <script type="text/javascript" src="bundle.js"></script>
-    <script type="text/javascript">
-      new game.MainController(
-        document.querySelector('#container'),
-        'levels.json'
-      ).start();
-    </script>
+    <script type="module" src="index.js"></script>
   </body>
 </html>

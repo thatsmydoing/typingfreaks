@@ -1,7 +1,9 @@
-/// <reference path="select.ts" />
-/// <reference path="common.ts" />
+import * as audio from '../audio';
+import * as level from '../level';
+import * as util from '../util';
+import { GameContext, Screen } from './common';
+import { SelectScreen } from './select';
 
-namespace game {
   export class LoadingScreen implements Screen {
     readonly name: string = 'loading';
 
@@ -72,4 +74,3 @@ namespace game {
 
     transitionExit(): void {}
   }
-}

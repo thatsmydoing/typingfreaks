@@ -1,8 +1,7 @@
-/// <reference path="../audio.ts" />
-/// <reference path="../background.ts" />
-/// <reference path="../level.ts" />
+import * as audio from '../audio';
+import * as background from '../background';
+import * as level from '../level';
 
-namespace game {
   export interface Screen {
     readonly name: string;
     handleInput(key: string): void;
@@ -65,4 +64,3 @@ namespace game {
 
     switchScreen(screen: Screen): void;
   }
-}

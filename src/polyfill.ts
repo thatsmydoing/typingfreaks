@@ -1,4 +1,3 @@
-namespace polyfill {
   interface API {
     request: string;
     changeEvent: string;
@@ -48,4 +47,3 @@ namespace polyfill {
   }
 
   export const fullscreen = new FullscreenPolyfill();
-}

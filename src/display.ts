@@ -5,13 +5,11 @@
  * kanji is simply just for reading.
  */
 
-/// <reference path="kana.ts" />
-/// <reference path="state.ts" />
-/// <reference path="util.ts" />
-
-namespace display {
-  import InputState = kana.KanaInputState;
-  import TransitionResult = state.TransitionResult;
+import { KanaInputState as InputState } from './kana';
+import * as state from './state';
+import { TransitionResult } from './state';
+import * as level from './level';
+import * as util from './util';
 
   class SingleKanaDisplayComponent {
     element: HTMLElement;
@@ -334,4 +332,3 @@ namespace display {
       this.clearObservers();
     }
   }
-}

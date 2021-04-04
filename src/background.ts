@@ -1,4 +1,5 @@
-namespace background {
+import * as util from './util';
+
   export class BackgroundManager {
     element: HTMLElement;
     video: HTMLElement;
@@ -62,4 +63,3 @@ namespace background {
       this.element.appendChild(this.next);
     }
   }
-}

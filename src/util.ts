@@ -1,4 +1,3 @@
-namespace util {
   export function loadTemplate(element: ParentNode, id: string): DocumentFragment {
     let template = element.querySelector(`#${id}-template`);
     if (template !== null && template instanceof HTMLTemplateElement) {
@@ -120,4 +119,3 @@ namespace util {
       resolve: resolve!,
     }
   }
-}

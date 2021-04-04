@@ -1,4 +1,5 @@
-namespace audio {
+import * as youtube from './youtube';
+
   export class AudioManager {
     context: AudioContext;
     volume: GainNode;
@@ -293,4 +294,3 @@ namespace audio {
       }
     }
   }
-}

@@ -1,8 +1,13 @@
-/// <reference path="common.ts" />
-/// <reference path="typing.ts" />
-/// <reference path="../util.ts" />
+import * as level from '../level';
+import * as util from '../util';
+import {
+  GameContext,
+  Screen,
+} from './common';
+import {
+  TypingScreen
+} from './typing';
 
-namespace game {
   export class SelectScreen implements Screen {
     readonly name: string = 'select';
     folderInfo: HTMLElement;
@@ -89,7 +94,7 @@ namespace game {
         decideSound.play();
       }
       let level = this.currentLevelSet.levels[index];
-      let gameScreen = new game.TypingScreen(this.context, level, this);
+      let gameScreen = new TypingScreen(this.context, level, this);
       this.context.switchScreen(gameScreen);
     }
 
@@ -232,4 +237,3 @@ namespace game {
       this.onSongChoose(this.currentIndex);
     }
   }
-}

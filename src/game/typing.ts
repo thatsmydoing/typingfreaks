@@ -1,10 +1,16 @@
-/// <reference path="../audio.ts" />
-/// <reference path="../kana.ts" />
-/// <reference path="../level.ts" />
-/// <reference path="../display.ts" />
-/// <reference path="common.ts" />
+import * as audio from '../audio';
+import * as display from '../display';
+import * as level from '../level';
+import * as kana from '../kana';
+import * as util from '../util';
+import * as youtube from '../youtube';
 
-namespace game {
+import {
+  GameContext,
+  Screen,
+  ScreenManager,
+} from './common';
+
   import Level = level.Level;
 
   class TypingScreenContext {
@@ -364,4 +370,3 @@ namespace game {
       }
     }
   }
-}

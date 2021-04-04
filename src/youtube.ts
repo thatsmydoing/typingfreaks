@@ -1,4 +1,3 @@
-namespace youtube {
   let apiPromise: Promise<void>;
 
   export function loadYoutubeApi(): Promise<void> {
@@ -55,4 +54,3 @@ namespace youtube {
       return null;
     }
   }
-}

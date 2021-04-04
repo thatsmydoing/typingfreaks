@@ -1,10 +1,15 @@
-/// <reference path="audio.ts" />
-/// <reference path="background.ts" />
-/// <reference path="polyfill.ts" />
-/// <reference path="game/common.ts" />
-/// <reference path="game/loading.ts" />
+import * as audio from './audio';
+import * as background from './background';
+import * as util from './util';
+import * as polyfill from './polyfill';
 
-namespace game {
+import {
+  GameContext,
+  Screen,
+  ScreenManager,
+} from './game/common';
+import { LoadingScreen } from './game/loading';
+
   export class MainController extends ScreenManager {
     loadingScreen: Screen;
 
@@ -51,4 +56,3 @@ namespace game {
       this.container.style.setProperty('--base-font-size', `${fontSize}px`);
     }
   }
-}

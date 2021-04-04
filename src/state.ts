@@ -5,7 +5,7 @@
  * state name and is also used to represent the remaining text to be input at
  * that particular state.
  */
-namespace state {
+
   export enum TransitionResult { FAILED, SUCCESS, SKIPPED }
 
   interface StateMap {
@@ -171,4 +171,3 @@ namespace state {
   ): Transition {
     return { from, input, to, boundary };
   }
-}

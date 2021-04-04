@@ -15,13 +15,12 @@
  * up in the display.
  */
 
-/// <reference path="state.ts" />
-
-namespace kana {
-  import State = state.State;
-  import StateMachine = state.StateMachine;
-  import TransitionResult = state.TransitionResult;
-  import t = state.makeTransition;
+import * as state from './state';
+import {
+  State,
+  StateMachine,
+  makeTransition as t,
+} from './state';
 
   function literal(source: string, ...extraBoundaries: number[]): StateMachine {
     let transitions: state.Transition[] = [];
@@ -416,7 +415,7 @@ namespace kana {
    * care to not change the length of the string as we have to match it
    * one-for-one so we can display the original source kana.
    */
-  function normalizeInput(input: string): string {
+  export function normalizeInput(input: string): string {
     return input.toLowerCase().split('').map(letter => {
       let transform = KATAKANA_MAPPING[letter];
       if (transform !== undefined) {
@@ -506,5 +505,3 @@ namespace kana {
       return remaining;
     }
   }
-
-}

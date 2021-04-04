@@ -3,7 +3,7 @@
  * that you have to complete. Each line has the kanji of the line, which is used
  * solely for display and the kana of the line which the input is based.
  */
-namespace level {
+
   export interface Line {
     kanji: string,
     kana: string,
@@ -184,4 +184,3 @@ namespace level {
     }
     return lines;
   }
-}

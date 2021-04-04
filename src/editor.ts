@@ -1,8 +1,8 @@
-/// <reference path="util.ts" />
-/// <reference path="level.ts" />
-/// <reference path="audio.ts" />
+import * as audio from './audio';
+import * as level from './level';
+import * as util from './util';
+import * as youtube from './youtube';
 
-namespace editor {
   export class Editor {
     audioManager: audio.AudioManager;
     urlElement: HTMLInputElement;
@@ -355,4 +355,6 @@ namespace editor {
       })
     }
   }
-}
+
+let e = new Editor();
+e.start();
