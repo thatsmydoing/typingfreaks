@@ -22,11 +22,7 @@ function cleanup {
 
 trap cleanup EXIT
 
-mkdir "$release_name"
-cp dist/bundle.{js,js.map} "$release_name"
-for file in $(git ls-files dist); do
-    cp "$file" "$release_name"
-done
+mv dist "$release_name"
 zip -r "$release_name.zip" "$release_name"
 
 gh release create -d --notes "" "$version" "$release_name.zip"

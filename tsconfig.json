@@ -3,10 +3,16 @@
     "strict": true,
     "removeComments": true,
     "sourceMap": true,
-    "outFile": "dist/bundle.js",
-    "target": "es6"
+    "module": "es6",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "target": "es6",
+    "types": []
   },
   "include": [
-    "src/**/*"
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

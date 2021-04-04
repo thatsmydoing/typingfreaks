@@ -28,7 +28,7 @@ songs. Then simply serve it as a static site.
 
 ### Config
 
-The [config](dist/levels.json) is a simple JSON file with the following
+The [config](assets/levels.json) is a simple JSON file with the following
 properties:
 
 The following accept any CSS color

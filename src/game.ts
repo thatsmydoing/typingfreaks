@@ -1,54 +1,54 @@
-/// <reference path="audio.ts" />
-/// <reference path="background.ts" />
-/// <reference path="polyfill.ts" />
-/// <reference path="game/common.ts" />
-/// <reference path="game/loading.ts" />
+import * as audio from './audio';
+import * as background from './background';
+import * as util from './util';
+import * as polyfill from './polyfill';
 
-namespace game {
-  export class MainController extends ScreenManager {
-    loadingScreen: Screen;
+import { GameContext, Screen, ScreenManager } from './game/common';
+import { LoadingScreen } from './game/loading';
 
-    constructor(container: HTMLElement, configUrl: string) {
-      super(container);
-      container.appendChild(util.loadTemplate(container, 'base'));
+export class MainController extends ScreenManager {
+  loadingScreen: Screen;
 
-      let self = this;
-      let bgLayer: HTMLElement = util.getElement(container, '#background');
-      let gameContext: GameContext = {
-        container: container,
-        audioManager: new audio.AudioManager(),
-        bgManager: new background.BackgroundManager(bgLayer),
-        loadTemplate: (id: string) => util.loadTemplate(container, id),
-        assets: null,
-        config: null,
-        switchScreen(screen: Screen): void {
-          self.switchScreen(screen);
-        }
+  constructor(container: HTMLElement, configUrl: string) {
+    super(container);
+    container.appendChild(util.loadTemplate(container, 'base'));
+
+    let self = this;
+    let bgLayer: HTMLElement = util.getElement(container, '#background');
+    let gameContext: GameContext = {
+      container: container,
+      audioManager: new audio.AudioManager(),
+      bgManager: new background.BackgroundManager(bgLayer),
+      loadTemplate: (id: string) => util.loadTemplate(container, id),
+      assets: null,
+      config: null,
+      switchScreen(screen: Screen): void {
+        self.switchScreen(screen);
+      },
+    };
+
+    this.loadingScreen = new LoadingScreen(gameContext, configUrl);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.altKey && event.key === 'Enter') {
+        polyfill.fullscreen.request(this.container);
       }
+      if (this.activeScreen !== null && !event.ctrlKey && !event.metaKey) {
+        this.activeScreen.handleInput(event.key);
+      }
+    });
 
-      this.loadingScreen = new LoadingScreen(gameContext, configUrl);
+    polyfill.fullscreen.addEventListener(() => {
+      this.onResize();
+    });
+  }
 
-      document.addEventListener('keydown', (event) => {
-        if (event.altKey && event.key === 'Enter') {
-          polyfill.fullscreen.request(this.container);
-        }
-        if (this.activeScreen !== null && !event.ctrlKey && !event.metaKey) {
-          this.activeScreen.handleInput(event.key);
-        }
-      });
+  start(): void {
+    this.switchScreen(this.loadingScreen);
+  }
 
-      polyfill.fullscreen.addEventListener(() => {
-        this.onResize();
-      });
-    }
-
-    start(): void {
-      this.switchScreen(this.loadingScreen);
-    }
-
-    onResize(): void {
-      const fontSize = this.container.offsetHeight / 28.125;
-      this.container.style.setProperty('--base-font-size', `${fontSize}px`);
-    }
+  onResize(): void {
+    const fontSize = this.container.offsetHeight / 28.125;
+    this.container.style.setProperty('--base-font-size', `${fontSize}px`);
   }
 }
