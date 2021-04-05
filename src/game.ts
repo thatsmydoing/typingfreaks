@@ -30,6 +30,10 @@ export class MainController extends ScreenManager {
     this.loadingScreen = new LoadingScreen(gameContext, configUrl);
 
     document.addEventListener('keydown', (event) => {
+      if (event.key === 'Tab') {
+        // prevent losing focus
+        event.preventDefault();
+      }
       if (event.altKey && event.key === 'Enter') {
         polyfill.fullscreen.request(this.container);
       }

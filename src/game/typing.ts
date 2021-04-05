@@ -177,6 +177,7 @@ class TypingPlayingScreen implements Screen {
   currentIndex: number;
   inputState: kana.KanaInputState | null;
   isWaiting: boolean;
+  skippable: boolean;
   kanjiElement: HTMLElement;
   kanaController: display.KanaDisplayController;
   romajiController: display.RomajiDisplayController;
@@ -189,6 +190,7 @@ class TypingPlayingScreen implements Screen {
     this.currentIndex = -1;
     this.inputState = null;
     this.isWaiting = false;
+    this.skippable = false;
     this.kanjiElement = util.getElement(this.gameContainer, '.kanji-line');
     this.romajiController = new display.RomajiDisplayController(
       util.getElement(this.gameContainer, '.romaji-first'),
@@ -231,15 +233,21 @@ class TypingPlayingScreen implements Screen {
     this.onStart();
   }
 
-  setWaiting(waiting: boolean): void {
-    this.gameContainer.classList.toggle('waiting', waiting);
+  get currentLine() {
+    return this.lines[this.currentIndex];
+  }
+
+  setWaiting(waiting: boolean, skippable: boolean = false): void {
     this.isWaiting = waiting;
+    this.skippable = waiting && skippable;
+    this.gameContainer.classList.toggle('waiting', this.isWaiting);
+    this.gameContainer.classList.toggle('skippable', this.skippable);
   }
 
   onStart(): void {
     this.nextLine();
     if (this.context.track !== null) {
-      this.context.track.play();
+      this.context.track.start(0);
     }
 
     this.setWaiting(false);
@@ -247,7 +255,7 @@ class TypingPlayingScreen implements Screen {
   }
 
   checkComplete(): void {
-    let currentLine = this.lines[this.currentIndex];
+    let currentLine = this.currentLine;
     if (
       currentLine != null &&
       currentLine.kana == '@' &&
@@ -276,7 +284,14 @@ class TypingPlayingScreen implements Screen {
       this.scoreController.intervalEnd(true);
     }
     if (this.context.track !== null) {
-      this.setWaiting(true);
+      // skippable if the last line was empty and the current line is longer
+      // than 3 seconds
+      const lastLine = this.lines[this.currentIndex - 1];
+      const skippable =
+        autoComplete &&
+        lastLine !== undefined &&
+        lastLine.end! - lastLine.start! > 3;
+      this.setWaiting(true, skippable);
     } else {
       if (this.currentIndex >= this.lines.length) {
         this.finish();
@@ -287,11 +302,17 @@ class TypingPlayingScreen implements Screen {
   handleInput(key: string): void {
     if (key === 'Escape' || key === 'Backspace') {
       this.finish();
+      return;
     } else if (!this.isWaiting) {
       if (this.inputState !== null && /^[-_ a-z]$/.test(key)) {
         if (this.inputState.handleInput(key)) {
           this.onComplete();
         }
+      }
+    } else if (this.skippable && key === 'Tab' && this.context.track !== null) {
+      const start = this.currentLine.start!;
+      if (start - this.context.track.getTime() > 3) {
+        this.context.track.start(start - 1.5);
       }
     }
   }
@@ -337,6 +358,7 @@ class TypingPlayingScreen implements Screen {
   exit(): void {}
 
   transitionExit(): void {
+    this.gameContainer.classList.remove('skippable');
     this.kanaController.destroy();
     this.romajiController.destroy();
     if (this.context.track !== null) {

@@ -98,7 +98,6 @@ export abstract class Track {
     this.listeners.forEach((l) => l(this, state));
   }
 
-  abstract play(): void;
   abstract start(fromTime?: number, duration?: number): void;
   abstract pause(): void;
   abstract stop(): void;
@@ -126,16 +125,20 @@ export class FileTrack extends Track {
     this.state = PlayState.UNSTARTED;
   }
 
+  /**
+   * Play and forget useful for SFX and the like
+   */
   play(): void {
-    this.source = this.manager.context.createBufferSource();
-    this.source.buffer = this.buffer;
-    this.source.connect(this.manager.output);
-    this.playStartTime = this.manager.getTime();
-    this.setState(PlayState.PLAYING);
-    this.source.start();
+    const source = this.manager.context.createBufferSource();
+    source.buffer = this.buffer;
+    source.connect(this.manager.output);
+    source.start();
   }
 
   start(fromTime?: number, duration?: number): void {
+    if (this.state === PlayState.PLAYING) {
+      this.stop();
+    }
     if (fromTime !== undefined) {
       this.resumeTime = fromTime;
     }
@@ -237,11 +240,6 @@ export class YoutubeTrack extends Track {
       this.player.mute();
       this.player.loadVideoById(this.id);
     });
-  }
-
-  play(): void {
-    this.clearTimeout();
-    this.player.playVideo();
   }
 
   start(fromTime?: number, duration?: number): void {

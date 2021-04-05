@@ -53,7 +53,7 @@ export class LoadingScreen implements Screen {
     loadingElement.classList.add('finished');
   }
 
-  loadTrack(url: string): Promise<audio.Track | null> {
+  loadTrack(url: string): Promise<audio.FileTrack | null> {
     if (url == null) {
       return Promise.resolve(null);
     } else {

@@ -53,8 +53,8 @@ export class ScreenManager {
 }
 
 interface GameSounds {
-  selectSound: audio.Track | null;
-  decideSound: audio.Track | null;
+  selectSound: audio.FileTrack | null;
+  decideSound: audio.FileTrack | null;
 }
 
 export interface GameContext {

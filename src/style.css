@@ -501,7 +501,7 @@
     '. . kana'
     '. . kanji'
     'romaji-first romaji romaji'
-    '. . stats';
+    'skip skip stats';
   grid-row-gap: 0.125em;
   padding: 1.25em 1.25em 0.125em 1.25em;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
@@ -553,6 +553,16 @@
 
 #game .romaji-first.error {
   animation: pulse 0.2s;
+}
+
+#game .skip-notice {
+  grid-area: skip;
+  opacity: 0;
+  font-size: 0.875em;
+}
+
+#game.skippable .skip-notice {
+  animation: 1.5s flash 0s 2;
 }
 
 /* }}} */
@@ -666,6 +676,18 @@
   }
   100% {
     color: var(--base-color);
+  }
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
