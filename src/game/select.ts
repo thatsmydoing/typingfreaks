@@ -78,6 +78,7 @@ export class SelectScreen implements Screen {
     if (level.songLink) {
       const link = document.createElement('a');
       link.href = level.songLink;
+      link.target = '_blank';
       link.textContent = 'More info';
       linkContainer.appendChild(link);
     }
