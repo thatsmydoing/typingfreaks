@@ -121,7 +121,7 @@
 
 #song-info {
   grid-column: start / right;
-  grid-row: header / game;
+  grid-row: top / bottom;
   left: -31.25em;
 }
 
@@ -284,13 +284,18 @@
 /* song-info {{{ */
 
 #song-info {
-  display: grid;
+  margin-top: 10em;
+  margin-left: 1.25em;
 }
 
 .song-info {
-  align-self: end;
-  margin-left: 1.25em;
   text-shadow: 0em 0em 0.3125em var(--contrast-color);
+}
+
+.song-info div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-info .genre {
@@ -299,7 +304,6 @@
 
 .song-info .creator {
   font-size: 1.25em;
-  line-height: 0.5;
 }
 
 .song-info .title {
