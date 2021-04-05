@@ -12,6 +12,7 @@ goal.
  * the displayed text is in Hepburn romanization but still supports other
    romanizations for input
  * YouTube support for songs (still experimental)
+ * waiting sections can be skipped
 
 You might also be interested in [innocenat's clone][1].
 
