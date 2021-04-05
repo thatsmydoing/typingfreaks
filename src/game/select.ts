@@ -32,6 +32,11 @@ export class SelectScreen implements Screen {
     this.songInfo = util.getElement(container, '#song-info');
     this.songList = util.getElement(container, '#song-list');
 
+    this.songList.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      this.activeListController.handleScroll(event.deltaY);
+    });
+
     this.listControllers = [];
     this.levelSets.forEach((levelSet) => {
       let controller = new SongListController(
@@ -200,6 +205,14 @@ class SongListController {
       this.scroll(5);
     } else if (key === ' ' || key === 'Enter') {
       this.choose();
+    }
+  }
+
+  handleScroll(deltaY: number): void {
+    if (deltaY > 0) {
+      this.scroll(1);
+    } else if (deltaY < 0) {
+      this.scroll(-1);
     }
   }
 

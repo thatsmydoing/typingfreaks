@@ -136,6 +136,11 @@
   left: 18.75em;
 }
 
+#container div#song-list {
+  /* override default */
+  pointer-events: auto;
+}
+
 #folder-info {
   grid-column: start / left;
   grid-row: top / header;
