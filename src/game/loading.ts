@@ -73,6 +73,7 @@ export class LoadingScreen implements Screen {
     let containerStyle = this.context.container.style;
     containerStyle.setProperty('--base-color', config.baseColor);
     containerStyle.setProperty('--highlight-color', config.highlightColor);
+    containerStyle.setProperty('--contrast-color', config.contrastColor);
   }
 
   transitionExit(): void {}

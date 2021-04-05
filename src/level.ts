@@ -34,6 +34,7 @@ export interface Config {
   decideSound: string;
   baseColor: string;
   highlightColor: string;
+  contrastColor: string;
   levelSets: LevelSet[];
 }
 
@@ -94,6 +95,7 @@ function parseTMSettings(
     background,
     baseColor: 'white',
     highlightColor: 'blue',
+    contrastColor: 'black',
     selectMusic,
     selectSound,
     decideSound,

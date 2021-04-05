@@ -1,6 +1,7 @@
 #container {
   --base-color: white;
   --highlight-color: red;
+  --contrast-color: black;
   --base-font-size: 16px;
 
   position: relative;
@@ -89,7 +90,7 @@
 #container {
   display: grid;
   grid-template-columns: [start] 18.75em [left] auto [right] 18.75em [end];
-  grid-template-rows: [top] 3.125em [header] auto [game] 11.25em [bottom];
+  grid-template-rows: [top] 3.125em [header] auto [game] 12.5em [bottom];
 
   font-size: var(--base-font-size);
   height: 450px;
@@ -289,7 +290,7 @@
 .song-info {
   align-self: end;
   margin-left: 1.25em;
-  text-shadow: 0em 0em 0.3125em var(--base-color);
+  text-shadow: 0em 0em 0.3125em var(--contrast-color);
 }
 
 .song-info .genre {
@@ -502,8 +503,8 @@
     'romaji-first romaji romaji'
     '. . stats';
   grid-row-gap: 0.125em;
-  padding: 0.125em 1.25em;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+  padding: 1.25em 1.25em 0.125em 1.25em;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
 }
 
 #game .track-progress {

@@ -2,6 +2,7 @@
   "background": "royalblue",
   "baseColor": "white",
   "highlightColor": "cyan",
+  "contrastColor": "black",
   "selectSound": "select.wav",
   "decideSound": "decide.wav",
   "levelSets": [
