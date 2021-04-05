@@ -45,17 +45,21 @@
 
 #background div#video {
   transition: none;
-  height: 140%;
-  bottom: -20%;
+  height: 200%;
+  bottom: -50%;
+  right: 0;
 }
 
 #background div#video.settled {
   transition: none;
   pointer-events: auto;
-  height: 75%;
-  width: 75%;
-  bottom: 0;
-  right: 0;
+  height: 70%;
+  width: 70%;
+  bottom: 0.5em;
+  right: 0.5em;
+  box-sizing: content-box;
+  padding: 1px;
+  border: solid 1px white;
 }
 /* }}} */
 
@@ -246,11 +250,14 @@
 }
 
 #container.game.game-finished #background div#video {
-  transition: height 0.5s, width 0.5s, bottom 0.5s;
-  height: 75%;
-  width: 75%;
-  bottom: 0;
-  right: 0;
+  transition: height 0.5s, width 0.5s, bottom 0.5s, right 0.5s;
+  height: 70%;
+  width: 70%;
+  bottom: 0.5em;
+  right: 0.5em;
+  box-sizing: content-box;
+  padding: 1px;
+  border: solid 1px white;
 }
 
 /* }}} */
