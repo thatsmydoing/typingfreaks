@@ -20,6 +20,24 @@ function testInput(input: string, line: string) {
   }
 }
 
+function testFail(input: string, line: string) {
+  const inputState = new KanaInputState(line);
+  let fail = false;
+  inputState.map((_, m) => {
+    m.addObserver((result, _boundary) => {
+      fail =
+        fail ||
+        result === TransitionResult.FAILED ||
+        result === TransitionResult.SKIPPED;
+    });
+  });
+  for (const c of input.split('')) {
+    inputState.handleInput(c);
+  }
+  fail = fail || !inputState.isFinished();
+  assert.ok(fail, `Expected ${input} to fail on ${line}`);
+}
+
 test('normalizeInput', () => {
   assert.is(normalizeInput('ABCdef'), 'abcdef');
   assert.is(normalizeInput('フェスティバル'), 'ふぇすてぃばる');
@@ -70,6 +88,20 @@ test('small tsu', () => {
   testInput('hassya', 'はっしゃ');
   // testInput('haltusha', 'はっしゃ');
   // testInput('haltusya', 'はっしゃ');
+});
+
+test('nn', () => {
+  testInput('nn', 'ん');
+  testInput('nna', 'んあ');
+  testFail('na', 'んあ');
+  testInput('nda', 'んだ');
+  testInput('nnda', 'んだ');
+  testFail('nnnda', 'んだ');
+  testInput('nnnda', 'んんだ');
+  testInput('nnnnda', 'んんだ');
+  testFail('nya', 'んにゃ');
+  testFail('nnya', 'んにゃ');
+  testInput('nnnya', 'んにゃ');
 });
 
 test.run();

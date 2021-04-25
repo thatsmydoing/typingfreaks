@@ -37,7 +37,7 @@ export class State {
     this.transitions[input] = [state, boundary];
   }
 
-  transition(input: string): [State, boolean] | null {
+  transition(input: string): [State, boolean] | undefined {
     return this.transitions[input];
   }
 

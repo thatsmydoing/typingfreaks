@@ -133,6 +133,30 @@ function smallKana(base: StateMachine): StateMachine {
   return new StateMachine(newState, base.finalState);
 }
 
+function n(base: StateMachine): StateMachine {
+  const { display, transitions } = base.initialState;
+  const allowSingleN = ['n', 'a', 'i', 'u', 'e', 'o', 'y'].every((k) => {
+    return base.initialState.transition(k) === undefined;
+  });
+
+  if (allowSingleN) {
+    const newState = new State('nn' + display);
+    const middleState = new State('n' + display);
+
+    newState.addTransition('n', middleState, true);
+    middleState.addTransition('n', base.initialState);
+    Object.keys(transitions).forEach((k) => {
+      let [nextState, _] = transitions[k];
+      middleState.addTransition(k, nextState);
+    });
+    return new StateMachine(newState, base.finalState);
+  } else {
+    throw new Error(
+      `Invalid base ${base.initialState.display}, just defer to literal`
+    );
+  }
+}
+
 interface KanaMapping {
   [index: string]: StateMachine;
 }
@@ -280,7 +304,7 @@ const SINGLE_KANA_MAPPING: KanaMapping = {
   ゐ: literal('i'),
   ゑ: literal('e'),
   を: literal('wo'),
-  ん: literal('n'),
+  ん: literal('nn'),
   が: literal('ga'),
   ぎ: literal('gi'),
   ぐ: literal('gu'),
@@ -425,6 +449,7 @@ const TRIPLE_KANA_MAPPING: KanaMapping = {};
   'ゔ',
 ].forEach((kana) => {
   DOUBLE_KANA_MAPPING['っ' + kana] = smallTsu(SINGLE_KANA_MAPPING[kana]);
+  DOUBLE_KANA_MAPPING['ん' + kana] = n(SINGLE_KANA_MAPPING[kana]);
 });
 [
   'きゃ',
@@ -461,6 +486,7 @@ const TRIPLE_KANA_MAPPING: KanaMapping = {};
   'ゔぉ',
 ].forEach((kana) => {
   TRIPLE_KANA_MAPPING['っ' + kana] = smallTsu(DOUBLE_KANA_MAPPING[kana]);
+  TRIPLE_KANA_MAPPING['ん' + kana] = n(DOUBLE_KANA_MAPPING[kana]);
 });
 
 /**
@@ -552,6 +578,10 @@ export class KanaInputState {
         return true;
       }
     }
+    return this.currentIndex >= this.stateMachines.length;
+  }
+
+  isFinished(): boolean {
     return this.currentIndex >= this.stateMachines.length;
   }
 
