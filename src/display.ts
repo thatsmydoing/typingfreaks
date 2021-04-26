@@ -54,10 +54,12 @@ class KanaMachineController {
       .map((c) => new SingleKanaDisplayComponent(c));
   }
 
-  observer: state.Observer = (result, boundary) => {
-    if (boundary) {
-      this.children[this.current].setFull();
-      this.current += 1;
+  observer: state.Observer<number> = (result, meta) => {
+    if (meta > this.current) {
+      while (this.current < meta) {
+        this.children[this.current].setFull();
+        this.current += 1;
+      }
     } else if (result != TransitionResult.FAILED) {
       this.children[this.current].setPartial();
     }
@@ -122,7 +124,7 @@ export class RomajiDisplayController {
       this.inputState.map((_, machine) => {
         machine.addObserver(this.observer);
       });
-      this.observer(TransitionResult.SUCCESS, false);
+      this.observer(TransitionResult.SUCCESS, 0, false);
     } else {
       this.firstElement.textContent = '';
       this.restElement.textContent = '';
@@ -137,7 +139,7 @@ export class RomajiDisplayController {
     }
   }
 
-  observer: state.Observer = (result) => {
+  observer: state.Observer<number> = (result) => {
     if (result === TransitionResult.FAILED) {
       this.firstElement.classList.remove('error');
       this.firstElement.offsetHeight; // trigger reflow
@@ -238,7 +240,7 @@ export class Score {
     }
   }
 
-  update(result: TransitionResult, boundary: boolean): void {
+  update(result: TransitionResult, points: number): void {
     if (result === TransitionResult.FAILED) {
       this.missed += 1;
       this.lastMissed = true;
@@ -249,7 +251,7 @@ export class Score {
       this.combo = 0;
     }
 
-    if (boundary) {
+    for (let i = 0; i < points; ++i) {
       if (this.lastSkipped) {
         // no points if we've skipped
         this.lastSkipped = false;
@@ -281,6 +283,7 @@ export class ScoreController {
   skippedElement: HTMLElement;
 
   inputState: InputState | null = null;
+  lastMeta: number;
   score: Score;
 
   constructor(
@@ -294,6 +297,7 @@ export class ScoreController {
     this.hitElement = util.getElement(statsContainer, '.hit');
     this.missedElement = util.getElement(statsContainer, '.missed');
     this.skippedElement = util.getElement(statsContainer, '.skipped');
+    this.lastMeta = 0;
     this.score = new Score();
     this.setValues();
   }
@@ -313,8 +317,10 @@ export class ScoreController {
     this.setValues();
   }
 
-  observer: state.Observer = (result, boundary) => {
-    this.score.update(result, boundary);
+  observer: state.Observer<number> = (result, meta, finished) => {
+    const points = Math.max(0, meta - this.lastMeta);
+    this.lastMeta = finished ? 0 : meta;
+    this.score.update(result, points);
     this.setValues();
   };
 

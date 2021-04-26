@@ -8,9 +8,9 @@ function testInput(input: string, line: string) {
   const inputState = new KanaInputState(line);
   let kanaCount = 0;
   inputState.map((_, m) => {
-    m.addObserver((result, boundary) => {
-      if (boundary) {
-        kanaCount += 1;
+    m.addObserver((result, meta) => {
+      if (m.isFinished()) {
+        kanaCount += meta;
       }
       assert.is(
         result,
@@ -46,6 +46,34 @@ function testFail(input: string, line: string) {
   }
   fail = fail || !inputState.isFinished();
   assert.ok(fail, `Expected ${input} to fail on ${line}`);
+}
+
+function testSkip(input: string, line: string, expectedSkips: number) {
+  const inputState = new KanaInputState(line);
+  let kanaCount = 0;
+  let skipCount = 0;
+  inputState.map((_, m) => {
+    m.addObserver((result, meta) => {
+      if (result === TransitionResult.SKIPPED) {
+        kanaCount += meta;
+        skipCount += 1;
+      } else if (result === TransitionResult.SUCCESS) {
+        kanaCount += meta;
+      } else {
+        assert.unreachable(`Expected ${input} to match ${line}`);
+      }
+    });
+  });
+  for (const c of input.split('')) {
+    inputState.handleInput(c);
+  }
+  assert.ok(inputState.isFinished(), `Expected inputState to be finished`);
+  assert.is(
+    kanaCount,
+    line.length,
+    `Expected ${line.length} boundaries, got ${kanaCount}`
+  );
+  assert.is(skipCount, expectedSkips, `Expected skip count to match`);
 }
 
 test('normalizeInput', () => {
@@ -88,16 +116,16 @@ test('multiple romanization double kana', () => {
 
 test('small tsu', () => {
   testInput('katto', 'カット');
-  // testInput('kaltsuto', 'かっと');
-  // testInput('kaltuto', 'かっと');
+  testInput('kaltsuto', 'かっと');
+  testInput('kaltuto', 'かっと');
   testInput('ejji', 'エッジ');
   testInput('ezzi', 'エッジ');
-  // testInput('extuji', 'エッジ');
-  // testInput('extsuzi', 'エッジ');
+  testInput('extuji', 'エッジ');
+  testInput('extsuzi', 'エッジ');
   testInput('hassha', 'はっしゃ');
   testInput('hassya', 'はっしゃ');
-  // testInput('haltusha', 'はっしゃ');
-  // testInput('haltusya', 'はっしゃ');
+  testInput('haltusha', 'はっしゃ');
+  testInput('haltusya', 'はっしゃ');
 });
 
 test('nn', () => {
@@ -112,6 +140,12 @@ test('nn', () => {
   testFail('nya', 'んにゃ');
   testFail('nnya', 'んにゃ');
   testInput('nnnya', 'んにゃ');
+});
+
+test('skipping', () => {
+  testSkip('a', 'は', 1);
+  testSkip('hao', 'はろ', 1);
+  testSkip('hro', 'はろ', 1);
 });
 
 test.run();

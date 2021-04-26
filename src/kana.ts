@@ -16,16 +16,26 @@
  */
 
 import * as state from './state';
-import { State, StateMachine, makeTransition as t } from './state';
+import {
+  State,
+  StateMachine,
+  makeTransition as t,
+  mergeMachines,
+  appendMachines,
+  appendStates,
+} from './state';
 
 function literal(source: string, ...extraBoundaries: number[]): StateMachine {
   let transitions: state.Transition[] = [];
+  let meta = 0;
   for (let i = 0; i < source.length; ++i) {
     let from = source.substring(i);
     let input = source.charAt(i);
     let to = source.substring(i + 1);
-    let boundary = i === source.length - 1 || extraBoundaries.indexOf(i) >= 0;
-    transitions.push(t(from, input, to, boundary));
+    if (i === source.length - 1 || extraBoundaries.indexOf(i) >= 0) {
+      meta += 1;
+    }
+    transitions.push(t(from, input, to, meta));
   }
   return state.buildFromTransitions(source, transitions);
 }
@@ -34,8 +44,8 @@ function shi(): StateMachine {
   return state.buildFromTransitions('shi', [
     t('shi', 's', 'hi'),
     t('hi', 'h', 'i'),
-    t('hi', 'i', '', true),
-    t('i', 'i', '', true),
+    t('hi', 'i', '', 1),
+    t('i', 'i', '', 1),
   ]);
 }
 
@@ -44,7 +54,7 @@ function chi(): StateMachine {
     t('chi', 'c', 'hi'),
     t('chi', 't', 'i'),
     t('hi', 'h', 'i'),
-    t('i', 'i', '', true),
+    t('i', 'i', '', 1),
   ]);
 }
 
@@ -52,8 +62,8 @@ function tsu(): StateMachine {
   return state.buildFromTransitions('tsu', [
     t('tsu', 't', 'su'),
     t('su', 's', 'u'),
-    t('su', 'u', '', true),
-    t('u', 'u', '', true),
+    t('su', 'u', '', 1),
+    t('u', 'u', '', 1),
   ]);
 }
 
@@ -61,7 +71,7 @@ function fu(): StateMachine {
   return state.buildFromTransitions('fu', [
     t('fu', 'f', 'u'),
     t('fu', 'h', 'u'),
-    t('u', 'u', '', true),
+    t('u', 'u', '', 1),
   ]);
 }
 
@@ -69,7 +79,7 @@ function ji(): StateMachine {
   return state.buildFromTransitions('ji', [
     t('ji', 'j', 'i'),
     t('ji', 'z', 'i'),
-    t('i', 'i', '', true),
+    t('i', 'i', '', 1),
   ]);
 }
 
@@ -77,10 +87,10 @@ function sh(end: string): StateMachine {
   let source = 'sh' + end;
   let middle = 'h' + end;
   return state.buildFromTransitions(source, [
-    t(source, 's', middle, true),
+    t(source, 's', middle, 1),
     t(middle, 'h', end),
     t(middle, 'y', end),
-    t(end, end, '', true),
+    t(end, end, '', 2),
   ]);
 }
 
@@ -91,65 +101,59 @@ function ch(end: string): StateMachine {
 
   return state.buildFromTransitions(source, [
     t(source, 'c', middle),
-    t(middle, 'h', end, true),
-    t(source, 't', altMiddle, true),
+    t(middle, 'h', end, 1),
+    t(source, 't', altMiddle, 1),
     t(altMiddle, 'y', end),
-    t(end, end, '', true),
+    t(end, end, '', 2),
   ]);
 }
 
 function j(end: string): StateMachine {
-  let source = 'j' + end;
-  let altMiddle = 'y' + end;
-
-  return state.buildFromTransitions(source, [
-    t(source, 'j', end, true),
-    t(source, 'z', altMiddle),
-    t(end, 'y', end),
-    t(altMiddle, 'y', end, true),
-    t(end, end, '', true),
-  ]);
+  return mergeMachines(
+    literal(`j${end}`, 0),
+    literal(`jy${end}`, 0),
+    literal(`zy${end}`, 0)
+  );
 }
 
 function smallTsu(base: StateMachine): StateMachine {
   let { display, transitions } = base.initialState;
 
-  let newState = new State(display.charAt(0) + display);
+  const newState = new State(display.charAt(0) + display, 0);
   Object.keys(transitions).forEach((k) => {
-    let [nextState, boundary] = transitions[k];
-    let intermediateDisplay = k + nextState.display;
-    let intermediateState = new State(intermediateDisplay);
-    intermediateState.addTransition(k, nextState, boundary);
-    newState.addTransition(k, intermediateState, true);
+    const nextState = transitions[k];
+    const intermediateState = new State(k, 0);
+    intermediateState.addTransition(k, new State('', 1));
+    newState.addTransition(k, appendStates(intermediateState, nextState));
   });
 
-  return new StateMachine(newState, base.finalState);
+  return mergeMachines(
+    new StateMachine(newState),
+    appendMachines(
+      state.buildFromTransitions('l', [t('l', 'l', ''), t('l', 'x', '')]),
+      tsu(),
+      base
+    )
+  );
 }
 
 function smallKana(base: StateMachine): StateMachine {
   let newState = base.initialState.clone();
   newState.addTransition('l', base.initialState);
   newState.addTransition('x', base.initialState);
-  return new StateMachine(newState, base.finalState);
+  return new StateMachine(newState);
 }
 
 function n(base: StateMachine): StateMachine {
-  const { display, transitions } = base.initialState;
   const allowSingleN = ['n', 'a', 'i', 'u', 'e', 'o', 'y'].every((k) => {
     return base.initialState.transition(k) === undefined;
   });
 
   if (allowSingleN) {
-    const newState = new State('nn' + display);
-    const middleState = new State('n' + display);
-
-    newState.addTransition('n', middleState, true);
-    middleState.addTransition('n', base.initialState);
-    Object.keys(transitions).forEach((k) => {
-      let [nextState, _] = transitions[k];
-      middleState.addTransition(k, nextState);
-    });
-    return new StateMachine(newState, base.finalState);
+    return mergeMachines(
+      appendMachines(literal('n'), base),
+      appendMachines(literal('nn'), base)
+    );
   } else {
     throw new Error(
       `Invalid base ${base.initialState.display}, just defer to literal`
