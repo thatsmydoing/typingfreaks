@@ -6,8 +6,12 @@ import { TransitionResult } from '../src/state';
 
 function testInput(input: string, line: string) {
   const inputState = new KanaInputState(line);
+  let kanaCount = 0;
   inputState.map((_, m) => {
-    m.addObserver((result, _boundary) => {
+    m.addObserver((result, boundary) => {
+      if (boundary) {
+        kanaCount += 1;
+      }
       assert.is(
         result,
         TransitionResult.SUCCESS,
@@ -18,6 +22,12 @@ function testInput(input: string, line: string) {
   for (const c of input.split('')) {
     inputState.handleInput(c);
   }
+  assert.ok(inputState.isFinished(), `Expected inputState to be finished`);
+  assert.is(
+    kanaCount,
+    line.length,
+    `Expected ${line.length} boundaries, got ${kanaCount}`
+  );
 }
 
 function testFail(input: string, line: string) {

@@ -116,10 +116,10 @@ function smallTsu(base: StateMachine): StateMachine {
 
   let newState = new State(display.charAt(0) + display);
   Object.keys(transitions).forEach((k) => {
-    let [nextState, _] = transitions[k];
+    let [nextState, boundary] = transitions[k];
     let intermediateDisplay = k + nextState.display;
     let intermediateState = new State(intermediateDisplay);
-    intermediateState.addTransition(k, nextState);
+    intermediateState.addTransition(k, nextState, boundary);
     newState.addTransition(k, intermediateState, true);
   });
 
