@@ -75,17 +75,43 @@ function fu(): StateMachine {
   ]);
 }
 
-function f(vowel: string): StateMachine {
+function f(vowel: StateMachine): StateMachine {
+  const end = vowel.initialState.display;
   return mergeMachines(
-    literal(`f${vowel}`, 0),
-    appendMachines(fu(), smallKana(literal(vowel)))
+    literal(`f${end}`, 0),
+    appendMachines(fu(), vowel)
   );
 }
 
-function v(vowel: string): StateMachine {
+function v(vowel: StateMachine): StateMachine {
+  const end = vowel.initialState.display;
   return mergeMachines(
-    literal(`v${vowel}`, 0),
-    appendMachines(literal('vu'), smallKana(literal(vowel)))
+    literal(`v${end}`, 0),
+    appendMachines(literal('vu'), vowel)
+  );
+}
+
+function y(base: StateMachine, vowel: StateMachine): StateMachine {
+  const newState = base.initialState.transform((state) => {
+    return [
+      state.display.replace(/i$/, vowel.initialState.display),
+      state.meta,
+    ];
+  });
+  const newVowelState = vowel.initialState.transform((state) => {
+    return [state.display, state.meta + 1];
+  });
+  for (const state of newState.closure()) {
+    for (const key in state.transitions) {
+      const nextState = state.transitions[key];
+      if (nextState.display === vowel.initialState.display) {
+        state.transitions[key] = newVowelState;
+      }
+    }
+  }
+  return mergeMachines(
+    new StateMachine(newState),
+    appendMachines(base, SMALL_KANA_MAPPING.get(vowel)!)
   );
 }
 
@@ -97,37 +123,43 @@ function ji(): StateMachine {
   ]);
 }
 
-function sh(end: string): StateMachine {
+function sh(vowel: StateMachine): StateMachine {
+  const end = vowel.initialState.display.replace(/^y/, '');
   let source = 'sh' + end;
   let middle = 'h' + end;
-  return state.buildFromTransitions(source, [
-    t(source, 's', middle, 1),
-    t(middle, 'h', end),
-    t(middle, 'y', end),
-    t(end, end, '', 2),
-  ]);
+
+  return mergeMachines(
+    state.buildFromTransitions(source, [
+      t(source, 's', middle, 1),
+      t(middle, 'h', end),
+      t(middle, 'y', end),
+      t(end, end, '', 2),
+    ]),
+    appendMachines(shi(), SMALL_KANA_MAPPING.get(vowel)!)
+  );
 }
 
-function ch(end: string): StateMachine {
+function ch(vowel: StateMachine): StateMachine {
+  const end = vowel.initialState.display.replace(/^y/, '');
   let source = 'ch' + end;
   let middle = 'h' + end;
   let altMiddle = 'y' + end;
 
-  return state.buildFromTransitions(source, [
-    t(source, 'c', middle),
-    t(middle, 'h', end, 1),
-    t(source, 't', altMiddle, 1),
-    t(altMiddle, 'y', end),
-    t(end, end, '', 2),
-  ]);
+  return mergeMachines(
+    state.buildFromTransitions(source, [
+      t(source, 'c', middle),
+      t(middle, 'h', end, 1),
+      t(source, 't', altMiddle, 1),
+      t(altMiddle, 'y', end),
+      t(end, end, '', 2),
+    ]),
+    appendMachines(chi(), SMALL_KANA_MAPPING.get(vowel)!)
+  );
 }
 
-function j(end: string): StateMachine {
-  return mergeMachines(
-    literal(`j${end}`, 0),
-    literal(`jy${end}`, 0),
-    literal(`zy${end}`, 0)
-  );
+function j(vowel: StateMachine): StateMachine {
+  const end = vowel.initialState.display.replace(/^y/, '');
+  return mergeMachines(literal(`j${end}`, 0), y(ji(), vowel));
 }
 
 function smallTsu(base: StateMachine): StateMachine {
@@ -143,7 +175,7 @@ function smallTsu(base: StateMachine): StateMachine {
 
   return mergeMachines(
     new StateMachine(newState),
-    appendMachines(smallKana(tsu()), base)
+    appendMachines(SMALL_KANA_MAPPING.get(SINGLE_KANA_MAPPING['つ'])!, base)
   );
 }
 
@@ -353,6 +385,8 @@ const SINGLE_KANA_MAPPING: KanaMapping = {
   SINGLE_KANA_MAPPING[letter] = literal(letter);
 });
 
+const SMALL_KANA_MAPPING: Map<StateMachine, StateMachine> = new Map();
+
 [
   ['ぁ', 'あ'],
   ['ぃ', 'い'],
@@ -360,56 +394,61 @@ const SINGLE_KANA_MAPPING: KanaMapping = {
   ['ぇ', 'え'],
   ['ぉ', 'お'],
   ['ヵ', 'か'],
+  ['っ', 'つ'],
+  ['ゃ', 'や'],
+  ['ゅ', 'ゆ'],
+  ['ょ', 'よ'],
 ].forEach((pair) => {
   let [small, big] = pair;
   SINGLE_KANA_MAPPING[small] = smallKana(SINGLE_KANA_MAPPING[big]);
+  SMALL_KANA_MAPPING.set(SINGLE_KANA_MAPPING[big], SINGLE_KANA_MAPPING[small]);
 });
 
 const DOUBLE_KANA_MAPPING: KanaMapping = {
-  きゃ: literal('kya', 0),
-  きゅ: literal('kyu', 0),
-  きょ: literal('kyo', 0),
-  しゃ: sh('a'),
-  しゅ: sh('u'),
-  しょ: sh('o'),
-  ちゃ: ch('a'),
-  ちゅ: ch('u'),
-  ちょ: ch('o'),
-  にゃ: literal('nya', 0),
-  にゅ: literal('nyu', 0),
-  にょ: literal('nyo', 0),
-  ひゃ: literal('hya', 0),
-  ひゅ: literal('hyu', 0),
-  ひょ: literal('hyo', 0),
-  みゃ: literal('mya', 0),
-  みゅ: literal('myu', 0),
-  みょ: literal('myo', 0),
-  りゃ: literal('rya', 0),
-  りゅ: literal('ryu', 0),
-  りょ: literal('ryo', 0),
-  ぎゃ: literal('gya', 0),
-  ぎゅ: literal('gyu', 0),
-  ぎょ: literal('gyo', 0),
-  じゃ: j('a'),
-  じゅ: j('u'),
-  じょ: j('o'),
-  ぢゃ: literal('dya', 0),
-  ぢゅ: literal('dyu', 0),
-  ぢょ: literal('dyo', 0),
-  びゃ: literal('bya', 0),
-  びゅ: literal('byu', 0),
-  びょ: literal('byo', 0),
-  ぴゃ: literal('pya', 0),
-  ぴゅ: literal('pyu', 0),
-  ぴょ: literal('pyo', 0),
-  ふぁ: f('a'),
-  ふぃ: f('i'),
-  ふぇ: f('e'),
-  ふぉ: f('o'),
-  ゔぁ: v('a'),
-  ゔぃ: v('i'),
-  ゔぇ: v('e'),
-  ゔぉ: v('o'),
+  きゃ: y(SINGLE_KANA_MAPPING['き'], SINGLE_KANA_MAPPING['や']),
+  きゅ: y(SINGLE_KANA_MAPPING['き'], SINGLE_KANA_MAPPING['ゆ']),
+  きょ: y(SINGLE_KANA_MAPPING['き'], SINGLE_KANA_MAPPING['よ']),
+  しゃ: sh(SINGLE_KANA_MAPPING['や']),
+  しゅ: sh(SINGLE_KANA_MAPPING['ゆ']),
+  しょ: sh(SINGLE_KANA_MAPPING['よ']),
+  ちゃ: ch(SINGLE_KANA_MAPPING['や']),
+  ちゅ: ch(SINGLE_KANA_MAPPING['ゆ']),
+  ちょ: ch(SINGLE_KANA_MAPPING['よ']),
+  にゃ: y(SINGLE_KANA_MAPPING['に'], SINGLE_KANA_MAPPING['や']),
+  にゅ: y(SINGLE_KANA_MAPPING['に'], SINGLE_KANA_MAPPING['ゆ']),
+  にょ: y(SINGLE_KANA_MAPPING['に'], SINGLE_KANA_MAPPING['よ']),
+  ひゃ: y(SINGLE_KANA_MAPPING['ひ'], SINGLE_KANA_MAPPING['や']),
+  ひゅ: y(SINGLE_KANA_MAPPING['ひ'], SINGLE_KANA_MAPPING['ゆ']),
+  ひょ: y(SINGLE_KANA_MAPPING['ひ'], SINGLE_KANA_MAPPING['よ']),
+  みゃ: y(SINGLE_KANA_MAPPING['み'], SINGLE_KANA_MAPPING['や']),
+  みゅ: y(SINGLE_KANA_MAPPING['み'], SINGLE_KANA_MAPPING['ゆ']),
+  みょ: y(SINGLE_KANA_MAPPING['み'], SINGLE_KANA_MAPPING['よ']),
+  りゃ: y(SINGLE_KANA_MAPPING['り'], SINGLE_KANA_MAPPING['や']),
+  りゅ: y(SINGLE_KANA_MAPPING['り'], SINGLE_KANA_MAPPING['ゆ']),
+  りょ: y(SINGLE_KANA_MAPPING['り'], SINGLE_KANA_MAPPING['よ']),
+  ぎゃ: y(SINGLE_KANA_MAPPING['ぎ'], SINGLE_KANA_MAPPING['や']),
+  ぎゅ: y(SINGLE_KANA_MAPPING['ぎ'], SINGLE_KANA_MAPPING['ゆ']),
+  ぎょ: y(SINGLE_KANA_MAPPING['ぎ'], SINGLE_KANA_MAPPING['よ']),
+  じゃ: j(SINGLE_KANA_MAPPING['や']),
+  じゅ: j(SINGLE_KANA_MAPPING['ゆ']),
+  じょ: j(SINGLE_KANA_MAPPING['よ']),
+  ぢゃ: y(SINGLE_KANA_MAPPING['ぢ'], SINGLE_KANA_MAPPING['や']),
+  ぢゅ: y(SINGLE_KANA_MAPPING['ぢ'], SINGLE_KANA_MAPPING['ゆ']),
+  ぢょ: y(SINGLE_KANA_MAPPING['ぢ'], SINGLE_KANA_MAPPING['よ']),
+  びゃ: y(SINGLE_KANA_MAPPING['び'], SINGLE_KANA_MAPPING['や']),
+  びゅ: y(SINGLE_KANA_MAPPING['び'], SINGLE_KANA_MAPPING['ゆ']),
+  びょ: y(SINGLE_KANA_MAPPING['び'], SINGLE_KANA_MAPPING['よ']),
+  ぴゃ: y(SINGLE_KANA_MAPPING['ぴ'], SINGLE_KANA_MAPPING['や']),
+  ぴゅ: y(SINGLE_KANA_MAPPING['ぴ'], SINGLE_KANA_MAPPING['ゆ']),
+  ぴょ: y(SINGLE_KANA_MAPPING['ぴ'], SINGLE_KANA_MAPPING['よ']),
+  ふぁ: f(SINGLE_KANA_MAPPING['ぁ']),
+  ふぃ: f(SINGLE_KANA_MAPPING['ぃ']),
+  ふぇ: f(SINGLE_KANA_MAPPING['ぇ']),
+  ふぉ: f(SINGLE_KANA_MAPPING['ぉ']),
+  ゔぁ: v(SINGLE_KANA_MAPPING['ぁ']),
+  ゔぃ: v(SINGLE_KANA_MAPPING['ぃ']),
+  ゔぇ: v(SINGLE_KANA_MAPPING['ぇ']),
+  ゔぉ: v(SINGLE_KANA_MAPPING['ぉ']),
 };
 
 const TRIPLE_KANA_MAPPING: KanaMapping = {};

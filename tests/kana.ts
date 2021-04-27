@@ -96,23 +96,33 @@ test('multiple romanization single kana', () => {
 });
 
 test('multiple romanization double kana', () => {
+  testInput('kya', 'きゃ');
+  testInput('kiya', 'きゃ');
+  testInput('kilya', 'きゃ');
   testInput('sha', 'しゃ');
   testInput('sya', 'しゃ');
-  // testInput('shilya', 'しゃ');
-  // testInput('silya', 'しゃ');
+  testInput('shilya', 'しゃ');
+  testInput('silya', 'しゃ');
   testInput('cha', 'ちゃ');
   testInput('tya', 'ちゃ');
-  // testInput('chilya', 'ちゃ');
-  // testInput('tilya', 'ちゃ');
+  testInput('chilya', 'ちゃ');
+  testInput('tilya', 'ちゃ');
   testInput('ja', 'じゃ');
   testInput('jya', 'じゃ');
   testInput('zya', 'じゃ');
-  // testInput('jilya', 'じゃ');
-  // testInput('zilya', 'じゃ');
+  testInput('jilya', 'じゃ');
+  testInput('zilya', 'じゃ');
 
   testInput('fe', 'ふぇ');
   testInput('fue', 'ふぇ');
   testInput('fule', 'ふぇ');
+});
+
+test('small kana', () => {
+  testInput('ka', 'ヵ');
+  testInput('lka', 'ヵ');
+  testInput('xka', 'ヵ');
+  testFail('llka', 'ヵ');
 });
 
 test('small tsu', () => {
