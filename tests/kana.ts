@@ -1,7 +1,7 @@
 import { test } from 'uvu';
 import * as assert from 'uvu/assert';
 
-import { normalizeInput, KanaInputState } from '../src/kana';
+import { KANA_MAPPING, normalizeInput, KanaInputState } from '../src/kana';
 import { TransitionResult } from '../src/state';
 
 function testInput(input: string, line: string) {
@@ -26,7 +26,7 @@ function testInput(input: string, line: string) {
   assert.is(
     kanaCount,
     line.length,
-    `Expected ${line.length} boundaries, got ${kanaCount}`
+    `${line}: Expected ${line.length} boundaries, got ${kanaCount}`
   );
 }
 
@@ -157,6 +157,15 @@ test('skipping', () => {
   testSkip('a', 'は', 1);
   testSkip('hao', 'はろ', 1);
   testSkip('hro', 'はろ', 1);
+});
+
+test('display matches', () => {
+  for (const line in KANA_MAPPING) {
+    if (line === ' ') {
+      continue;
+    }
+    testInput(KANA_MAPPING[line].getDisplay(), line);
+  }
 });
 
 test.run();
