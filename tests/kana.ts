@@ -111,7 +111,8 @@ test('multiple romanization double kana', () => {
   // testInput('zilya', 'じゃ');
 
   testInput('fe', 'ふぇ');
-  // testInput('fule', 'ふぇ');
+  testInput('fue', 'ふぇ');
+  testInput('fule', 'ふぇ');
 });
 
 test('small tsu', () => {

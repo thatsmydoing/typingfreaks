@@ -75,6 +75,20 @@ function fu(): StateMachine {
   ]);
 }
 
+function f(vowel: string): StateMachine {
+  return mergeMachines(
+    literal(`f${vowel}`, 0),
+    appendMachines(fu(), smallKana(literal(vowel)))
+  );
+}
+
+function v(vowel: string): StateMachine {
+  return mergeMachines(
+    literal(`v${vowel}`, 0),
+    appendMachines(literal('vu'), smallKana(literal(vowel)))
+  );
+}
+
 function ji(): StateMachine {
   return state.buildFromTransitions('ji', [
     t('ji', 'j', 'i'),
@@ -129,11 +143,7 @@ function smallTsu(base: StateMachine): StateMachine {
 
   return mergeMachines(
     new StateMachine(newState),
-    appendMachines(
-      state.buildFromTransitions('l', [t('l', 'l', ''), t('l', 'x', '')]),
-      tsu(),
-      base
-    )
+    appendMachines(smallKana(tsu()), base)
   );
 }
 
@@ -392,14 +402,14 @@ const DOUBLE_KANA_MAPPING: KanaMapping = {
   ぴゃ: literal('pya', 0),
   ぴゅ: literal('pyu', 0),
   ぴょ: literal('pyo', 0),
-  ふぁ: literal('fa', 0),
-  ふぃ: literal('fi', 0),
-  ふぇ: literal('fe', 0),
-  ふぉ: literal('fo', 0),
-  ゔぁ: literal('va', 0),
-  ゔぃ: literal('vi', 0),
-  ゔぇ: literal('ve', 0),
-  ゔぉ: literal('vo', 0),
+  ふぁ: f('a'),
+  ふぃ: f('i'),
+  ふぇ: f('e'),
+  ふぉ: f('o'),
+  ゔぁ: v('a'),
+  ゔぃ: v('i'),
+  ゔぇ: v('e'),
+  ゔぉ: v('o'),
 };
 
 const TRIPLE_KANA_MAPPING: KanaMapping = {};
