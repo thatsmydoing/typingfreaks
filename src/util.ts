@@ -44,6 +44,15 @@ export function getElement<E extends HTMLElement>(
   return e as E;
 }
 
+export function createElement(
+  elementName: string,
+  value: string | null
+): HTMLElement {
+  const e = document.createElement(elementName);
+  e.textContent = value;
+  return e;
+}
+
 export function loadBackground(url: string): Promise<void> {
   if (url.includes('.')) {
     return new Promise((resolve, reject) => {

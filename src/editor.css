@@ -2,27 +2,127 @@ body {
   margin: 0;
 }
 
-#controls {
-  position: fixed;
-  width: 100%;
-  background-color: white;
+#container {
+  padding: 10px;
+}
+
+.hide {
+  display: none;
+}
+
+#config-screen,
+#level-screen {
+  display: none;
+}
+
+.loaded #open-screen {
+  display: none;
+}
+
+.loaded #config-screen {
+  display: block;
+}
+
+.editing #config-screen {
+  display: none;
+}
+
+.editing #level-screen {
   display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-#controls > div {
-  flex-grow: 1;
+#config-navigation {
+  display: inline-flex;
+  gap: 5px;
 }
 
-.waveform-container {
-  position: relative;
-  height: 60px;
+#levels {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-#waveform,
-#waveform-overlay {
-  position: absolute;
-  height: 100%;
+.level-set .header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+table.level-list {
+  border-collapse: collapse;
   width: 100%;
+}
+
+.level-list tbody tr:hover {
+  background: #eee;
+}
+
+.level-list th,
+.level-list td {
+  border: solid 1px black;
+  padding: 0px 5px;
+}
+
+.level-list input {
+  width: 80%;
+}
+
+.lyrics {
+  padding-bottom: 200px;
+  display: grid;
+  grid-template-columns: auto auto auto 1fr 1fr [end];
+  grid-gap: 2px;
+}
+
+.lyrics .time {
+  width: 100px;
+  height: 30px;
+  border-radius: 2px;
+  border-color: silver;
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 8px;
+}
+
+.lyrics .rest-of-song {
+  grid-column: 2 / end;
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+
+.lyrics .time:invalid {
+  border-color: red;
+}
+
+.no-audio .lyrics {
+  grid-template-columns: auto 1fr 1fr;
+}
+
+.no-audio .lyrics .time,
+.no-audio .lyrics .play-section,
+.no-audio .lyrics .rest-of-song {
+  display: none;
+}
+
+#level-screen .playback {
+  display: flex;
+  position: fixed;
+  width: calc(100% - 20px);
+  bottom: 5px;
+  background: white;
+  gap: 5px;
+  box-shadow: 0px 0px 9px 0px gray;
+}
+
+.controls {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 5px 0px;
 }
 
 .scrubber {
@@ -40,10 +140,6 @@ body {
   height: 100%;
 }
 
-li.highlight {
-  background-color: yellow;
-}
-
 .markers {
   grid-row: 2 / 3;
   position: relative;
@@ -58,69 +154,38 @@ li.highlight {
   width: 5px;
 }
 
-.text-areas {
-  padding-top: 160px;
-  display: grid;
-  grid-template-columns: auto 1fr 1fr;
-  grid-template-rows: 20px auto;
-  grid-gap: 2px;
+.waveform-container {
+  position: relative;
+  height: 60px;
+  background: lightgrey;
 }
 
-#url {
-  width: 300px;
-}
-
-#intervals-label,
-#kana-label,
-#kanji-label {
-  grid-row: 1 / 2;
-}
-
-#intervals,
-#kana,
-#kanji {
-  grid-row: 2 / 3;
-}
-
-#intervals,
-#intervals-label {
-  min-width: 250px;
-  grid-column: 1 / 2;
-}
-
-#kana,
-#kana-label {
-  grid-column: 2 / 3;
-}
-
-#kanji,
-#kanji-label {
-  grid-column: 3 / 4;
-}
-
-#intervals input {
-  width: 100px;
-}
-
-#kanji,
-#kana {
-  border: solid 1px lightgrey;
-  min-height: 200px;
-  white-space: pre;
-  overflow-x: auto;
-  font-size: 16px;
-}
-
-#json {
+#waveform,
+#waveform-overlay {
+  position: absolute;
+  height: 100%;
   width: 100%;
-  height: 200px;
 }
 
-div#youtube {
+#level-screen.no-waveform .waveform-container {
+  display: none;
+}
+
+#display {
+  flex-grow: 1;
+  font-size: 150%;
+  min-height: 2em;
+}
+
+#youtube {
   flex-grow: 0;
 }
 
-iframe#youtube {
+#youtube iframe {
   width: 240px;
   height: 135px;
+}
+
+#level-screen.no-audio .playback {
+  display: none;
 }

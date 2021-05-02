@@ -6,53 +6,105 @@
   </head>
   <body>
     <div id="container">
-      <div id="controls">
-        <div>
-          <input id="url" type="text" />
-          <button id="load">Load from url (Youtube/etc)</button>
-          <input id="audio" type="file" />
-          <button id="play">Play</button>
-          <button id="pause">Pause</button>
-          <button id="insert-marker">Insert Marker</button>
-          <div class="scrubber">
-            <div class="bar">
-              <div class="bar-overlay"></div>
+      <div id="open-screen">
+        <button id="open-new">Create New</button>
+        or load an existing file
+        <input id="open-file" type="file" accept="application/json" />
+      </div>
+      <div id="config-screen">
+        <span id="config-navigation"></span>
+        <button id="config-add">Add Level Set</button>
+        <button id="config-download">Download</button>
+        <button id="config-close">Close</button>
+        <div id="config-levels"></div>
+      </div>
+      <div id="level-screen">
+        <div class="playback">
+          <div id="youtube"></div>
+          <div class="controls">
+            <div id="display"></div>
+            <div class="waveform-container">
+              <canvas id="waveform"></canvas>
+              <canvas id="waveform-overlay"></canvas>
             </div>
-            <div class="markers"></div>
+            <div class="scrubber">
+              <div class="bar">
+                <div class="bar-overlay"></div>
+              </div>
+              <div class="markers"></div>
+            </div>
+            <div>
+              <button id="play">Play</button>
+              <button id="pause">Pause</button>
+              <button id="insert-marker">Insert Marker</button>
+            </div>
           </div>
-          <div class="waveform-container">
-            <canvas id="waveform"></canvas>
-            <canvas id="waveform-overlay"></canvas>
-          </div>
-          <div id="display"></div>
         </div>
-        <div id="youtube"></div>
-      </div>
-
-      <div class="text-areas">
-        <span id="intervals-label">Intervals</span>
-        <span id="kanji-label">Kanji</span>
-        <span id="kana-label">Kana</span>
-        <ul id="intervals"></ul>
-        <textarea id="kanji"></textarea>
-        <textarea id="kana"></textarea>
-      </div>
-
-      <div>
-        <textarea id="json" placeholder="JSON"></textarea>
-      </div>
-      <div>
-        <button id="import">Import</button>
-        <button id="export">Export</button>
+        <div class="header">
+          <span id="level-title"></span>
+          <button id="level-save">Save</button>
+          <button id="level-close">Close</button>
+        </div>
+        <div class="lyrics"></div>
       </div>
     </div>
-    <template id="interval-template">
-      <li>
-        <input class="interval" type="number" step="0.1" />
-        <button class="play-section">Play</button>
-        <button class="remove-section">Remove</button>
-      </li>
+    <template id="line-template">
+      <input
+        class="time"
+        type="number"
+        step="0.05"
+        required
+        autocomplete="off"
+      />
+      <button class="play-section">Play</button>
+      <button class="remove-section">Remove</button>
+      <input class="kana" autocomplete="off" />
+      <input class="kanji" autocomplete="off" />
     </template>
-    <script type="module" src="editor.js"></script>
+    <template id="level-set-template">
+      <div class="level-set">
+        <div class="header">
+          <div class="name"></div>
+          <button class="add-level">Add Level</button>
+          <button class="move-up">^</button>
+          <button class="move-down">v</button>
+          <button class="remove">Remove</button>
+        </div>
+        <table class="level-list">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Creator</th>
+              <th>Genre</th>
+              <th>Difficulty</th>
+              <th>Audio</th>
+              <th>Link</th>
+              <th>Lyrics</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody> </tbody>
+        </table>
+      </div>
+    </template>
+    <template id="level-list-item-template">
+      <tr>
+        <td class="name"></td>
+        <td class="creator"></td>
+        <td class="genre"></td>
+        <td class="difficulty"></td>
+        <td class="audio"></td>
+        <td class="link"></td>
+        <td>
+          <button class="edit-lyrics">Edit Lyrics</button>
+        </td>
+        <td>
+          <button class="move-up">^</button>
+          <button class="move-down">v</button>
+          <button class="remove-level">Remove</button>
+        </td>
+      </tr>
+    </template>
+    <script type="module" src="editor/index.js"></script>
   </body>
 </html>
