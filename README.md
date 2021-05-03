@@ -29,6 +29,9 @@ songs. Then simply serve it as a static site.
 
 ### Config
 
+You can use the [online editor][3] for most changes. There are some minor things
+it doesn't support changing yet. In that case, you will have to edit it by hand.
+
 The [config](assets/levels.json) is a simple JSON file with the following
 properties:
 
@@ -100,3 +103,4 @@ npm run build
 
 [1]: https://github.com/innocenat/typingmania
 [2]: https://github.com/thatsmydoing/typingfreaks/releases/latest
+[3]: https://typingfreaks.pleasantprogrammer.com/editor.html
