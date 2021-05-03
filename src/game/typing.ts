@@ -290,7 +290,8 @@ class TypingPlayingScreen implements Screen {
       const skippable =
         autoComplete &&
         lastLine !== undefined &&
-        lastLine.end! - lastLine.start! > 3;
+        lastLine.end! - lastLine.start! > 3 &&
+        this.currentIndex < this.lines.length - 1;
       this.setWaiting(true, skippable);
     } else {
       if (this.currentIndex >= this.lines.length) {
