@@ -162,7 +162,11 @@ export class FileTrack extends Track {
   }
 
   pause(): void {
-    if (this.state === PlayState.PAUSED || this.state === PlayState.STOPPED)
+    if (
+      this.state === PlayState.UNSTARTED ||
+      this.state === PlayState.PAUSED ||
+      this.state === PlayState.STOPPED
+    )
       return;
     this.resumeTime = this.manager.getTime() - this.playStartTime;
     if (this.source) {
