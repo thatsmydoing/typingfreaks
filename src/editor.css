@@ -76,6 +76,14 @@ table.level-list {
   grid-gap: 2px;
 }
 
+.lyrics .header {
+  font-weight: bold;
+}
+
+.lyrics .header.span {
+  grid-column: span 2;
+}
+
 .lyrics .time {
   width: 100px;
   height: 30px;
@@ -117,7 +125,7 @@ table.level-list {
   box-shadow: 0px 0px 9px 0px gray;
 }
 
-.controls {
+#level-screen .controls {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -125,27 +133,27 @@ table.level-list {
   margin: 5px 0px;
 }
 
-.scrubber {
+#level-screen .scrubber {
   display: grid;
   grid-template-rows: 10px 20px;
   background: lightgrey;
 }
 
-.bar {
+#level-screen .bar {
   grid-row: 1 / 2;
 }
 
-.bar-overlay {
+#level-screen .bar-overlay {
   background: red;
   height: 100%;
 }
 
-.markers {
+#level-screen .markers {
   grid-row: 2 / 3;
   position: relative;
 }
 
-.marker {
+#level-screen .marker {
   position: absolute;
   box-sizing: border-box;
   border-left: solid 2px black;
@@ -154,7 +162,7 @@ table.level-list {
   width: 5px;
 }
 
-.waveform-container {
+#level-screen .waveform-container {
   position: relative;
   height: 60px;
   background: lightgrey;
