@@ -86,11 +86,8 @@ incompatibilities.
 
 ## Editor
 
-There is a provided editor that's quite rough. It's main purpose is to help with
-creating the `lines` property of the levels. You can load a youtube or an audio
-file and place marks to split the sections. Lyrics can be input in the text
-areas. You can then export it to a JSON string which you can just paste into
-`levels.json`. You can also import from an existing JSON string to edit a level.
+There is an [online editor][3] available. It lets you create a full config from
+scratch and then download the JSON file.
 
 ## Build Instructions
 
