@@ -1,4 +1,4 @@
-import * as level from '../level';
+import { Level, LevelSet, calculateSpeed, calculateLines } from '../level';
 import * as util from '../util';
 import { GameContext, Screen } from './common';
 import { TypingScreen } from './typing';
@@ -87,6 +87,15 @@ export class SelectScreen implements Screen {
       link.textContent = 'More info';
       linkContainer.appendChild(link);
     }
+
+    const { lines, average } =
+      level.audio == null ? calculateLines(level) : calculateSpeed(level);
+
+    let lengthText = `${lines} lines`;
+    if (average > 0) {
+      lengthText += ` / ${Math.floor(average * 60)} KPM`;
+    }
+    this.songInfo.querySelector('.length')!.textContent = lengthText;
   }
 
   chooseSong(index: number): void {
@@ -115,14 +124,14 @@ export class SelectScreen implements Screen {
 
 class FolderSelectController {
   labelElement: HTMLElement;
-  levelSets: level.LevelSet[];
+  levelSets: LevelSet[];
   currentIndex: number;
   onFolderChange: (index: number) => void;
   listeners: util.ListenersManager;
 
   constructor(
     element: HTMLElement,
-    levelSets: level.LevelSet[],
+    levelSets: LevelSet[],
     onFolderChange: (index: number) => void
   ) {
     this.labelElement = util.getElement(element, '.label');
@@ -161,14 +170,14 @@ class FolderSelectController {
 
 class SongListController {
   element: HTMLElement;
-  levels: level.Level[];
+  levels: Level[];
   currentIndex: number;
   onSongChange: (index: number) => void;
   onSongChoose: (index: number) => void;
 
   constructor(
     context: GameContext,
-    levels: level.Level[],
+    levels: Level[],
     onSongChange: (index: number) => void,
     onSongChoose: (index: number) => void
   ) {

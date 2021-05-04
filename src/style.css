@@ -296,7 +296,7 @@
 /* song-info {{{ */
 
 #song-info {
-  margin-top: 10em;
+  margin-top: 9.5em;
   margin-left: 1.25em;
 }
 
@@ -312,18 +312,17 @@
 
 .song-info .genre {
   font-size: 0.75em;
+  height: 1.5em;
 }
 
 .song-info .creator {
   font-size: 1.25em;
+  height: 1.5em;
 }
 
 .song-info .title {
   font-size: 1.875em;
-}
-
-.song-info .link {
-  min-height: 1.5em;
+  height: 1.5em;
 }
 
 .song-info .link a {

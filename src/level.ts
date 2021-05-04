@@ -4,6 +4,8 @@
  * solely for display and the kana of the line which the input is based.
  */
 
+import { KANA_REGEX } from './kana';
+
 export interface Line {
   kanji: string;
   kana: string;
@@ -196,4 +198,61 @@ function parseTMSong(dom: Document): Line[] {
     });
   }
   return lines;
+}
+
+interface LevelSpeed {
+  lines: number;
+  kana: number;
+  average: number;
+  maximum: number;
+}
+
+export function calculateLines(level: Level): LevelSpeed {
+  const lines = level.lines.length;
+  const kana = level.lines.reduce((acc, line) => acc + countKana(line.kana), 0);
+  return {
+    lines,
+    kana,
+    average: -1,
+    maximum: -1,
+  };
+}
+
+export function calculateSpeed(level: Level): LevelSpeed {
+  let count = 0;
+  let maximum = 0;
+  let total = 0;
+  let kanaTotal = 0;
+
+  for (const line of level.lines) {
+    if (line.kana === '' || line.kana === '@') {
+      continue;
+    }
+    if (line.start === undefined || line.end === undefined) {
+      continue;
+    }
+
+    const kanaCount = countKana(line.kana);
+    const duration = line.end - line.start;
+    const lineSpeed = kanaCount / duration;
+
+    count += 1;
+    maximum = Math.max(maximum, lineSpeed);
+    total += lineSpeed;
+    kanaTotal += kanaCount;
+  }
+  const average = total / count;
+  return {
+    lines: count,
+    kana: kanaTotal,
+    average,
+    maximum,
+  };
+}
+
+function countKana(input: string): number {
+  return input.split('').reduce((acc, c) => {
+    // non-kana is counted as half
+    return (KANA_REGEX.test(c) ? 1 : 0.5) + acc;
+  }, 0);
 }

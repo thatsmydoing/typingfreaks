@@ -25,6 +25,8 @@ import {
   appendStates,
 } from './state';
 
+export const KANA_REGEX = /[ぁ-んァ-ン]/;
+
 function literal(source: string, ...extraBoundaries: number[]): StateMachine {
   let transitions: state.Transition[] = [];
   let meta = 0;
