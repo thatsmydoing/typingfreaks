@@ -84,8 +84,7 @@ table.level-list {
   grid-column: span 2;
 }
 
-.lyrics input.time {
-  width: 100px;
+.lyrics input {
   height: 30px;
   border-radius: 2px;
   border-color: silver;
@@ -94,7 +93,16 @@ table.level-list {
   padding: 0px 8px;
 }
 
-.lyrics .time:invalid {
+.lyrics input:disabled {
+  background: lightgrey;
+}
+
+.lyrics input.time {
+  width: 100px;
+}
+
+.lyrics .time:invalid,
+.lyrics .kana:invalid {
   border-color: red;
 }
 

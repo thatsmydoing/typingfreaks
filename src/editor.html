@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
     <title>Typing Freaks Editor</title>
     <link rel="stylesheet" href="editor.css" />
   </head>
@@ -63,7 +64,11 @@
       />
       <button class="play-section">Play</button>
       <button class="remove-section">Remove</button>
-      <input class="kana" autocomplete="off" />
+      <input
+        class="kana"
+        pattern="[a-zA-Zぁ-んァ-ンー\s]*"
+        autocomplete="off"
+      />
       <input class="kanji" autocomplete="off" />
     </template>
     <template id="level-set-template">
