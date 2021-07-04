@@ -56,7 +56,10 @@ export class LyricsEditor {
   removeLine(line: LineEditor): boolean {
     if (line === this.firstLine) {
       if (line.nextLine === undefined) {
-        // this is the only line, so we just clear it
+        // this should not happen
+        return false;
+      } else if (line.nextLine === this.lastLine) {
+        // this is the only editable line, so we just clear it
         line.clear();
         return false;
       } else {
@@ -92,6 +95,8 @@ export class LyricsEditor {
 
   clear(): void {
     while (this.removeLine(this.lastLine)) {}
+    // we always keep one extra line so we have to clear the first line manually
+    this.removeLine(this.firstLine);
   }
 
   getDisplayForTime(time: number): string | null {
@@ -337,6 +342,7 @@ export class LineEditor {
     } else {
       if (this.nextLine.nextLine === undefined) {
         // the next line is the last one
+        input.value = '';
         if (
           this.kanaInput.value === '' &&
           this.kanjiInput.value === '' &&
