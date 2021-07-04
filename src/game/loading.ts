@@ -7,20 +7,42 @@ import { SelectScreen } from './select';
 export class LoadingScreen implements Screen {
   readonly name: string = 'loading';
 
-  constructor(private context: GameContext, private configUrl: string) {}
+  constructor(
+    private context: GameContext,
+    private configUrl: string,
+    private fromEditor: boolean
+  ) {}
 
   enter(): void {
     console.log('Loading assets...');
-    let configPromise;
+    let configPromise: Promise<level.Config>;
     if (this.configUrl.endsWith('.json')) {
       configPromise = level.loadFromJson(this.configUrl);
     } else {
       configPromise = level.loadFromTM(this.configUrl);
     }
-    configPromise.then((config) => {
-      this.context.config = config;
-      this.loadAssets();
-    });
+    let editorConfigPromise: Promise<level.Config | null>;
+    if (this.fromEditor) {
+      editorConfigPromise = level.loadFromLocalStorage();
+    } else {
+      editorConfigPromise = Promise.resolve(null);
+    }
+
+    Promise.all([configPromise, editorConfigPromise]).then(
+      ([config, editorConfig]) => {
+        if (editorConfig !== null) {
+          console.log('Using editor levels');
+          const [result, context] = util.deepEqual(config, editorConfig);
+          if (!result) {
+            console.log(`Editor levels differ: ${context}`);
+          }
+          this.context.config = editorConfig;
+        } else {
+          this.context.config = config;
+        }
+        this.loadAssets();
+      }
+    );
   }
 
   loadAssets(): void {

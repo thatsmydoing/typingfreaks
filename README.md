@@ -89,6 +89,11 @@ incompatibilities.
 There is an [online editor][3] available. It lets you create a full config from
 scratch and then download the JSON file.
 
+For fast testing, it's also possible to go to try out the editor's config in the
+game by appending `?from=editor` to the game URL. For the online editor, that
+would be [here][4]. Note that this is all in browser, sharing the link with
+someone else will simply error out.
+
 ## Build Instructions
 
 The project is a vanilla typescript project. Simply run:
@@ -101,3 +106,4 @@ npm run build
 [1]: https://github.com/innocenat/typingmania
 [2]: https://github.com/thatsmydoing/typingfreaks/releases/latest
 [3]: https://typingfreaks.pleasantprogrammer.com/editor.html
+[4]: https://typingfreaks.pleasantprogrammer.com/?from=editor

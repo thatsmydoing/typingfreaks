@@ -40,6 +40,15 @@ export interface Config {
   levelSets: LevelSet[];
 }
 
+export async function loadFromLocalStorage(): Promise<Config> {
+  const text = localStorage.getItem('LEVELS_JSON');
+  if (text === null) {
+    throw new Error('No LEVELS_JSON in local storage');
+  } else {
+    return JSON.parse(text);
+  }
+}
+
 export async function loadFromJson(url: string): Promise<Config> {
   const response = await window.fetch(url);
   return await response.json();

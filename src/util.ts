@@ -139,3 +139,48 @@ export function makeDeferred(): Deferred {
     resolve: resolve!,
   };
 }
+
+export function deepEqual(
+  a: unknown,
+  b: unknown,
+  context: string = ''
+): [boolean, string] {
+  if (a === b) {
+    return [true, context];
+  }
+  if (a === null || b === null || a === undefined || b === undefined) {
+    return [false, context];
+  }
+  if (typeof a !== typeof b) {
+    return [false, context];
+  }
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) {
+      return [false, context];
+    }
+    for (let i = 0; i < a.length; ++i) {
+      const result = deepEqual(a[i], b[i], `${context}/${i}`);
+      if (!result[0]) {
+        return result;
+      }
+    }
+    return [true, context];
+  }
+  if (typeof a === 'object' && typeof b === 'object') {
+    const keys = Object.keys(a!);
+    for (const key of keys) {
+      // @ts-ignore
+      const result = deepEqual(a[key], b[key], `${context}/${key}`);
+      if (!result[0]) {
+        return result;
+      }
+    }
+    for (const key of Object.keys(b!)) {
+      if (!keys.includes(key)) {
+        return [false, `${context}/${key}`];
+      }
+    }
+    return [true, context];
+  }
+  return [a === b, context];
+}

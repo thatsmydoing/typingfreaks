@@ -9,7 +9,7 @@ import { LoadingScreen } from './game/loading';
 export class MainController extends ScreenManager {
   loadingScreen: Screen;
 
-  constructor(container: HTMLElement, configUrl: string) {
+  constructor(container: HTMLElement, configUrl: string, fromEditor: boolean) {
     super(container);
     container.appendChild(util.loadTemplate(container, 'base'));
 
@@ -27,7 +27,7 @@ export class MainController extends ScreenManager {
       },
     };
 
-    this.loadingScreen = new LoadingScreen(gameContext, configUrl);
+    this.loadingScreen = new LoadingScreen(gameContext, configUrl, fromEditor);
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Tab') {
