@@ -316,7 +316,10 @@ export class LineEditor {
       this.adjustTimeInput();
     }
 
-    if (current === '') {
+    const isLastLine = part === 'time'
+      ? this.nextLine === undefined
+      : this.nextLine === this.container.lastLine;
+    if (current === '' && isLastLine) {
       return;
     }
 
